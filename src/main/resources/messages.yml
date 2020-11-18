@@ -1,0 +1,5 @@
+costs:
+  exception: 'Es ist ein Fehler aufgetreten: %s'
+  money:
+    price: %s
+    not-enough-money: 'Nicht genug Geld. Kosten: %s'
