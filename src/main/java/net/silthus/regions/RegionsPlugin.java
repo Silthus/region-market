@@ -6,13 +6,11 @@ import lombok.Getter;
 import net.milkbowl.vault.economy.Economy;
 import net.silthus.ebean.Config;
 import net.silthus.ebean.EbeanWrapper;
-import net.silthus.regions.costs.MoneyCost;
-import net.silthus.regions.entities.*;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityRegainHealthEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
+import net.silthus.regions.entities.Region;
+import net.silthus.regions.entities.RegionAcl;
+import net.silthus.regions.entities.RegionGroup;
+import net.silthus.regions.entities.RegionPlayer;
+import net.silthus.regions.entities.RegionTransaction;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -27,6 +25,7 @@ public class RegionsPlugin extends JavaPlugin {
     private Economy economy;
     private Database database;
     private RegionManager regionManager;
+    private RegionsPluginConfig pluginConfig;
 
     public RegionsPlugin() {
     }
@@ -45,13 +44,9 @@ public class RegionsPlugin extends JavaPlugin {
             return;
         }
 
-        this.database = setupDatabase();
-        this.regionManager = new RegionManager();
-    }
-
-    void registerDefaults() {
-
-        getRegionManager().register(MoneyCost.class, () -> new MoneyCost(getEconomy()));
+        loadConfig();
+        setupDatabase();
+        setupRegionManager();
     }
 
     private boolean setupEconomy() {
@@ -66,14 +61,29 @@ public class RegionsPlugin extends JavaPlugin {
         return true;
     }
 
-    private Database setupDatabase() {
+    private void loadConfig() {
 
-        return new EbeanWrapper(Config.builder(this).entities(
+        getDataFolder().mkdirs();
+        pluginConfig = new RegionsPluginConfig(new File(getDataFolder(), "config.yml").toPath());
+        pluginConfig.loadAndSave();
+    }
+
+    private void setupDatabase() {
+
+        this.database = new EbeanWrapper(Config.builder(this).entities(
                 Region.class,
                 RegionAcl.class,
                 RegionGroup.class,
                 RegionPlayer.class,
                 RegionTransaction.class
         ).build()).connect();
+    }
+
+    private void setupRegionManager() {
+
+        this.regionManager = new RegionManager(this, pluginConfig);
+        regionManager.registerDefaults();
+
+        regionManager.load();
     }
 }

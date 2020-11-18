@@ -1,15 +1,21 @@
 package net.silthus.regions.costs;
 
+import lombok.Data;
+import lombok.experimental.Accessors;
 import net.milkbowl.vault.economy.Economy;
+import net.milkbowl.vault.economy.EconomyResponse;
 import net.silthus.regions.Cost;
 import net.silthus.regions.CostType;
 import net.silthus.regions.entities.Region;
+import net.silthus.regions.entities.RegionGroup;
 import net.silthus.regions.entities.RegionPlayer;
 import net.silthus.regions.util.Enums;
 import net.silthus.regions.util.Messages;
-import org.apache.commons.lang.NotImplementedException;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 
+@Data
+@Accessors(fluent = true)
 @CostType("money")
 public class MoneyCost implements Cost {
 
@@ -17,8 +23,9 @@ public class MoneyCost implements Cost {
 
     private Type type;
     private double basePrice;
-    private double regionMultiplier;
-    private double regionGroupMultiplier;
+    private double regionCountMultiplier;
+    private double regionGroupCountMultiplier;
+    private double sameGroupCountMultiplier;
 
     public MoneyCost(Economy economy) {
         this.economy = economy;
@@ -29,30 +36,86 @@ public class MoneyCost implements Cost {
 
         this.type = Enums.searchEnum(Type.class, config.getString("type", Type.PER2M.name()));
         this.basePrice = config.getDouble("base", 10.0);
-        this.regionMultiplier = config.getDouble("region-multiplier", 1.0);
-        this.regionGroupMultiplier = config.getDouble("region-group-multiplier", 1.0);
+        this.regionCountMultiplier = config.getDouble("region-count-multiplier", 0.0);
+        this.regionGroupCountMultiplier = config.getDouble("region-group-count-multiplier", 0.0);
+        this.sameGroupCountMultiplier = config.getDouble("same-group-count-multiplier", 0.0);
     }
 
     @Override
     public String display(RegionPlayer player, Region region) {
 
-        return String.format(Messages.msg("regions.cost.money.price", "%s"),
-                economy.format(calculate(player, region)));
+        try {
+            return Messages.msg("costs.money.price", "%s", calculate(player, region));
+        } catch (CostCalucationException e) {
+            return Messages.msg("costs.exception", "Es ist ein Fehler aufgetreten: %s", e.getMessage());
+        }
     }
 
     @Override
     public Result check(RegionPlayer player, Region region) {
-        return null;
+
+        OfflinePlayer offlinePlayer = player.getOfflinePlayer();
+
+        try {
+            double cost = calculate(player, region);
+            if (economy().has(offlinePlayer, cost)) {
+                return new Result(true, null);
+            } else {
+                return new Result(false, Messages.msg("costs.money.not-enough-money", "Nicht genug Geld. Kosten: %s", economy().format(cost)));
+            }
+        } catch (CostCalucationException e) {
+            return new Result(false, e.getMessage());
+        }
     }
 
     @Override
     public Result apply(RegionPlayer player, Region region) {
-        return null;
+
+        try {
+            EconomyResponse economyResponse = economy().withdrawPlayer(player.getOfflinePlayer(), calculate(player, region));
+            return new Result(economyResponse.transactionSuccess(), economyResponse.errorMessage);
+        } catch (CostCalucationException e) {
+            return new Result(false, e.getMessage());
+        }
     }
 
-    private double calculate(RegionPlayer player, Region region) {
+    double calculate(RegionPlayer player, Region region) throws CostCalucationException {
 
-        throw new NotImplementedException();
+        switch (region.priceType()) {
+            case FREE:
+                return 0;
+            case DYNAMIC:
+                double price = calculateDynamicPrice(player, region);
+                switch (type()) {
+                    case PER2M:
+                        return price * region.size();
+                    case PER3M:
+                        return price * region.volume();
+                    case STATIC:
+                    default:
+                        return price;
+                }
+            default:
+            case STATIC:
+                return region.price();
+        }
+    }
+
+    private double calculateDynamicPrice(RegionPlayer player, Region region) throws CostCalucationException {
+
+        RegionGroup group = region.group();
+        if (group == null) {
+            throw new CostCalucationException("Cannot calculate price of region '" + region.worldGuardRegion() + " (" + region.id() + ")' without a region group.");
+        }
+
+        int regionCount = player.regions().size();
+        int groupCount = player.regionGroups().size();
+        int sameGroupCount = player.regions(region.group()).size();
+
+        return region.price() + basePrice
+                + (basePrice * regionCount * regionCountMultiplier())
+                + (basePrice * groupCount * regionGroupCountMultiplier())
+                + (basePrice * sameGroupCount * sameGroupCountMultiplier());
     }
 
     public enum Type {

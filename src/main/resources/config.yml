@@ -1,0 +1,7 @@
+# the relative path where we should load skill configs from
+region-groups-path: region-groups
+database:
+  driver: 'h2'
+  url: 'jdbc:h2:~/skills.db'
+  username: sa
+  password: sa

@@ -18,11 +18,11 @@ public final class Messages {
         return msg(key, "");
     }
 
-    public static String msg(String key, String defaultValue) {
+    public static String msg(String key, String defaultValue, Object... args) {
         if (instance == null) {
             return "";
         }
-        return instance.getMessage(key, defaultValue);
+        return String.format(instance.getMessage(key, defaultValue), args);
     }
 
     private final File file;
