@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<migration xmlns="http://ebean-orm.github.io/xml/ns/dbmigration">
+    <changeSet type="apply">
+        <createTable name="sregions_regions" identityType="external" pkName="pk_sregions_regions">
+            <column name="id" type="uuid" primaryKey="true" identity="true"/>
+            <column name="group_id" type="uuid" references="sregions_region_groups.id" foreignKeyName="fk_sregions_regions_group_id" foreignKeyIndex="ix_sregions_regions_group_id"/>
+            <column name="world_guard_region" type="varchar"/>
+            <column name="owner_id" type="uuid" references="sregions_players.id" foreignKeyName="fk_sregions_regions_owner_id" foreignKeyIndex="ix_sregions_regions_owner_id"/>
+            <column name="version" type="bigint" notnull="true"/>
+            <column name="when_created" type="timestamp" notnull="true"/>
+            <column name="when_modified" type="timestamp" notnull="true"/>
+        </createTable>
+        <createTable name="sregions_acl" identityType="external" pkName="pk_sregions_acl">
+            <column name="id" type="uuid" primaryKey="true" identity="true"/>
+            <column name="region_id" type="uuid" references="sregions_regions.id" foreignKeyName="fk_sregions_acl_region_id" foreignKeyIndex="ix_sregions_acl_region_id"/>
+            <column name="player_id" type="uuid" references="sregions_players.id" foreignKeyName="fk_sregions_acl_player_id" foreignKeyIndex="ix_sregions_acl_player_id"/>
+            <column name="access_level" type="varchar(6)" checkConstraint="check ( access_level in ('OWNER','MEMBER','GUEST'))" checkConstraintName="ck_sregions_acl_access_level"/>
+            <column name="version" type="bigint" notnull="true"/>
+            <column name="when_created" type="timestamp" notnull="true"/>
+            <column name="when_modified" type="timestamp" notnull="true"/>
+        </createTable>
+        <createTable name="sregions_region_groups" identityType="external" pkName="pk_sregions_region_groups">
+            <column name="id" type="uuid" primaryKey="true" identity="true"/>
+            <column name="identifier" type="varchar"/>
+            <column name="name" type="varchar"/>
+            <column name="description" type="varchar"/>
+            <column name="version" type="bigint" notnull="true"/>
+            <column name="when_created" type="timestamp" notnull="true"/>
+            <column name="when_modified" type="timestamp" notnull="true"/>
+        </createTable>
+        <createTable name="sregions_players" identityType="external" pkName="pk_sregions_players">
+            <column name="id" type="uuid" primaryKey="true" identity="true"/>
+            <column name="name" type="varchar"/>
+            <column name="version" type="bigint" notnull="true"/>
+            <column name="when_created" type="timestamp" notnull="true"/>
+            <column name="when_modified" type="timestamp" notnull="true"/>
+        </createTable>
+        <createTable name="sregions_transactions" identityType="external" pkName="pk_sregions_transactions">
+            <column name="id" type="uuid" primaryKey="true" identity="true"/>
+            <column name="region_id" type="uuid" references="sregions_regions.id" foreignKeyName="fk_sregions_transactions_region_id" foreignKeyIndex="ix_sregions_transactions_region_id"/>
+            <column name="version" type="bigint" notnull="true"/>
+            <column name="when_created" type="timestamp" notnull="true"/>
+            <column name="when_modified" type="timestamp" notnull="true"/>
+        </createTable>
+    </changeSet>
+</migration>

@@ -8,6 +8,7 @@ buildscript {
 plugins {
     id 'com.github.johnrengelman.shadow' version '6.1.0'
     id 'kr.entree.spigradle' version '2.2.3'
+    id 'io.ebean' version '12.5.1'
     id 'io.freefair.lombok' version '5.3.0'
     id 'java'
     id 'jacoco'
@@ -35,7 +36,7 @@ spigot {
     authors = [project.property("author")]
     apiVersion = project.property("apiVersion")
     load = STARTUP
-    depends = ['WorldGuard', 'WorldEdit']
+    depends = ['WorldGuard', 'WorldEdit', 'Vault']
 }
 
 compileJava {
@@ -68,6 +69,7 @@ dependencies {
 
     implementation 'com.sk89q.worldguard:worldguard-bukkit:7.0.4'
     implementation 'com.sk89q.worldedit:worldedit-bukkit:7.2.0'
+    implementation 'com.github.MilkBowl:VaultAPI:1.7'
 
     testImplementation 'io.ebean:ebean-test:12.6.0'
 
