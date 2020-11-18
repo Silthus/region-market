@@ -26,6 +26,7 @@ public final class RegionManager {
     private final RegionsPlugin plugin;
     private final RegionsPluginConfig config;
     private final Map<String, Cost.Registration<?>> costTypes = new HashMap<>();
+    private final Map<String, RegionGroup> groups = new HashMap<>();
 
     public RegionManager(RegionsPlugin plugin, RegionsPluginConfig config) {
 
@@ -78,6 +79,9 @@ public final class RegionManager {
             regionGroup.load(this, config);
             regionGroup.save();
 
+            groups.put(regionGroup.identifier(), regionGroup);
+            log.info("Loaded region group: " + regionGroup.name() + " (" + regionGroup.identifier() + ")");
+
             return Optional.of(regionGroup);
         } catch (IOException | InvalidConfigurationException e) {
             log.severe("unable to load region group config " + file.getAbsolutePath() + ": " + e.getMessage());
@@ -85,6 +89,11 @@ public final class RegionManager {
         }
 
         return Optional.empty();
+    }
+
+    public Optional<RegionGroup> getRegionGroup(String identifier) {
+
+        return Optional.ofNullable(groups.get(identifier));
     }
 
     public <TCost extends Cost> RegionManager register(Class<TCost> costClass, Supplier<TCost> supplier) {

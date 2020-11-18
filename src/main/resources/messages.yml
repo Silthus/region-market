@@ -3,3 +3,6 @@ costs:
   money:
     price: %s
     not-enough-money: 'Nicht genug Geld. Kosten: %s'
+regions:
+  create:
+    no-permission: 'Du hast nicht genügend Rechte um das Grundstück zu erstellen.'
