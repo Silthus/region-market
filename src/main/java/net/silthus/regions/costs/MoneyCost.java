@@ -79,26 +79,30 @@ public class MoneyCost implements Cost {
         }
     }
 
-    double calculate(RegionPlayer player, Region region) throws CostCalucationException {
+    public double calculate(RegionPlayer player, Region region) throws CostCalucationException {
 
+        double price;
         switch (region.priceType()) {
             case FREE:
                 return 0;
             case DYNAMIC:
-                double price = calculateDynamicPrice(player, region);
+                price = calculateDynamicPrice(player, region);
                 switch (type()) {
                     case PER2M:
-                        return price * region.size();
+                        price = price * region.size();
+                        break;
                     case PER3M:
-                        return price * region.volume();
-                    case STATIC:
-                    default:
-                        return price;
+                        price = price * region.volume();
+                        break;
                 }
+                break;
             default:
             case STATIC:
-                return region.price();
+                price = region.price();
+                break;
         }
+
+        return price * region.priceMultiplier() * player.priceMultiplier();
     }
 
     private double calculateDynamicPrice(RegionPlayer player, Region region) throws CostCalucationException {

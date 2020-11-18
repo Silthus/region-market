@@ -13,15 +13,12 @@ import net.silthus.ebean.BaseEntity;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -31,16 +28,27 @@ import java.util.UUID;
 public class Region extends BaseEntity {
 
     public static Region of(ProtectedRegion region) {
-
         return of(region.getId());
     }
 
-    public static Region of(String worldGuardRegion) {
+    public static Region of(UUID world, ProtectedRegion region) {
 
-        return find.query().where().eq("world_guard_region", worldGuardRegion)
+        return of(world, region.getId());
+    }
+
+    public static Region of(String worldGuardRegion) {
+        return of(null, worldGuardRegion);
+    }
+
+    public static Region of(UUID world, String worldGuardRegion) {
+
+        return find.query().where()
+                .eq("world", world)
+                .and()
+                .eq("world_guard_region", worldGuardRegion)
                 .findOneOrEmpty()
                 .orElseGet(() -> {
-                    Region region = new Region(worldGuardRegion);
+                    Region region = new Region(world, worldGuardRegion);
                     region.save();
                     return region;
                 });
@@ -48,8 +56,9 @@ public class Region extends BaseEntity {
 
     public static final Finder<UUID, Region> find = new Finder<>(Region.class);
 
-    Region(String worldGuardRegion) {
+    Region(UUID world, String worldGuardRegion) {
 
+        this.world = world;
         this.worldGuardRegion = worldGuardRegion;
         this.volume = volume();
         this.size = size();
@@ -60,7 +69,9 @@ public class Region extends BaseEntity {
     private String worldName;
     private RegionType regionType = RegionType.SELL;
     private PriceType priceType = PriceType.STATIC;
+    private Status status = Status.FREE;
     private double price;
+    private double priceMultiplier = 1.0;
     private long volume;
     private long size;
 
@@ -75,6 +86,9 @@ public class Region extends BaseEntity {
 
     @OneToMany(cascade = CascadeType.REMOVE)
     private List<RegionTransaction> transactions = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.REMOVE)
+    private List<RegionSign> signs = new ArrayList<>();
 
     public Optional<ProtectedRegion> protectedRegion() {
 
@@ -113,6 +127,15 @@ public class Region extends BaseEntity {
         return protectedRegion().map(region -> region.volume() / (region.getMaximumPoint().getBlockY() - region.getMinimumPoint().getBlockY())).orElse(0);
     }
 
+    public String costs(RegionPlayer player) {
+
+        if (group() == null) {
+            return price + "";
+        } else {
+            return group().costs().stream().map(cost -> cost.display(player, this)).collect(Collectors.joining(" - "));
+        }
+    }
+
     public enum RegionType {
         SELL,
         RENT,
@@ -130,6 +153,18 @@ public class Region extends BaseEntity {
         FREE,
         STATIC,
         DYNAMIC;
+
+        @DbEnumValue
+        public String getValue() {
+
+            return name();
+        }
+    }
+
+    public enum Status {
+        FREE,
+        OCCUPIED,
+        ABADONED;
 
         @DbEnumValue
         public String getValue() {

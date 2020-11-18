@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -15,6 +17,7 @@ public class RegionsPluginConfig extends BukkitYamlConfiguration {
 
     @Comment("The relative path where your skill region groups are located.")
     private String regionGroupsPath = "region-groups";
+    private List<String> ignoredRegions = new ArrayList<>();
     private DatabaseConfig database = new DatabaseConfig();
 
     public RegionsPluginConfig(Path path) {

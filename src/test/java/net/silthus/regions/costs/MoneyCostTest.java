@@ -93,6 +93,17 @@ class MoneyCostTest {
                 assertThat(cost.calculate(player, region)).isEqualTo(100.0);
             }
 
+            @SneakyThrows
+            @Test
+            @DisplayName("should factor in individual cost factor of region")
+            void shouldFactorInIdividualCostFactorOfRegion() {
+
+                region.price(100.0);
+                region.priceMultiplier(2.0);
+
+                assertThat(cost.calculate(player, region)).isEqualTo(200.0);
+            }
+
             @Test
             @DisplayName("should error if price is dynamic but region is not part of a group")
             void shouldErrorIfPriceIsDynamicAndNoParentIsFound() {
@@ -190,6 +201,21 @@ class MoneyCostTest {
 
                 region.price(100.0);
                 assertThat(cost.calculate(player, region)).isEqualTo(100.0);
+            }
+
+            @SneakyThrows
+            @Test
+            @DisplayName("should factor in individual cost factor of region")
+            void shouldFactorInIdividualCostFactorOfRegion() {
+
+                region.priceType(Region.PriceType.DYNAMIC);
+                region.priceMultiplier(2.0);
+                cost.basePrice(100.0);
+                cost.regionCountMultiplier(2.0);
+                player.regions().add(Region.of("bar"));
+                player.regions().add(Region.of("foo"));
+
+                assertThat(cost.calculate(player, region)).isEqualTo(100000.0);
             }
 
             @SneakyThrows
@@ -293,6 +319,21 @@ class MoneyCostTest {
 
                 // basePrice + (regionCount * multiplier * basePrice)
                 assertThat(cost.calculate(player, region)).isEqualTo(5000.0);
+            }
+
+            @SneakyThrows
+            @Test
+            @DisplayName("should factor in individual cost factor of region")
+            void shouldFactorInIdividualCostFactorOfRegion() {
+
+                region.priceType(Region.PriceType.DYNAMIC);
+                region.priceMultiplier(2.0);
+                cost.basePrice(100.0);
+                cost.regionCountMultiplier(2.0);
+                player.regions().add(Region.of("bar"));
+                player.regions().add(Region.of("foo"));
+
+                assertThat(cost.calculate(player, region)).isEqualTo(10000.0);
             }
 
             @SneakyThrows
