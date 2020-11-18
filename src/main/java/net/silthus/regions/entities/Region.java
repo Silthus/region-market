@@ -16,10 +16,15 @@ import java.util.List;
 @Table(name = "sregions_regions")
 public class Region extends BaseEntity {
 
+    @ManyToOne
+    private RegionGroup group;
     private String worldGuardRegion;
-    private String regionGroup;
     @ManyToOne
     private RegionPlayer owner;
+
     @OneToMany(cascade = CascadeType.REMOVE)
     private List<RegionAcl> acl = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.REMOVE)
+    private List<RegionTransaction> transactions = new ArrayList<>();
 }
