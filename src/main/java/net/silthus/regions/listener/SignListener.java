@@ -5,17 +5,17 @@ import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import com.sk89q.worldguard.protection.regions.RegionContainer;
 import net.silthus.regions.RegionSignParseException;
 import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionGroup;
 import net.silthus.regions.entities.RegionPlayer;
 import net.silthus.regions.entities.RegionSign;
-import net.silthus.regions.util.Messages;
+import net.silthus.regions.Messages;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -29,11 +29,13 @@ import static net.silthus.regions.Constants.SIGN_TAG;
 public class SignListener implements Listener {
 
     private final RegionsPlugin plugin;
-    private final RegionContainer regionContainer;
 
     public SignListener(RegionsPlugin plugin) {
         this.plugin = plugin;
-        this.regionContainer = WorldGuard.getInstance().getPlatform().getRegionContainer();
+    }
+
+    private RegionManager getRegionManager(World world) {
+        return WorldGuard.getInstance().getPlatform().getRegionContainer().get(new BukkitWorld(world));
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -71,6 +73,7 @@ public class SignListener implements Listener {
         } catch (RegionSignParseException e) {
             event.getPlayer().sendMessage(ChatColor.RED + e.getMessage());
             event.setCancelled(true);
+            event.getBlock().setType(Material.AIR);
             return;
         }
 
@@ -81,6 +84,7 @@ public class SignListener implements Listener {
             if (regionGroup.isEmpty()) {
                 player.sendMessage(ChatColor.RED + Messages.msg("regions.create.no-region-group", "Die Grundstücksgruppe %s in Zeile 3 existiert nicht.", groupLine));
                 event.setCancelled(true);
+                event.getBlock().setType(Material.AIR);
                 return;
             }
         }
@@ -98,6 +102,7 @@ public class SignListener implements Listener {
             } catch (NumberFormatException e) {
                 player.sendMessage(ChatColor.RED + Messages.msg("regions.create.not-a-price", "Der Grundstückspreis in Zeile 4 %s ist keine gültige Zahl.", costLine));
                 event.setCancelled(true);
+                event.getBlock().setType(Material.AIR);
                 return;
             }
         }
@@ -121,7 +126,7 @@ public class SignListener implements Listener {
             throw new RegionSignParseException(Messages.msg("regions.create.empty-region", "Du musst eine WorldGuard Region in Zeile 2 angeben."));
         }
 
-        RegionManager regionManager = regionContainer.get(new BukkitWorld(sign.getWorld()));
+        RegionManager regionManager = getRegionManager(player.getWorld());
         if (regionManager == null) {
             throw new RegionSignParseException(Messages.msg("regions.create.missing-worldguard", "Der WorldGuard RegionManager konnte für diese Welt nicht gefunden werden."));
         }
@@ -131,6 +136,6 @@ public class SignListener implements Listener {
             throw new RegionSignParseException(Messages.msg("regions.create.no-region", "Die WorldGuard Region '%s' in Zeile 2 existiert nicht.", regionName));
         }
 
-        return Region.of(sign.getWorld().getUID(), protectedRegion);
+        return Region.of(sign.getWorld(), protectedRegion);
     }
 }

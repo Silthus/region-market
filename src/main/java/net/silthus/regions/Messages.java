@@ -1,4 +1,4 @@
-package net.silthus.regions.util;
+package net.silthus.regions;
 
 import lombok.AccessLevel;
 import lombok.Setter;

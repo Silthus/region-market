@@ -1,12 +1,24 @@
 -- apply changes
 create table sregions_regions (
   id                            uuid not null,
-  group_id                      uuid,
   world_guard_region            varchar(255),
+  world                         uuid,
+  world_name                    varchar(255),
+  region_type                   varchar(8),
+  price_type                    varchar(7),
+  status                        varchar(8),
+  price                         float not null,
+  price_multiplier              float not null,
+  volume                        bigint not null,
+  size                          bigint not null,
+  group_identifier              varchar(255),
   owner_id                      uuid,
   version                       bigint not null,
   when_created                  timestamptz not null,
   when_modified                 timestamptz not null,
+  constraint ck_sregions_regions_region_type check ( region_type in ('SELL','RENT','CONTRACT','HOTEL')),
+  constraint ck_sregions_regions_price_type check ( price_type in ('FREE','STATIC','DYNAMIC')),
+  constraint ck_sregions_regions_status check ( status in ('FREE','OCCUPIED','ABADONED')),
   constraint pk_sregions_regions primary key (id)
 );
 
@@ -23,14 +35,13 @@ create table sregions_acl (
 );
 
 create table sregions_region_groups (
-  id                            uuid not null,
-  identifier                    varchar(255),
+  identifier                    varchar(255) not null,
   name                          varchar(255),
   description                   varchar(255),
   version                       bigint not null,
   when_created                  timestamptz not null,
   when_modified                 timestamptz not null,
-  constraint pk_sregions_region_groups primary key (id)
+  constraint pk_sregions_region_groups primary key (identifier)
 );
 
 create table sregions_players (
@@ -42,6 +53,20 @@ create table sregions_players (
   constraint pk_sregions_players primary key (id)
 );
 
+create table sregions_region_signs (
+  id                            uuid not null,
+  region_id                     uuid,
+  x                             integer not null,
+  y                             integer not null,
+  z                             integer not null,
+  world_id                      uuid,
+  world                         varchar(255),
+  version                       bigint not null,
+  when_created                  timestamptz not null,
+  when_modified                 timestamptz not null,
+  constraint pk_sregions_region_signs primary key (id)
+);
+
 create table sregions_transactions (
   id                            uuid not null,
   region_id                     uuid,
@@ -51,8 +76,8 @@ create table sregions_transactions (
   constraint pk_sregions_transactions primary key (id)
 );
 
-create index ix_sregions_regions_group_id on sregions_regions (group_id);
-alter table sregions_regions add constraint fk_sregions_regions_group_id foreign key (group_id) references sregions_region_groups (id) on delete restrict on update restrict;
+create index ix_sregions_regions_group_identifier on sregions_regions (group_identifier);
+alter table sregions_regions add constraint fk_sregions_regions_group_identifier foreign key (group_identifier) references sregions_region_groups (identifier) on delete restrict on update restrict;
 
 create index ix_sregions_regions_owner_id on sregions_regions (owner_id);
 alter table sregions_regions add constraint fk_sregions_regions_owner_id foreign key (owner_id) references sregions_players (id) on delete restrict on update restrict;
@@ -62,6 +87,9 @@ alter table sregions_acl add constraint fk_sregions_acl_region_id foreign key (r
 
 create index ix_sregions_acl_player_id on sregions_acl (player_id);
 alter table sregions_acl add constraint fk_sregions_acl_player_id foreign key (player_id) references sregions_players (id) on delete restrict on update restrict;
+
+create index ix_sregions_region_signs_region_id on sregions_region_signs (region_id);
+alter table sregions_region_signs add constraint fk_sregions_region_signs_region_id foreign key (region_id) references sregions_regions (id) on delete restrict on update restrict;
 
 create index ix_sregions_transactions_region_id on sregions_transactions (region_id);
 alter table sregions_transactions add constraint fk_sregions_transactions_region_id foreign key (region_id) references sregions_regions (id) on delete restrict on update restrict;

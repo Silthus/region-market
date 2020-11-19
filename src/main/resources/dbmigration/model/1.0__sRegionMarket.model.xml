@@ -3,8 +3,17 @@
     <changeSet type="apply">
         <createTable name="sregions_regions" identityType="external" pkName="pk_sregions_regions">
             <column name="id" type="uuid" primaryKey="true" identity="true"/>
-            <column name="group_id" type="uuid" references="sregions_region_groups.id" foreignKeyName="fk_sregions_regions_group_id" foreignKeyIndex="ix_sregions_regions_group_id"/>
             <column name="world_guard_region" type="varchar"/>
+            <column name="world" type="uuid"/>
+            <column name="world_name" type="varchar"/>
+            <column name="region_type" type="varchar(8)" checkConstraint="check ( region_type in ('SELL','RENT','CONTRACT','HOTEL'))" checkConstraintName="ck_sregions_regions_region_type"/>
+            <column name="price_type" type="varchar(7)" checkConstraint="check ( price_type in ('FREE','STATIC','DYNAMIC'))" checkConstraintName="ck_sregions_regions_price_type"/>
+            <column name="status" type="varchar(8)" checkConstraint="check ( status in ('FREE','OCCUPIED','ABADONED'))" checkConstraintName="ck_sregions_regions_status"/>
+            <column name="price" type="double" notnull="true"/>
+            <column name="price_multiplier" type="double" notnull="true"/>
+            <column name="volume" type="bigint" notnull="true"/>
+            <column name="size" type="bigint" notnull="true"/>
+            <column name="group_identifier" type="varchar" references="sregions_region_groups.identifier" foreignKeyName="fk_sregions_regions_group_identifier" foreignKeyIndex="ix_sregions_regions_group_identifier"/>
             <column name="owner_id" type="uuid" references="sregions_players.id" foreignKeyName="fk_sregions_regions_owner_id" foreignKeyIndex="ix_sregions_regions_owner_id"/>
             <column name="version" type="bigint" notnull="true"/>
             <column name="when_created" type="timestamp" notnull="true"/>
@@ -20,8 +29,7 @@
             <column name="when_modified" type="timestamp" notnull="true"/>
         </createTable>
         <createTable name="sregions_region_groups" identityType="external" pkName="pk_sregions_region_groups">
-            <column name="id" type="uuid" primaryKey="true" identity="true"/>
-            <column name="identifier" type="varchar"/>
+            <column name="identifier" type="varchar" primaryKey="true"/>
             <column name="name" type="varchar"/>
             <column name="description" type="varchar"/>
             <column name="version" type="bigint" notnull="true"/>
@@ -31,6 +39,18 @@
         <createTable name="sregions_players" identityType="external" pkName="pk_sregions_players">
             <column name="id" type="uuid" primaryKey="true" identity="true"/>
             <column name="name" type="varchar"/>
+            <column name="version" type="bigint" notnull="true"/>
+            <column name="when_created" type="timestamp" notnull="true"/>
+            <column name="when_modified" type="timestamp" notnull="true"/>
+        </createTable>
+        <createTable name="sregions_region_signs" identityType="external" pkName="pk_sregions_region_signs">
+            <column name="id" type="uuid" primaryKey="true" identity="true"/>
+            <column name="region_id" type="uuid" references="sregions_regions.id" foreignKeyName="fk_sregions_region_signs_region_id" foreignKeyIndex="ix_sregions_region_signs_region_id"/>
+            <column name="x" type="integer" notnull="true"/>
+            <column name="y" type="integer" notnull="true"/>
+            <column name="z" type="integer" notnull="true"/>
+            <column name="world_id" type="uuid"/>
+            <column name="world" type="varchar"/>
             <column name="version" type="bigint" notnull="true"/>
             <column name="when_created" type="timestamp" notnull="true"/>
             <column name="when_modified" type="timestamp" notnull="true"/>
