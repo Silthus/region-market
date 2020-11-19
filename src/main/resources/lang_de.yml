@@ -1,0 +1,14 @@
+invalid-player: Es gibt keinen Spieler mit dem Namen %player.
+rcskills:
+  list-cmd: Zeigt alle deine freigeschalteten Skills an.
+  reload-cmd: Lädt alle Skills aus den Config Dateien neu ein.
+  reload: Es wurden alle Skills neu geladen.
+  add-cmd:
+    desc: Gibt dem Spieler den gewünschten Skill.
+    info: Der Skill %skill wurde %player erfolgreich zugewiesen.
+  remove-cmd:
+    desc: Entfernt den gewünschten Skill vom Spieler.
+    info: Der Skill %skill wurde erfolgreich von %player entfernt.
+  resolver:
+    skill:
+      error: Es gibt keinen Skill mit dem Namen %skill.

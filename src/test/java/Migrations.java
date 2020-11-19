@@ -9,6 +9,8 @@ public class Migrations {
 
         DbMigration migration = DbMigration.create();
 
+        migration.setName("sRegionMarket");
+
         // location of the migration changeSet and where ddl is generated to
         migration.setPathToResources("src/main/resources");
 

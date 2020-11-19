@@ -31,7 +31,7 @@ public class Region extends BaseEntity {
         return of(region.getId());
     }
 
-    public static Region of(UUID world, ProtectedRegion region) {
+    public static Region of(World world, ProtectedRegion region) {
 
         return of(world, region.getId());
     }
@@ -40,7 +40,7 @@ public class Region extends BaseEntity {
         return of(null, worldGuardRegion);
     }
 
-    public static Region of(UUID world, String worldGuardRegion) {
+    public static Region of(World world, String worldGuardRegion) {
 
         return find.query().where()
                 .eq("world", world)
@@ -56,9 +56,10 @@ public class Region extends BaseEntity {
 
     public static final Finder<UUID, Region> find = new Finder<>(Region.class);
 
-    Region(UUID world, String worldGuardRegion) {
+    Region(World world, String worldGuardRegion) {
 
-        this.world = world;
+        this.world = world.getUID();
+        this.worldName = world.getName();
         this.worldGuardRegion = worldGuardRegion;
         this.volume = volume();
         this.size = size();

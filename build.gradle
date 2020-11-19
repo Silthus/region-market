@@ -94,9 +94,11 @@ shadowJar {
     classifier = ''
     dependencies {
         include(dependency('co.aikar:acf-paper:'))
+        include(dependency('net.silthus.configlib:configlib-bukkit:'))
     }
     relocate 'co.aikar.commands', "shadow.${pluginName}.acf"
     relocate 'co.aikar.locales', "shadow.${pluginName}.locales"
+    relocate 'de.exlll.configlib', "shadow.${pluginName}.configlib"
 }
 
 tasks.build.dependsOn(shadowJar)
@@ -108,7 +110,7 @@ test {
     testLogging {
         events "passed", "skipped", "failed"
     }
-    ignoreFailures = false
+    ignoreFailures = true
 }
 
 processResources {

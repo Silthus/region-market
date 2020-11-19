@@ -10,6 +10,8 @@ import net.silthus.ebean.Config;
 import net.silthus.ebean.EbeanWrapper;
 import net.silthus.regions.commands.AdminCommands;
 import net.silthus.regions.entities.*;
+import net.silthus.regions.listener.ClickListener;
+import net.silthus.regions.listener.SignListener;
 import net.silthus.regions.listener.SignPacketListener;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -33,17 +35,19 @@ public class RegionsPlugin extends JavaPlugin {
     private PaperCommandManager commandManager;
 
     private SignPacketListener signPacketListener;
+    private SignListener signListener;
+    private ClickListener clickListener;
 
     private boolean testing = false;
 
     public RegionsPlugin() {
         super();
-        testing = true;
     }
 
     public RegionsPlugin(
             JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file) {
         super(loader, description, dataFolder, file);
+        testing = true;
     }
 
     @Override
@@ -56,12 +60,12 @@ public class RegionsPlugin extends JavaPlugin {
             return;
         }
 
-        if (!testing && !Bukkit.getPluginManager().isPluginEnabled("HolographicDisplays")) {
-            getLogger().severe("*** HolographicDisplays is not installed or not enabled. ***");
-            getLogger().severe("*** This plugin will be disabled. ***");
-            this.setEnabled(false);
-            return;
-        }
+//        if (!testing && !Bukkit.getPluginManager().isPluginEnabled("HolographicDisplays")) {
+//            getLogger().severe("*** HolographicDisplays is not installed or not enabled. ***");
+//            getLogger().severe("*** This plugin will be disabled. ***");
+//            this.setEnabled(false);
+//            return;
+//        }
 
         loadConfig();
         setupDatabase();
@@ -91,12 +95,15 @@ public class RegionsPlugin extends JavaPlugin {
 
     private void setupDatabase() {
 
-        this.database = new EbeanWrapper(Config.builder(this).entities(
-                Region.class,
-                RegionAcl.class,
-                RegionGroup.class,
-                RegionPlayer.class,
-                RegionTransaction.class
+        this.database = new EbeanWrapper(Config.builder(this)
+                .runMigrations(true)
+                .entities(
+                    Region.class,
+                    RegionSign.class,
+                    RegionAcl.class,
+                    RegionGroup.class,
+                    RegionPlayer.class,
+                    RegionTransaction.class
         ).build()).connect();
     }
 
@@ -112,6 +119,12 @@ public class RegionsPlugin extends JavaPlugin {
 
         signPacketListener = new SignPacketListener(this, ProtocolLibrary.getProtocolManager());
         Bukkit.getPluginManager().registerEvents(signPacketListener, this);
+
+        signListener = new SignListener(this);
+        Bukkit.getPluginManager().registerEvents(signListener, this);
+
+        clickListener = new ClickListener(this);
+        Bukkit.getPluginManager().registerEvents(clickListener, this);
     }
 
 
