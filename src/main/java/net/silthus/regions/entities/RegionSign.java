@@ -1,15 +1,18 @@
 package net.silthus.regions.entities;
 
+import io.ebean.Finder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.silthus.ebean.BaseEntity;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import java.util.Optional;
 import java.util.UUID;
 
 @Entity
@@ -18,6 +21,22 @@ import java.util.UUID;
 @Setter
 @Accessors(fluent = true)
 public class RegionSign extends BaseEntity {
+
+    public static Optional<RegionSign> of(Location location) {
+
+        if (location.getWorld() == null) {
+            return Optional.empty();
+        }
+
+        return find.query().where()
+                .eq("x", location.getBlockX())
+                .eq("y", location.getBlockY())
+                .eq("z", location.getBlockZ())
+                .eq("world_id", location.getWorld().getUID())
+                .findOneOrEmpty();
+    }
+
+    public static final Finder<UUID, RegionSign> find = new Finder<>(RegionSign.class);
 
     @ManyToOne
     private Region region;
