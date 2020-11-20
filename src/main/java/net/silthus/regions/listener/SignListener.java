@@ -46,15 +46,14 @@ public class SignListener implements Listener {
             return;
         }
 
-        try {
-            Region region = tryGetRegion(event.getPlayer(), event.getLocation().getBlock(), event.getLines());
-            RegionPlayer player = RegionPlayer.of(event.getPlayer());
-
-            event.setLine(4, ChatColor.GREEN + region.costs(player));
-        } catch (RegionSignParseException e) {
-            plugin.getLogger().severe("failed to parse region sign at " + event.getLocation() + " for " + event.getPlayer().getName());
+        Optional<Region> region = Region.of(event.getLocation());
+        if (region.isEmpty()) {
             event.setCancelled(true);
+            return;
         }
+
+        RegionPlayer player = RegionPlayer.of(event.getPlayer());
+        event.setLine(4, ChatColor.GREEN + region.get().costs(player));
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -65,11 +64,10 @@ public class SignListener implements Listener {
             return;
         }
 
-        Player player = null;
-        Region region = null;
+        Player player = event.getPlayer();
+        Region region;
         try {
-            player = event.getPlayer();
-            region = tryGetRegion(event.getPlayer(), event.getBlock(), event.getLines());
+            region = tryGetOrCreateRegion(event.getPlayer(), event.getBlock(), event.getLines());
         } catch (RegionSignParseException e) {
             event.getPlayer().sendMessage(ChatColor.RED + e.getMessage());
             event.setCancelled(true);
@@ -114,7 +112,7 @@ public class SignListener implements Listener {
         player.sendMessage(ChatColor.GREEN + Messages.msg("regions.create.success", "Das Grundstück $1%s wurde erfolgreich erstellt. Preis: $2%s ($3%s)", region.worldGuardRegion(), region.price(), region.priceType()));
     }
 
-    private Region tryGetRegion(Player player, Block sign, String[] lines) throws RegionSignParseException {
+    private Region tryGetOrCreateRegion(Player player, Block sign, String[] lines) throws RegionSignParseException {
 
         if (!player.hasPermission(PERMISSION_CREATE_SIGN)) {
             throw new RegionSignParseException(Messages.msg("regions.create.no-permission", "Du hast nicht genügend Rechte um das Grundstück zu erstellen."));
@@ -136,6 +134,6 @@ public class SignListener implements Listener {
             throw new RegionSignParseException(Messages.msg("regions.create.no-region", "Die WorldGuard Region '%s' in Zeile 2 existiert nicht.", regionName));
         }
 
-        return Region.of(sign.getWorld(), protectedRegion);
+        return Region.of(sign.getWorld(), protectedRegion).orElse(new Region(sign.getWorld(), regionName));
     }
 }

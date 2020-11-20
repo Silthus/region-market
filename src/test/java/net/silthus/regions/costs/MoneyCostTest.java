@@ -56,7 +56,7 @@ class MoneyCostTest {
         void setUp() {
 
             player = RegionPlayer.of(server.addPlayer());
-            region = spy(Region.of("foobar"));
+            region = spy(new Region("test"));
             region.price(0.0);
             group = RegionGroup.of("test");
             region.group(group);

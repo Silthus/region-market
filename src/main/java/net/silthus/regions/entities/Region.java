@@ -4,6 +4,7 @@ import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import io.ebean.ExpressionList;
 import io.ebean.Finder;
 import io.ebean.annotation.DbEnumValue;
 import lombok.Getter;
@@ -11,6 +12,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.silthus.ebean.BaseEntity;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.World;
 
 import javax.persistence.*;
@@ -27,39 +29,46 @@ import java.util.stream.Collectors;
 @Table(name = "sregions_regions")
 public class Region extends BaseEntity {
 
-    public static Region of(ProtectedRegion region) {
+    public static Optional<Region> of(Location location) {
+
+        return RegionSign.of(location).map(RegionSign::region);
+    }
+
+    public static Optional<Region> of(ProtectedRegion region) {
         return of(region.getId());
     }
 
-    public static Region of(World world, ProtectedRegion region) {
+    public static Optional<Region> of(World world, ProtectedRegion region) {
 
         return of(world, region.getId());
     }
 
-    public static Region of(String worldGuardRegion) {
+    public static Optional<Region> of(String worldGuardRegion) {
         return of(null, worldGuardRegion);
     }
 
-    public static Region of(World world, String worldGuardRegion) {
+    public static Optional<Region> of(World world, String worldGuardRegion) {
 
-        return find.query().where()
-                .eq("world", world)
-                .and()
-                .eq("world_guard_region", worldGuardRegion)
-                .findOneOrEmpty()
-                .orElseGet(() -> {
-                    Region region = new Region(world, worldGuardRegion);
-                    region.save();
-                    return region;
-                });
+        ExpressionList<Region> query = find.query().where();
+        if (world != null) {
+            query = query.eq("world", world.getUID())
+                    .and();
+        }
+        return query.eq("world_guard_region", worldGuardRegion)
+                .findOneOrEmpty();
     }
 
     public static final Finder<UUID, Region> find = new Finder<>(Region.class);
 
-    Region(World world, String worldGuardRegion) {
+    public Region(String worldGuardRegion) {
 
-        this.world = world.getUID();
-        this.worldName = world.getName();
+        this(null, worldGuardRegion);
+    }
+
+    public Region(World world, String worldGuardRegion) {
+
+        this.world = world != null ? world.getUID() : null;
+        this.worldName = world != null ? world.getName() : null;
         this.worldGuardRegion = worldGuardRegion;
         this.volume = volume();
         this.size = size();
