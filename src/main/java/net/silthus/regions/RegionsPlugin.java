@@ -83,6 +83,12 @@ public class RegionsPlugin extends JavaPlugin {
         }
     }
 
+    public void reload() {
+
+        loadConfig();
+        getRegionManager().reload();
+    }
+
     private boolean setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
             return false;

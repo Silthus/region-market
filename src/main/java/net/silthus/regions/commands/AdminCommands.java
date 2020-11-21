@@ -40,6 +40,14 @@ public class AdminCommands extends BaseCommand implements Listener {
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
+    @Subcommand("reload")
+    @CommandPermission("sregions.admin.reload")
+    public void reload() {
+
+        plugin.reload();
+        getCurrentCommandIssuer().sendMessage(ChatColor.GREEN + "sRegions wurde erfolgreich neugeladen.");
+    }
+
     @Subcommand("create")
     @CommandCompletion("@wgRegions")
     @CommandPermission("sregions.region.create")

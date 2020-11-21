@@ -39,6 +39,11 @@ public final class RegionManager {
         loadRegionGroups(new File(plugin.getDataFolder(), config.getRegionGroupsPath()).toPath());
     }
 
+    public void reload() {
+        groups.clear();
+        load();
+    }
+
     public void registerDefaults() {
 
         register(MoneyCost.class, () -> new MoneyCost(plugin.getEconomy()));
