@@ -1,0 +1,14 @@
+# 1.0.0 (2020-11-21)
+
+
+### Bug Fixes
+
+* **db:** add initial migrations ([abea4a1](https://github.com/Silthus/region-market/commit/abea4a1b98562920dbbf9dbc196efe8955833388))
+* **regions:** add option to buy regions via signs ([aebc39a](https://github.com/Silthus/region-market/commit/aebc39a8cc213fcd88e25a95e57e9e126cfd7599))
+
+
+### Features
+
+* add dynamic and static cost calculations based on m2 or m3 ([aa6a4ce](https://github.com/Silthus/region-market/commit/aa6a4cec63330fac9bcecee4f7aa6fbaaaec953a))
+* add region creation via signs ([a36297f](https://github.com/Silthus/region-market/commit/a36297fffcae4d76abe01041ee15bf8e93083acb))
+* support multiple database types with ebean ([919fa2e](https://github.com/Silthus/region-market/commit/919fa2eec9e313f19b5c7fa21587e5bb34df1ec7))
