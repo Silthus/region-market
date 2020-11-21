@@ -1,3 +1,15 @@
+# [1.1.0](https://github.com/Silthus/region-market/compare/v1.0.0...v1.1.0) (2020-11-21)
+
+
+### Bug Fixes
+
+* **signs:** update sign on first placement ([e8a6370](https://github.com/Silthus/region-market/commit/e8a6370e24ab2467d3dd1db84b3b2767c265c446))
+
+
+### Features
+
+* **cmd:** add reload command ([2b23bc1](https://github.com/Silthus/region-market/commit/2b23bc1c0228aa0d85b9164b27b681118f6e120b))
+
 # 1.0.0 (2020-11-21)
 
 
