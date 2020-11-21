@@ -2,18 +2,25 @@ package net.silthus.regions.entities;
 
 import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.domains.DefaultDomain;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import io.ebean.ExpressionList;
 import io.ebean.Finder;
 import io.ebean.annotation.DbEnumValue;
+import io.ebean.annotation.Transactional;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import net.milkbowl.vault.economy.Economy;
 import net.silthus.ebean.BaseEntity;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.World;
+import net.silthus.regions.Cost;
+import net.silthus.regions.RegionsPlugin;
+import net.silthus.regions.costs.CostCalucationException;
+import net.silthus.regions.costs.MoneyCost;
+import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -28,6 +35,11 @@ import java.util.stream.Collectors;
 @Accessors(fluent = true)
 @Table(name = "sregions_regions")
 public class Region extends BaseEntity {
+
+    public static boolean exists(World world, ProtectedRegion protectedRegion) {
+
+        return of(world, protectedRegion).isPresent();
+    }
 
     public static Optional<Region> of(Location location) {
 
@@ -54,27 +66,27 @@ public class Region extends BaseEntity {
             query = query.eq("world", world.getUID())
                     .and();
         }
-        return query.eq("world_guard_region", worldGuardRegion)
+        return query.eq("name", worldGuardRegion)
                 .findOneOrEmpty();
     }
 
     public static final Finder<UUID, Region> find = new Finder<>(Region.class);
 
-    public Region(String worldGuardRegion) {
+    public Region(String name) {
 
-        this(null, worldGuardRegion);
+        this(null, name);
     }
 
-    public Region(World world, String worldGuardRegion) {
+    public Region(World world, String name) {
 
         this.world = world != null ? world.getUID() : null;
         this.worldName = world != null ? world.getName() : null;
-        this.worldGuardRegion = worldGuardRegion;
+        this.name = name;
         this.volume = volume();
         this.size = size();
     }
 
-    private String worldGuardRegion;
+    private String name;
     private UUID world;
     private String worldName;
     private RegionType regionType = RegionType.SELL;
@@ -112,7 +124,29 @@ public class Region extends BaseEntity {
             return Optional.empty();
         }
 
-        return Optional.ofNullable(regionManager.getRegion(worldGuardRegion()));
+        return Optional.ofNullable(regionManager.getRegion(name()));
+    }
+
+    public Region owner(RegionPlayer player) {
+
+        RegionPlayer previousOwner = owner();
+        this.owner = player;
+        new RegionTransaction(this, player)
+                .action(RegionTransaction.Action.CHANGE_OWNER)
+                .data("previous_owner.id", previousOwner != null ? previousOwner.id() : null)
+                .data("previous_owner.name", previousOwner != null ? previousOwner.name() : null)
+                .data("new_owner.id", player.id())
+                .data("new_owner.name", player.name())
+                .save();
+        save();
+
+        protectedRegion().ifPresent(region -> {
+            DefaultDomain defaultDomain = new DefaultDomain();
+            defaultDomain.addPlayer(player.id());
+            region.setOwners(defaultDomain);
+        });
+
+        return this;
     }
 
     /**
@@ -134,7 +168,58 @@ public class Region extends BaseEntity {
      */
     public long size() {
 
-        return protectedRegion().map(region -> region.volume() / (region.getMaximumPoint().getBlockY() - region.getMinimumPoint().getBlockY())).orElse(0);
+        return protectedRegion().map(region -> region.volume()
+                / ((region.getMaximumPoint().getBlockY() - region.getMinimumPoint().getBlockY()) + 1))
+                .orElse(0);
+    }
+
+    public Cost.Result canBuy(RegionPlayer player) {
+
+        if (status() == Status.OCCUPIED) {
+            if (owner() == null) {
+                return new Cost.Result(false, "Das Grundstück " + name() + " gehört bereits jemandem.");
+            } else {
+                return new Cost.Result(false, "Das Grundstück " + name() + " gehört bereits " + owner().name());
+            }
+        }
+
+        if (group() == null) {
+            Economy economy = RegionsPlugin.getPlugin(RegionsPlugin.class).getEconomy();
+            return new Cost.Result(economy.has(player.getOfflinePlayer(), price),
+                    "Du hast nicht genügend Geld! Du benötigst mindestens: " + economy.format(price), price);
+        } else {
+            return group().costs().stream()
+                    .map(cost -> cost.check(player, this))
+                    .reduce((result, result2) -> new Cost.Result(
+                            result.success() && result2.success(),
+                            result.error() + "\n" + result2.error(),
+                            result.price() + result2.price()
+                    )).orElse(new Cost.Result(true, null));
+        }
+    }
+
+    @Transactional
+    public Cost.Result buy(RegionPlayer player) {
+
+        Cost.Result canBuy = canBuy(player);
+        if (canBuy.failure()) {
+            return canBuy;
+        }
+
+        Economy economy = RegionsPlugin.getPlugin(RegionsPlugin.class).getEconomy();
+        double price = calculatePrice(player);
+        economy.withdrawPlayer(player.getOfflinePlayer(), price);
+
+        owner(player);
+        status(Status.OCCUPIED);
+        new RegionTransaction(this, player)
+                .action(RegionTransaction.Action.BUY)
+                .data("price", price)
+                .save();
+        save();
+        updateSigns();
+
+        return new Cost.Result(true, null, price);
     }
 
     public String costs(RegionPlayer player) {
@@ -144,6 +229,70 @@ public class Region extends BaseEntity {
         } else {
             return group().costs().stream().map(cost -> cost.display(player, this)).collect(Collectors.joining(" - "));
         }
+    }
+
+    public double calculatePrice(RegionPlayer player) {
+
+        if (group() == null) {
+            return price;
+        } else {
+            return (Double) group.costs().stream()
+                    .filter(cost -> cost instanceof MoneyCost)
+                    .map(cost -> (MoneyCost) cost)
+                    .map(cost -> {
+                        try {
+                            return cost.calculate(player, this);
+                        } catch (CostCalucationException e) {
+                            e.printStackTrace();
+                            return 0;
+                        }
+                    }).reduce((c1, c2) -> c1.doubleValue() + c2.doubleValue())
+                    .orElse(0.0);
+        }
+    }
+
+    public void updateSigns() {
+
+        for (RegionSign sign : signs()) {
+            World world = Bukkit.getWorld(sign.worldId());
+            if (world == null) continue;
+            Block blockAt = world.getBlockAt(sign.x(), sign.y(), sign.z());
+            if (!(blockAt.getState() instanceof Sign)) {
+                sign.delete();
+            } else {
+                RegionsPlugin plugin = RegionsPlugin.getPlugin(RegionsPlugin.class);
+                Sign block = (Sign) blockAt.getState();
+                if (status() != Status.OCCUPIED) {
+                    block.setLine(0, ChatColor.GREEN + "[Grundstück]");
+                    block.setLine(1, ChatColor.WHITE + name());
+                    block.setLine(2, ChatColor.GREEN + "- Verfügbar -");
+                    block.setLine(3, ChatColor.GREEN + "Preis: " + ChatColor.YELLOW + plugin.getEconomy().format(price()));
+                } else {
+                    block.setLine(0, ChatColor.RED + "[Grundstück]");
+                    block.setLine(1, ChatColor.WHITE + name());
+                    block.setLine(2, ChatColor.RED + "- Besitzer -");
+                    block.setLine(3, ChatColor.YELLOW + owner().name());
+                }
+                block.update(true);
+            }
+        }
+    }
+
+    @Override
+    public void save() {
+
+        super.save();
+        updateSigns();
+    }
+
+    @Override
+    public boolean delete() {
+
+        for (RegionSign sign : signs()) {
+            sign.block().ifPresent(block -> block.setType(Material.AIR));
+            sign.delete();
+        }
+        return super.delete();
     }
 
     public enum RegionType {

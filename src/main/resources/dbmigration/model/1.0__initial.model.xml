@@ -3,7 +3,7 @@
     <changeSet type="apply">
         <createTable name="sregions_regions" identityType="external" pkName="pk_sregions_regions">
             <column name="id" type="uuid" primaryKey="true" identity="true"/>
-            <column name="world_guard_region" type="varchar"/>
+            <column name="name" type="varchar"/>
             <column name="world" type="uuid"/>
             <column name="world_name" type="varchar"/>
             <column name="region_type" type="varchar(8)" checkConstraint="check ( region_type in ('SELL','RENT','CONTRACT','HOTEL'))" checkConstraintName="ck_sregions_regions_region_type"/>
@@ -58,6 +58,9 @@
         <createTable name="sregions_transactions" identityType="external" pkName="pk_sregions_transactions">
             <column name="id" type="uuid" primaryKey="true" identity="true"/>
             <column name="region_id" type="uuid" references="sregions_regions.id" foreignKeyName="fk_sregions_transactions_region_id" foreignKeyIndex="ix_sregions_transactions_region_id"/>
+            <column name="player_id" type="uuid" references="sregions_players.id" foreignKeyName="fk_sregions_transactions_player_id" foreignKeyIndex="ix_sregions_transactions_player_id"/>
+            <column name="action" type="varchar(12)" checkConstraint="check ( action in ('SELL','BUY','CHANGE_OWNER'))" checkConstraintName="ck_sregions_transactions_action"/>
+            <column name="data" type="json"/>
             <column name="version" type="bigint" notnull="true"/>
             <column name="when_created" type="timestamp" notnull="true"/>
             <column name="when_modified" type="timestamp" notnull="true"/>

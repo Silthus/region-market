@@ -5,6 +5,7 @@ import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import io.ebean.Model;
 import net.silthus.regions.RegionSignParseException;
 import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.entities.Region;
@@ -16,14 +17,16 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.SignChangeEvent;
 
 import java.util.Optional;
 
-import static net.silthus.regions.Constants.PERMISSION_CREATE_SIGN;
+import static net.silthus.regions.Constants.PERMISSION_SIGN_CREATE;
 import static net.silthus.regions.Constants.SIGN_TAG;
 
 public class SignListener implements Listener {
@@ -46,14 +49,26 @@ public class SignListener implements Listener {
             return;
         }
 
-        Optional<Region> region = Region.of(event.getLocation());
-        if (region.isEmpty()) {
+        Optional<Region> optionalRegion = Region.of(event.getLocation());
+        if (optionalRegion.isEmpty()) {
             event.setCancelled(true);
             return;
         }
 
+        Region region = optionalRegion.get();
         RegionPlayer player = RegionPlayer.of(event.getPlayer());
-        event.setLine(4, ChatColor.GREEN + region.get().costs(player));
+
+        if (region.status() != Region.Status.OCCUPIED) {
+            event.setLine(0, ChatColor.GREEN + "[Grundstück]");
+            event.setLine(1, ChatColor.WHITE + region.name());
+            event.setLine(3, ChatColor.GREEN + "- Verfügbar -");
+            event.setLine(4, ChatColor.GREEN + "Kosten: " + ChatColor.YELLOW + region.costs(player));
+        } else {
+            event.setLine(0, ChatColor.RED + "[Grundstück]");
+            event.setLine(1, ChatColor.WHITE + region.name());
+            event.setLine(3, ChatColor.RED + "- Besitzer -");
+            event.setLine(4, ChatColor.YELLOW + region.owner().name());
+        }
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -109,12 +124,12 @@ public class SignListener implements Listener {
         regionSign.save();
 
         region.save();
-        player.sendMessage(ChatColor.GREEN + Messages.msg("regions.create.success", "Das Grundstück $1%s wurde erfolgreich erstellt. Preis: $2%s ($3%s)", region.worldGuardRegion(), region.price(), region.priceType()));
+        player.sendMessage(ChatColor.GREEN + Messages.msg("regions.create.success", "Das Grundstück $1%s wurde erfolgreich erstellt. Preis: $2%s ($3%s)", region.name(), region.price(), region.priceType()));
     }
 
     private Region tryGetOrCreateRegion(Player player, Block sign, String[] lines) throws RegionSignParseException {
 
-        if (!player.hasPermission(PERMISSION_CREATE_SIGN)) {
+        if (!player.hasPermission(PERMISSION_SIGN_CREATE)) {
             throw new RegionSignParseException(Messages.msg("regions.create.no-permission", "Du hast nicht genügend Rechte um das Grundstück zu erstellen."));
         }
 
@@ -135,5 +150,15 @@ public class SignListener implements Listener {
         }
 
         return Region.of(sign.getWorld(), protectedRegion).orElse(new Region(sign.getWorld(), regionName));
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onBlockBreak(BlockBreakEvent event) {
+
+        if (!(event.getBlock().getState() instanceof Sign)) {
+            return;
+        }
+        Optional<RegionSign> regionSign = RegionSign.of(event.getBlock().getLocation());
+        regionSign.ifPresent(Model::delete);
     }
 }

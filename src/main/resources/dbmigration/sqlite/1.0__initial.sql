@@ -1,7 +1,7 @@
 -- apply changes
 create table sregions_regions (
   id                            varchar(40) not null,
-  world_guard_region            varchar(255),
+  name                          varchar(255),
   world                         varchar(40),
   world_name                    varchar(255),
   region_type                   varchar(8),
@@ -75,10 +75,15 @@ create table sregions_region_signs (
 create table sregions_transactions (
   id                            varchar(40) not null,
   region_id                     varchar(40),
+  player_id                     varchar(40),
+  action                        varchar(12),
+  data                          clob,
   version                       integer not null,
   when_created                  timestamp not null,
   when_modified                 timestamp not null,
+  constraint ck_sregions_transactions_action check ( action in ('SELL','BUY','CHANGE_OWNER')),
   constraint pk_sregions_transactions primary key (id),
-  foreign key (region_id) references sregions_regions (id) on delete restrict on update restrict
+  foreign key (region_id) references sregions_regions (id) on delete restrict on update restrict,
+  foreign key (player_id) references sregions_players (id) on delete restrict on update restrict
 );
 

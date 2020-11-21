@@ -73,6 +73,19 @@ public interface Cost {
     class Result {
         boolean success;
         String error;
+        double price;
+
+        public Result(boolean success, String error) {
+            this.success = success;
+            this.error = error;
+            this.price = 0;
+        }
+
+        public Result(boolean success, String error, double price) {
+            this.success = success;
+            this.error = error;
+            this.price = price;
+        }
 
         public boolean failure() {
             return !success();

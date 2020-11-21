@@ -36,7 +36,7 @@ spigot {
     authors = [project.property("author")]
     apiVersion = project.property("apiVersion")
     load = STARTUP
-    depends = ['WorldGuard', 'WorldEdit', 'ProtocolLib', 'HolographicDisplays', 'Vault']
+    depends = ['WorldGuard', 'WorldEdit', 'ProtocolLib', 'Vault', 'ebean-wrapper']
 //    softDepend = ['HolographicDisplays', 'Vault']
 }
 
@@ -62,8 +62,9 @@ repositories {
 dependencies {
     compileOnly spigot(mcVersion)
 
-    implementation 'net.silthus:ebean-wrapper:2.7.0'
+    implementation 'net.silthus:ebean-wrapper:2.8.1'
     implementation 'net.silthus.configlib:configlib-bukkit:2.6.0'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.3'
 
     implementation 'co.aikar:acf-paper:0.5.0-SNAPSHOT'
 
@@ -95,6 +96,7 @@ shadowJar {
     dependencies {
         include(dependency('co.aikar:acf-paper:'))
         include(dependency('net.silthus.configlib:configlib-bukkit:'))
+        include(dependency('com.fasterxml.jackson.core::'))
     }
     relocate 'co.aikar.commands', "shadow.${pluginName}.acf"
     relocate 'co.aikar.locales', "shadow.${pluginName}.locales"

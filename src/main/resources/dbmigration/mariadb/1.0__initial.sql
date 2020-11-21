@@ -1,7 +1,7 @@
 -- apply changes
 create table sregions_regions (
   id                            varchar(40) not null,
-  world_guard_region            varchar(255),
+  name                          varchar(255),
   world                         varchar(40),
   world_name                    varchar(255),
   region_type                   varchar(8),
@@ -66,6 +66,9 @@ create table sregions_region_signs (
 create table sregions_transactions (
   id                            varchar(40) not null,
   region_id                     varchar(40),
+  player_id                     varchar(40),
+  action                        varchar(12),
+  data                          json,
   version                       bigint not null,
   when_created                  datetime(6) not null,
   when_modified                 datetime(6) not null,
@@ -89,4 +92,7 @@ alter table sregions_region_signs add constraint fk_sregions_region_signs_region
 
 create index ix_sregions_transactions_region_id on sregions_transactions (region_id);
 alter table sregions_transactions add constraint fk_sregions_transactions_region_id foreign key (region_id) references sregions_regions (id) on delete restrict on update restrict;
+
+create index ix_sregions_transactions_player_id on sregions_transactions (player_id);
+alter table sregions_transactions add constraint fk_sregions_transactions_player_id foreign key (player_id) references sregions_players (id) on delete restrict on update restrict;
 

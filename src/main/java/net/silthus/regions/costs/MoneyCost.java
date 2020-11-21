@@ -109,7 +109,7 @@ public class MoneyCost implements Cost {
 
         RegionGroup group = region.group();
         if (group == null) {
-            throw new CostCalucationException("Cannot calculate price of region '" + region.worldGuardRegion() + " (" + region.id() + ")' without a region group.");
+            throw new CostCalucationException("Cannot calculate price of region '" + region.name() + " (" + region.id() + ")' without a region group.");
         }
 
         int regionCount = player.regions().size();
