@@ -95,7 +95,7 @@ public class SignListener implements Listener {
         if (!Strings.isNullOrEmpty(groupLine)) {
             Optional<RegionGroup> regionGroup = plugin.getRegionManager().getRegionGroup(groupLine);
             if (regionGroup.isEmpty()) {
-                player.sendMessage(ChatColor.RED + Messages.msg("regions.create.no-region-group", "Die Grundstücksgruppe %s in Zeile 3 existiert nicht.", groupLine));
+                player.sendMessage(String.format(ChatColor.RED + "Die Grundstücksgruppe %s in Zeile 3 existiert nicht.", groupLine));
                 event.setCancelled(true);
                 event.getBlock().setType(Material.AIR);
                 return;
@@ -113,7 +113,7 @@ public class SignListener implements Listener {
                 region.price(Double.parseDouble(costLine));
                 region.priceType(Region.PriceType.STATIC);
             } catch (NumberFormatException e) {
-                player.sendMessage(ChatColor.RED + Messages.msg("regions.create.not-a-price", "Der Grundstückspreis in Zeile 4 %s ist keine gültige Zahl.", costLine));
+                player.sendMessage(String.format(ChatColor.RED + "Der Grundstückspreis in Zeile 4 %s ist keine gültige Zahl.", costLine));
                 event.setCancelled(true);
                 event.getBlock().setType(Material.AIR);
                 return;
@@ -125,29 +125,29 @@ public class SignListener implements Listener {
         region.signs().add(regionSign);
 
         region.save();
-        player.sendMessage(String.format(ChatColor.GREEN + "regions.create.success", "Das Grundstück $1%s wurde erfolgreich erstellt. Preis: $2%s ($3%s)", region.name(), region.price(), region.priceType()));
+        player.sendMessage(String.format(ChatColor.GREEN + "Das Grundstück $1%s wurde erfolgreich erstellt. Preis: $2%s ($3%s)", region.name(), region.price(), region.priceType()));
     }
 
     private Region tryGetOrCreateRegion(Player player, Block sign, String[] lines) throws RegionSignParseException {
 
         if (!player.hasPermission(PERMISSION_SIGN_CREATE)) {
-            throw new RegionSignParseException(Messages.msg("regions.create.no-permission", "Du hast nicht genügend Rechte um das Grundstück zu erstellen."));
+            throw new RegionSignParseException("Du hast nicht genügend Rechte um das Grundstück zu erstellen.");
         }
 
         String regionName = lines[1];
 
         if (Strings.isNullOrEmpty(regionName)) {
-            throw new RegionSignParseException(Messages.msg("regions.create.empty-region", "Du musst eine WorldGuard Region in Zeile 2 angeben."));
+            throw new RegionSignParseException("Du musst eine WorldGuard Region in Zeile 2 angeben.");
         }
 
         RegionManager regionManager = getRegionManager(player.getWorld());
         if (regionManager == null) {
-            throw new RegionSignParseException(Messages.msg("regions.create.missing-worldguard", "Der WorldGuard RegionManager konnte für diese Welt nicht gefunden werden."));
+            throw new RegionSignParseException("Der WorldGuard RegionManager konnte für diese Welt nicht gefunden werden.");
         }
 
         ProtectedRegion protectedRegion = regionManager.getRegion(regionName);
         if (protectedRegion == null) {
-            throw new RegionSignParseException(Messages.msg("regions.create.no-region", "Die WorldGuard Region '%s' in Zeile 2 existiert nicht.", regionName));
+            throw new RegionSignParseException(String.format("Die WorldGuard Region '%s' in Zeile 2 existiert nicht.", regionName));
         }
 
         return Region.of(sign.getWorld(), protectedRegion).orElse(new Region(sign.getWorld(), regionName));
