@@ -122,9 +122,10 @@ public class SignListener implements Listener {
 
         RegionSign regionSign = new RegionSign(region, event.getBlock());
         regionSign.save();
+        region.signs().add(regionSign);
 
         region.save();
-        player.sendMessage(ChatColor.GREEN + Messages.msg("regions.create.success", "Das Grundstück $1%s wurde erfolgreich erstellt. Preis: $2%s ($3%s)", region.name(), region.price(), region.priceType()));
+        player.sendMessage(String.format(ChatColor.GREEN + "regions.create.success", "Das Grundstück $1%s wurde erfolgreich erstellt. Preis: $2%s ($3%s)", region.name(), region.price(), region.priceType()));
     }
 
     private Region tryGetOrCreateRegion(Player player, Block sign, String[] lines) throws RegionSignParseException {
