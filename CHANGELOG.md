@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/Silthus/region-market/compare/v1.1.0...v1.1.1) (2020-11-21)
+
+
+### Bug Fixes
+
+* **signs:** show correct error messages ([15d16b1](https://github.com/Silthus/region-market/commit/15d16b1060610c4435168404a9b3e3e3bdfec5ff))
+
 # [1.1.0](https://github.com/Silthus/region-market/compare/v1.0.0...v1.1.0) (2020-11-21)
 
 
