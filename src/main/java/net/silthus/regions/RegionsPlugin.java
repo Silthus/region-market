@@ -2,6 +2,10 @@ package net.silthus.regions;
 
 import co.aikar.commands.PaperCommandManager;
 import com.comphenix.protocol.ProtocolLibrary;
+import com.google.common.base.Strings;
+import com.sk89q.worldedit.bukkit.BukkitPlayer;
+import com.sk89q.worldedit.bukkit.BukkitWorld;
+import com.sk89q.worldguard.WorldGuard;
 import io.ebean.Database;
 import kr.entree.spigradle.annotations.PluginMain;
 import lombok.Getter;
@@ -9,20 +13,23 @@ import net.milkbowl.vault.economy.Economy;
 import net.silthus.ebean.Config;
 import net.silthus.ebean.EbeanWrapper;
 import net.silthus.regions.commands.AdminCommands;
+import net.silthus.regions.commands.RegionCommands;
 import net.silthus.regions.entities.*;
 import net.silthus.regions.listener.ClickListener;
 import net.silthus.regions.listener.SignListener;
 import net.silthus.regions.listener.SignPacketListener;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.command.CommandException;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.Locale;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @PluginMain
 @Getter
@@ -53,7 +60,7 @@ public class RegionsPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
 
-        if (!testing && !setupEconomy() ) {
+        if (!isTesting() && !setupEconomy()) {
             getLogger().severe(String.format("[%s] - No Vault dependency found!", getDescription().getName()));
             getLogger().severe("*** This plugin will be disabled. ***");
             this.setEnabled(false);
@@ -70,8 +77,10 @@ public class RegionsPlugin extends JavaPlugin {
         loadConfig();
         setupDatabase();
         setupRegionManager();
-        setupListeners();
-        setupCommands();
+        if (!isTesting()) {
+            setupListeners();
+            setupCommands();
+        }
     }
 
     private boolean setupEconomy() {
@@ -96,15 +105,15 @@ public class RegionsPlugin extends JavaPlugin {
     private void setupDatabase() {
 
         this.database = new EbeanWrapper(Config.builder(this)
-                .runMigrations(true)
                 .entities(
-                    Region.class,
-                    RegionSign.class,
-                    RegionAcl.class,
-                    RegionGroup.class,
-                    RegionPlayer.class,
-                    RegionTransaction.class
-        ).build()).connect();
+                        Region.class,
+                        RegionSign.class,
+                        RegionAcl.class,
+                        RegionGroup.class,
+                        RegionPlayer.class,
+                        RegionTransaction.class
+                )
+                .build()).connect();
     }
 
     private void setupRegionManager() {
@@ -131,16 +140,66 @@ public class RegionsPlugin extends JavaPlugin {
     private void setupCommands() {
 
         this.commandManager = new PaperCommandManager(this);
-        try {
-            saveResource("lang_de.yml", false);
-            commandManager.addSupportedLanguage(Locale.GERMAN);
-            commandManager.getLocales().loadYamlLanguageFile("lang_de.yml", Locale.GERMAN);
-            commandManager.getLocales().setDefaultLocale(Locale.GERMAN);
-        } catch (IOException | InvalidConfigurationException e) {
-            getLogger().severe("unable to load locales");
-            e.printStackTrace();
-        }
+
+        registerRegionPlayerContext(commandManager);
+        registerRegionContext(commandManager);
+        registerRegionsCompletion(commandManager);
+        registerWorldGuardRegionCompletion(commandManager);
 
         commandManager.registerCommand(new AdminCommands(this));
+        commandManager.registerCommand(new RegionCommands(this));
+    }
+
+    private void registerRegionPlayerContext(PaperCommandManager commandManager) {
+
+        commandManager.getCommandContexts().registerIssuerOnlyContext(RegionPlayer.class, c -> RegionPlayer.of(c.getPlayer()));
+    }
+
+    private void registerRegionContext(PaperCommandManager commandManager) {
+
+        commandManager.getCommandContexts().registerContext(Region.class, c -> {
+            String regionName = c.popFirstArg();
+
+            Optional<Region> region;
+            if (Strings.isNullOrEmpty(regionName)) {
+                region = Region.of(c.getPlayer().getLocation());
+                if (region.isEmpty()) {
+                    throw new CommandException("Unable to find a region at the current position.");
+                }
+            } else {
+                region = Region.of(c.getPlayer().getWorld(), regionName);
+                if (region.isEmpty()) {
+                    throw new CommandException("Unable to find a region with the name " + regionName);
+                }
+            }
+
+            return region.get();
+        });
+    }
+
+    private void registerRegionsCompletion(PaperCommandManager commandManager) {
+
+        commandManager.getCommandCompletions().registerAsyncCompletion("regions", context ->
+                Region.find.all().stream()
+                .filter(region -> region.world() == null
+                        || context.getPlayer().getWorld().getUID().equals(region.world()))
+                .map(Region::name)
+                .collect(Collectors.toSet()));
+    }
+
+    private void registerWorldGuardRegionCompletion(PaperCommandManager commandManager) {
+
+        commandManager.getCommandCompletions().registerAsyncCompletion("wgRegions", context -> {
+            com.sk89q.worldguard.protection.managers.RegionManager regionManager = WorldGuard.getInstance().getPlatform()
+                    .getRegionContainer().get(new BukkitWorld(context.getPlayer().getWorld()));
+
+            if (regionManager == null) {
+                return new HashSet<>();
+            }
+
+            return regionManager.getApplicableRegionsIDs(new BukkitPlayer(context.getPlayer()).getLocation().toVector().toBlockPoint())
+                    .stream().filter(s -> !getPluginConfig().getIgnoredRegions().contains(s))
+                    .collect(Collectors.toSet());
+        });
     }
 }

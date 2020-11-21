@@ -5,9 +5,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.silthus.ebean.BaseEntity;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
 
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
@@ -66,5 +68,16 @@ public class RegionSign extends BaseEntity {
         worldId(world.getUID());
         world(world.getName());
         return this;
+    }
+
+    public Optional<Block> block() {
+        return Optional.ofNullable(Bukkit.getWorld(worldId))
+                .map(world -> world.getBlockAt(x, y, z));
+    }
+
+    public Optional<Sign> sign() {
+        return block()
+                .filter(block -> block.getState() instanceof Sign)
+                .map(block -> (Sign)block.getState());
     }
 }

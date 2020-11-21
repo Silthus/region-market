@@ -71,7 +71,7 @@ class MoneyCostTest {
         @DisplayName("should have correct volume size")
         void volumeSize() {
 
-            assertThat(region.size()).isEqualTo(10);
+            assertThat(region.size()).isEqualTo(9);
         }
 
         @Nested
@@ -123,8 +123,8 @@ class MoneyCostTest {
                 region.priceType(Region.PriceType.DYNAMIC);
                 cost.basePrice(100.0);
                 cost.regionCountMultiplier(2.0);
-                player.regions().add(Region.of("bar"));
-                player.regions().add(Region.of("foo"));
+                player.regions().add(new Region("bar"));
+                player.regions().add(new Region("foo"));
 
                 // basePrice + (regionCount * multiplier * basePrice)
                 assertThat(cost.calculate(player, region)).isEqualTo(500.0);
@@ -147,7 +147,7 @@ class MoneyCostTest {
             @DisplayName("should multiply price with number of region groups")
             void shouldMultiplyBasePriceWithNumberOfGroups() {
 
-                Region test = Region.of("test");
+                Region test = new Region("test");
                 test.group(RegionGroup.of("foobar"));
                 player.regions().add(test);
 
@@ -163,8 +163,8 @@ class MoneyCostTest {
             @DisplayName("should multiply price with number of regions in the same group")
             void shouldMultiplyPriceWithTheNumberOfRegionsInTheSameGroup() {
 
-                player.regions().add(Region.of("test1").group(group));
-                player.regions().add(Region.of("test2").group(group));
+                player.regions().add(new Region("test1").group(group));
+                player.regions().add(new Region("test2").group(group));
 
                 region.priceType(Region.PriceType.DYNAMIC);
                 cost.basePrice(100.0);
@@ -212,8 +212,8 @@ class MoneyCostTest {
                 region.priceMultiplier(2.0);
                 cost.basePrice(100.0);
                 cost.regionCountMultiplier(2.0);
-                player.regions().add(Region.of("bar"));
-                player.regions().add(Region.of("foo"));
+                player.regions().add(new Region("bar"));
+                player.regions().add(new Region("foo"));
 
                 assertThat(cost.calculate(player, region)).isEqualTo(100000.0);
             }
@@ -226,8 +226,8 @@ class MoneyCostTest {
                 region.priceType(Region.PriceType.DYNAMIC);
                 cost.basePrice(100.0);
                 cost.regionCountMultiplier(2.0);
-                player.regions().add(Region.of("bar"));
-                player.regions().add(Region.of("foo"));
+                player.regions().add(new Region("bar"));
+                player.regions().add(new Region("foo"));
 
                 // basePrice + (regionCount * multiplier * basePrice)
                 assertThat(cost.calculate(player, region)).isEqualTo(50000.0);
@@ -250,7 +250,7 @@ class MoneyCostTest {
             @DisplayName("should multiply price with number of region groups")
             void shouldMultiplyBasePriceWithNumberOfGroups() {
 
-                Region test = Region.of("test");
+                Region test = new Region("test");
                 test.group(RegionGroup.of("foobar"));
                 player.regions().add(test);
 
@@ -266,8 +266,8 @@ class MoneyCostTest {
             @DisplayName("should multiply price with number of regions in the same group")
             void shouldMultiplyPriceWithTheNumberOfRegionsInTheSameGroup() {
 
-                player.regions().add(Region.of("test1").group(group));
-                player.regions().add(Region.of("test2").group(group));
+                player.regions().add(new Region("test1").group(group));
+                player.regions().add(new Region("test2").group(group));
 
                 region.priceType(Region.PriceType.DYNAMIC);
                 cost.basePrice(100.0);
@@ -314,8 +314,8 @@ class MoneyCostTest {
                 region.priceType(Region.PriceType.DYNAMIC);
                 cost.basePrice(100.0);
                 cost.regionCountMultiplier(2.0);
-                player.regions().add(Region.of("bar"));
-                player.regions().add(Region.of("foo"));
+                player.regions().add(new Region("bar"));
+                player.regions().add(new Region("foo"));
 
                 // basePrice + (regionCount * multiplier * basePrice)
                 assertThat(cost.calculate(player, region)).isEqualTo(5000.0);
@@ -330,8 +330,8 @@ class MoneyCostTest {
                 region.priceMultiplier(2.0);
                 cost.basePrice(100.0);
                 cost.regionCountMultiplier(2.0);
-                player.regions().add(Region.of("bar"));
-                player.regions().add(Region.of("foo"));
+                player.regions().add(new Region("bar"));
+                player.regions().add(new Region("foo"));
 
                 assertThat(cost.calculate(player, region)).isEqualTo(10000.0);
             }
@@ -353,7 +353,7 @@ class MoneyCostTest {
             @DisplayName("should multiply price with number of region groups")
             void shouldMultiplyBasePriceWithNumberOfGroups() {
 
-                Region test = Region.of("test");
+                Region test = new Region("test");
                 test.group(RegionGroup.of("foobar"));
                 player.regions().add(test);
 
@@ -369,8 +369,8 @@ class MoneyCostTest {
             @DisplayName("should multiply price with number of regions in the same group")
             void shouldMultiplyPriceWithTheNumberOfRegionsInTheSameGroup() {
 
-                player.regions().add(Region.of("test1").group(group));
-                player.regions().add(Region.of("test2").group(group));
+                player.regions().add(new Region("test1").group(group));
+                player.regions().add(new Region("test2").group(group));
 
                 region.priceType(Region.PriceType.DYNAMIC);
                 cost.basePrice(100.0);
