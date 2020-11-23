@@ -9,18 +9,24 @@ import com.sk89q.worldguard.WorldGuard;
 import io.ebean.Database;
 import kr.entree.spigradle.annotations.PluginMain;
 import lombok.Getter;
+import me.wiefferink.interactivemessenger.processing.Message;
+import me.wiefferink.interactivemessenger.source.LanguageManager;
 import net.milkbowl.vault.economy.Economy;
 import net.silthus.ebean.Config;
 import net.silthus.ebean.EbeanWrapper;
 import net.silthus.regions.commands.AdminCommands;
 import net.silthus.regions.commands.RegionCommands;
-import net.silthus.regions.entities.*;
+import net.silthus.regions.entities.Region;
+import net.silthus.regions.entities.RegionAcl;
+import net.silthus.regions.entities.RegionGroup;
+import net.silthus.regions.entities.RegionPlayer;
+import net.silthus.regions.entities.RegionSign;
+import net.silthus.regions.entities.RegionTransaction;
 import net.silthus.regions.listener.ClickListener;
 import net.silthus.regions.listener.SignListener;
 import net.silthus.regions.listener.SignPacketListener;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandException;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -40,6 +46,7 @@ public class RegionsPlugin extends JavaPlugin {
     private RegionManager regionManager;
     private RegionsPluginConfig pluginConfig;
     private PaperCommandManager commandManager;
+    private LanguageManager languageManager;
 
     private SignPacketListener signPacketListener;
     private SignListener signListener;
@@ -75,6 +82,7 @@ public class RegionsPlugin extends JavaPlugin {
 //        }
 
         loadConfig();
+        setupLanguageManager();
         setupDatabase();
         setupRegionManager();
         if (!isTesting()) {
@@ -207,5 +215,36 @@ public class RegionsPlugin extends JavaPlugin {
                     .stream().filter(s -> !getPluginConfig().getIgnoredRegions().contains(s))
                     .collect(Collectors.toSet());
         });
+    }
+
+    private void setupLanguageManager() {
+
+        languageManager = new LanguageManager(
+                this,                                  // The plugin (used to get the languages bundled in the jar file)
+                "lang",                           // Folder where the languages are stored
+                getConfig().getString("language"),     // The language to use indicated by the plugin user
+                "EN",                                  // The default language, expected to be shipped with the plugin and should be complete, fills in gaps in the user-selected language
+                getConfig().getStringList("chatPrefix") // Chat prefix to use with Message#prefix(), could of course come from the config file
+        );
+    }
+
+    /**
+     * Send a message to a target without a prefix.
+     * @param target       The target to send the message to
+     * @param key          The key of the language string
+     * @param replacements The replacements to insert in the message
+     */
+    public void messageNoPrefix(Object target, String key, Object... replacements) {
+        Message.fromKey(key).replacements(replacements).send(target);
+    }
+
+    /**
+     * Send a message to a target, prefixed by the default chat prefix.
+     * @param target       The target to send the message to
+     * @param key          The key of the language string
+     * @param replacements The replacements to insert in the message
+     */
+    public void message(Object target, String key, Object... replacements) {
+        Message.fromKey(key).prefix().replacements(replacements).send(target);
     }
 }

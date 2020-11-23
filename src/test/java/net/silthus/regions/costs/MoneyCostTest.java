@@ -58,7 +58,7 @@ class MoneyCostTest {
             player = RegionPlayer.of(server.addPlayer());
             region = spy(new Region("test"));
             region.price(0.0);
-            group = RegionGroup.of("test");
+            group = RegionGroup.getOrCreate("test");
             region.group(group);
             regionMock = mock(ProtectedRegion.class);
             when(region.protectedRegion()).thenReturn(Optional.of(regionMock));
@@ -148,7 +148,7 @@ class MoneyCostTest {
             void shouldMultiplyBasePriceWithNumberOfGroups() {
 
                 Region test = new Region("test");
-                test.group(RegionGroup.of("foobar"));
+                test.group(RegionGroup.getOrCreate("foobar"));
                 player.regions().add(test);
 
                 region.priceType(Region.PriceType.DYNAMIC);
@@ -251,7 +251,7 @@ class MoneyCostTest {
             void shouldMultiplyBasePriceWithNumberOfGroups() {
 
                 Region test = new Region("test");
-                test.group(RegionGroup.of("foobar"));
+                test.group(RegionGroup.getOrCreate("foobar"));
                 player.regions().add(test);
 
                 region.priceType(Region.PriceType.DYNAMIC);
@@ -354,7 +354,7 @@ class MoneyCostTest {
             void shouldMultiplyBasePriceWithNumberOfGroups() {
 
                 Region test = new Region("test");
-                test.group(RegionGroup.of("foobar"));
+                test.group(RegionGroup.getOrCreate("foobar"));
                 player.regions().add(test);
 
                 region.priceType(Region.PriceType.DYNAMIC);

@@ -1,0 +1,42 @@
+"action": "[gold][bold]<%0%>[/bold]"
+
+"button": "[bold]<%0%>[/bold]"
+
+"command":
+  - "[bold]%0%[/bold]"
+  - "    hover: %lang:action|Use %1%|%"
+  - "    command: %1%"
+
+"helpCommand":
+  - "[gold]%0% [gray]-[reset]"
+  - "    hover: %lang:action|Use %0%|%"
+  - "    command: %0%"
+
+"region": "%lang:tRegion|%region%|%"
+"tRegion":
+  - "[bold]%0%[/bold]"
+  - "    hover: Region %0%"
+  - "    hover: %lang:action|Region Information|%"
+  - "    command: /rcregions info region %0%"
+
+"player": "%lang:tPlayer|%player%|%"
+"tPlayer":
+  - "[bold]%0%[/bold]"
+  - "    hover: Spieler %0%"
+  - "    hover: %lang:action|Regions of %0%|%"
+  - "    command: /rcregions info player %0%"
+
+"owner":
+  - "[bold]%owner%[/bold]"
+  - "    hover: Besitzer %owner%"
+  - "    hover: %lang:action|Regions of %owner%|%"
+  - "    command: /rcregions info player %owner%"
+
+"total-maximum": "You cannot have more tahn %0% Region(en) (you already have %1% in group '%2%')."
+
+"confirm-yes": " [gray]%lang:command|Click to confirm|1%0%|%[gray] or to repeat the command."
+
+autolink-deactivated: "Sign AutoLink Mode is now [green]%lang:command|inactive|/rcregions:admin autolink|%."
+autolink-activated:
+  - "Sign AutoLink Mode is now [red]%lang:command|active|/rcregions:admin autolink|%."
+  - "Click into a region and then on a sign to link the sign with the region."

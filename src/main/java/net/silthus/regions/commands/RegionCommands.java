@@ -22,7 +22,7 @@ public class RegionCommands extends BaseCommand {
     }
 
     @Subcommand("buy")
-    @CommandPermission("sregions.region.buy")
+    @CommandPermission("rcregions.region.buy")
     @CommandCompletion("@regions")
     public void buy(RegionPlayer player, Region region) {
 
@@ -35,7 +35,7 @@ public class RegionCommands extends BaseCommand {
 
     @Subcommand("buyconfirm")
     @CommandCompletion("@regions")
-    @CommandPermission("sregions.region.buy.confirm")
+    @CommandPermission("rcregions.region.buy.confirm")
     public void buyConfirm(RegionPlayer player, Region region) {
 
         Cost.Result result = checkBuy(player, region);

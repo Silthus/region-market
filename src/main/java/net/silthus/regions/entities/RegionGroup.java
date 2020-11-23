@@ -20,6 +20,7 @@ import javax.persistence.Version;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Entity
@@ -31,7 +32,12 @@ public class RegionGroup extends Model {
 
     public static final Finder<String, RegionGroup> find = new Finder<>(RegionGroup.class);
 
-    public static RegionGroup of(String identifier) {
+    public static Optional<RegionGroup> of(String identifier) {
+
+        return Optional.ofNullable(find.byId(identifier));
+    }
+
+    public static RegionGroup getOrCreate(String identifier) {
 
         RegionGroup regionGroup = find.byId(identifier);
 

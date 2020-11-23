@@ -12,29 +12,41 @@ import io.ebean.annotation.Transactional;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import me.wiefferink.interactivemessenger.processing.ReplacementProvider;
 import net.milkbowl.vault.economy.Economy;
 import net.silthus.ebean.BaseEntity;
 import net.silthus.regions.Cost;
+import net.silthus.regions.MessageTags;
 import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.costs.CostCalucationException;
 import net.silthus.regions.costs.MoneyCost;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static net.silthus.regions.MessageTags.*;
+
 @Entity
 @Getter
 @Setter
 @Accessors(fluent = true)
 @Table(name = "sregions_regions")
-public class Region extends BaseEntity {
+public class Region extends BaseEntity implements ReplacementProvider {
 
     public static boolean exists(World world, ProtectedRegion protectedRegion) {
 
@@ -293,6 +305,47 @@ public class Region extends BaseEntity {
             sign.delete();
         }
         return super.delete();
+    }
+
+    @Override
+    public Object provideReplacement(String variable) {
+
+        switch (variable) {
+            case regionName:
+                return name();
+            case regionVolume:
+                return volume();
+            case regionSize:
+                return size();
+            case playerName:
+            case MessageTags.owner:
+                return owner() != null ? owner().name() : null;
+            case ownerId:
+            case playerId:
+                return owner() != null ? owner().id() : null;
+            case MessageTags.price:
+                return RegionsPlugin.getPlugin(RegionsPlugin.class).getEconomy().format(price());
+            case priceraw:
+                return price();
+            case MessageTags.priceMultiplier:
+                return priceMultiplier();
+            case MessageTags.worldName:
+                return worldName();
+            case regionStatus:
+                return status().getValue().toLowerCase();
+            case MessageTags.regionType:
+                return regionType().getValue().toLowerCase();
+            case MessageTags.priceType:
+                return priceType().getValue().toLowerCase();
+            case groupName:
+                return group() != null ? group().name() : null;
+            case groupId:
+                return group() != null ? group().identifier() : null;
+            case groupDescription:
+                return group() != null ? group().description() : null;
+        }
+
+        return null;
     }
 
     public enum RegionType {

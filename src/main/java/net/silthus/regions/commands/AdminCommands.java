@@ -2,8 +2,11 @@ package net.silthus.regions.commands;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.InvalidCommandArgument;
-import co.aikar.commands.annotation.*;
+import co.aikar.commands.annotation.CommandAlias;
+import co.aikar.commands.annotation.CommandCompletion;
+import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Optional;
+import co.aikar.commands.annotation.Subcommand;
 import com.google.common.base.Strings;
 import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldedit.math.BlockVector3;
@@ -27,7 +30,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @CommandAlias("rcra|rcregions:admin|sregions:admin|sra|srma")
@@ -41,7 +47,7 @@ public class AdminCommands extends BaseCommand implements Listener {
     }
 
     @Subcommand("reload")
-    @CommandPermission("sregions.admin.reload")
+    @CommandPermission("rcregions.admin.reload")
     public void reload() {
 
         plugin.reload();
@@ -50,7 +56,7 @@ public class AdminCommands extends BaseCommand implements Listener {
 
     @Subcommand("create")
     @CommandCompletion("@wgRegions")
-    @CommandPermission("sregions.region.create")
+    @CommandPermission("rcregions.region.create")
     public void create(Player player, @Optional String region, @Optional String price) {
 
         RegionManager regionManager = WorldGuard.getInstance().getPlatform().getRegionContainer().get(new BukkitWorld(player.getWorld()));
@@ -120,7 +126,7 @@ public class AdminCommands extends BaseCommand implements Listener {
 
     @Subcommand("delete|del|remove")
     @CommandCompletion("@regions")
-    @CommandPermission("sregions.region.delete")
+    @CommandPermission("rcregions.region.delete")
     public void delete(Region region) {
 
         region.delete();
@@ -131,16 +137,15 @@ public class AdminCommands extends BaseCommand implements Listener {
     private final Map<UUID, SignLinkMode> signLinkModes = new HashMap<>();
 
     @Subcommand("autolink|al")
-    @CommandPermission("regions.region.sign.autolink")
+    @CommandPermission("rcregions.region.sign.autolink")
     public void autolink(Player player) {
 
         if (signLinkModes.containsKey(player.getUniqueId())) {
             signLinkModes.remove(player.getUniqueId());
-            player.sendMessage(ChatColor.YELLOW + "[sRegions] Sign Autolink Mode deaktiviert.");
+            plugin.message(player, "autolink-deactivated");
         } else {
             signLinkModes.put(player.getUniqueId(), new SignLinkMode());
-            player.sendMessage(ChatColor.GREEN + "[sRegions] Sign Autolink Mode aktiviert.");
-            player.sendMessage(ChatColor.YELLOW + "Klicke in die Region und dann auf ein Schild um das Schild mit der Region zu verknüpfen.");
+            plugin.message(player, "autolink-activated");
         }
     }
 

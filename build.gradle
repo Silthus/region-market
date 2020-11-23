@@ -57,6 +57,7 @@ repositories {
     enginehub()
     maven { url = "https://repo.aikar.co/content/groups/aikar/" }
     protocolLib()
+    maven { url = "http://maven.wiefferink.me" }
 }
 
 dependencies {
@@ -75,6 +76,7 @@ dependencies {
     implementation 'com.github.MilkBowl:VaultAPI:1.7'
     implementation 'com.github.filoghost.HolographicDisplays:holographicdisplays-api:v2.4.3'
     implementation protocolLib()
+    implementation 'net.silthus:interactivemessenger:master'
 
     testImplementation 'io.ebean:ebean-test:12.6.0'
 
@@ -88,7 +90,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.+'
     testImplementation "org.mockito:mockito-core:3.+"
     testImplementation 'org.assertj:assertj-core:3.+'
-    testImplementation mockBukkit()
+    testImplementation 'com.github.seeseemelk:MockBukkit-v1.16:0.5.0'
 }
 
 shadowJar {
@@ -97,10 +99,12 @@ shadowJar {
         include(dependency('co.aikar:acf-paper:'))
         include(dependency('net.silthus.configlib:configlib-bukkit:'))
         include(dependency('com.fasterxml.jackson.core::'))
+        include(dependency('me.wiefferink:interactivemessenger:'))
     }
     relocate 'co.aikar.commands', "shadow.${pluginName}.acf"
     relocate 'co.aikar.locales', "shadow.${pluginName}.locales"
     relocate 'de.exlll.configlib', "shadow.${pluginName}.configlib"
+    relocate 'me.wiefferink.interactivemessenger', "shadow.${pluginName}.interactivemessenger"
 }
 
 tasks.build.dependsOn(shadowJar)

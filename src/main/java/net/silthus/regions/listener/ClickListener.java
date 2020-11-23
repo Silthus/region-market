@@ -55,6 +55,10 @@ public class ClickListener implements Listener {
                 event.getPlayer().sendMessage(ChatColor.YELLOW + "Regionen können aktuell noch nicht verkauft werden.");
                 // TODO: implement
             } else {
+                if (!event.getPlayer().hasPermission(Constants.PERMISSION_SIGN_BUY)) {
+                    event.getPlayer().sendMessage(ChatColor.RED + "Du hast nicht genügend Rechte um Grundstücke zu kaufen.");
+                    return;
+                }
                 if (region.status() == Region.Status.OCCUPIED) {
                     event.getPlayer().sendMessage(ChatColor.RED + "Dieses Grundstück gehört bereits: " + region.owner().name());
                     return;

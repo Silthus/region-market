@@ -1,0 +1,37 @@
+"action": "[gold][bold]<%0%>[/bold]"
+
+"button": "[bold]<%0%>[/bold]"
+
+"command":
+  - "[bold]%0%[/bold]"
+  - "    hover: %lang:action|Benutze %1%|%"
+  - "    command: %1%"
+
+"helpCommand":
+  - "[gold]%0% [gray]-[reset]"
+  - "    hover: %lang:action|Benutze %0%|%"
+  - "    command: %0%"
+
+"region": "%lang:tRegion|%region%|%"
+"tRegion":
+  - "[bold]%0%[/bold]"
+  - "    hover: Region %0%"
+  - "    hover: %lang:action|Region information|%"
+  - "    command: /rcregions info region %0%"
+
+"player": "%lang:tPlayer|%player%|%"
+"tPlayer":
+  - "[bold]%0%[/bold]"
+  - "    hover: Spieler %0%"
+  - "    hover: %lang:action|Regionen von %0%|%"
+  - "    command: /rcregions info player %0%"
+
+"owner":
+  - "[bold]%owner%[/bold]"
+  - "    hover: Besitzer %owner%"
+  - "    hover: %lang:action|Regionen von %owner%|%"
+  - "    command: /rcregions info player %owner%"
+
+"total-maximum": "Du kannst nicht mehr als %0% Region(en) mieten/kaufen (Du hast bereits %1% in Gruppe '%2%')."
+
+"confirm-yes": " [gray]Klicken um %lang:command|den Befehl zu bestätigen|1%0%|%[gray] oder zu wiederholen."

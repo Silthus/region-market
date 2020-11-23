@@ -80,7 +80,7 @@ public final class RegionManager {
             config.load(file);
             config.set("id", config.getString("id", ConfigUtil.getFileIdentifier(base, file)));
 
-            RegionGroup regionGroup = RegionGroup.of(config.getString("id"));
+            RegionGroup regionGroup = RegionGroup.getOrCreate(config.getString("id"));
             regionGroup.load(this, config);
             regionGroup.save();
 
