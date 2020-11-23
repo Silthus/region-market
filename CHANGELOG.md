@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/raidcraft/rcregions/compare/v1.1.1...v1.2.0) (2020-11-23)
+
+
+### Features
+
+* add new experimental messaging library ([66deb6c](https://github.com/raidcraft/rcregions/commit/66deb6c4535a491d2e24c021b290e13e42f21ae0))
+
 ## [1.1.1](https://github.com/Silthus/region-market/compare/v1.1.0...v1.1.1) (2020-11-21)
 
 
