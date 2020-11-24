@@ -41,7 +41,8 @@ autolink-activated:
   - "Sign AutoLink Mode is now [red]%lang:command|active|/rcregions:admin autolink|%."
   - "Click into a region and then on a sign to link the sign with the region."
 
-limit:
+limit: "%lang:tLimit|%region_player%|%0|%"
+tLimit:
   - "[underline]%0%[/underline]"
   - "     hover: Limits of %player%"
 
