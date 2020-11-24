@@ -12,7 +12,6 @@ import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionGroup;
 import net.silthus.regions.entities.RegionPlayer;
 import net.silthus.regions.entities.RegionSign;
-import net.silthus.regions.Messages;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -56,7 +55,7 @@ public class SignListener implements Listener {
         }
 
         Region region = optionalRegion.get();
-        RegionPlayer player = RegionPlayer.of(event.getPlayer());
+        RegionPlayer player = RegionPlayer.getOrCreate(event.getPlayer());
 
         if (region.status() != Region.Status.OCCUPIED) {
             event.setLine(0, ChatColor.GREEN + "[Grundstück]");
@@ -125,7 +124,7 @@ public class SignListener implements Listener {
         region.signs().add(regionSign);
 
         region.save();
-        player.sendMessage(String.format(ChatColor.GREEN + "Das Grundstück $1%s wurde erfolgreich erstellt. Preis: $2%s ($3%s)", region.name(), region.price(), region.priceType()));
+        player.sendMessage(String.format(ChatColor.GREEN + "Das Grundstück %s wurde erfolgreich erstellt. Preis: %s (%s)", region.name(), plugin.getEconomy().format(region.price()), region.priceType()));
     }
 
     private Region tryGetOrCreateRegion(Player player, Block sign, String[] lines) throws RegionSignParseException {

@@ -41,7 +41,7 @@ public class ClickListener implements Listener {
 
         event.setCancelled(true);
         Region region = optionalRegion.get();
-        RegionPlayer player = RegionPlayer.of(event.getPlayer());
+        RegionPlayer player = RegionPlayer.getOrCreate(event.getPlayer());
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             if (event.getPlayer().isSneaking()) {
                 if (region.status() != Region.Status.OCCUPIED) {

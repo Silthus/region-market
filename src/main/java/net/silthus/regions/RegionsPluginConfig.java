@@ -17,6 +17,7 @@ public class RegionsPluginConfig extends BukkitYamlConfiguration {
 
     @Comment("The relative path where your skill region groups are located.")
     private String regionGroupsPath = "region-groups";
+    private String limitsConfig = "limits.yml";
     private List<String> ignoredRegions = new ArrayList<>();
     private DatabaseConfig database = new DatabaseConfig();
 

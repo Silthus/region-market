@@ -12,6 +12,7 @@ import lombok.Getter;
 import me.wiefferink.interactivemessenger.processing.Message;
 import me.wiefferink.interactivemessenger.source.LanguageManager;
 import net.milkbowl.vault.economy.Economy;
+import net.milkbowl.vault.permission.Permission;
 import net.silthus.ebean.Config;
 import net.silthus.ebean.EbeanWrapper;
 import net.silthus.regions.commands.AdminCommands;
@@ -22,6 +23,7 @@ import net.silthus.regions.entities.RegionGroup;
 import net.silthus.regions.entities.RegionPlayer;
 import net.silthus.regions.entities.RegionSign;
 import net.silthus.regions.entities.RegionTransaction;
+import net.silthus.regions.limits.LimitsConfig;
 import net.silthus.regions.listener.ClickListener;
 import net.silthus.regions.listener.SignListener;
 import net.silthus.regions.listener.SignPacketListener;
@@ -42,15 +44,18 @@ import java.util.stream.Collectors;
 public class RegionsPlugin extends JavaPlugin {
 
     private Economy economy;
+    private Permission permission;
     private Database database;
     private RegionManager regionManager;
-    private RegionsPluginConfig pluginConfig;
     private PaperCommandManager commandManager;
     private LanguageManager languageManager;
 
     private SignPacketListener signPacketListener;
     private SignListener signListener;
     private ClickListener clickListener;
+
+    private RegionsPluginConfig pluginConfig;
+    private LimitsConfig limitsConfig;
 
     private boolean testing = false;
 
@@ -67,19 +72,12 @@ public class RegionsPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
 
-        if (!isTesting() && !setupEconomy()) {
+        if (!isTesting() && !setupVault()) {
             getLogger().severe(String.format("[%s] - No Vault dependency found!", getDescription().getName()));
             getLogger().severe("*** This plugin will be disabled. ***");
             this.setEnabled(false);
             return;
         }
-
-//        if (!testing && !Bukkit.getPluginManager().isPluginEnabled("HolographicDisplays")) {
-//            getLogger().severe("*** HolographicDisplays is not installed or not enabled. ***");
-//            getLogger().severe("*** This plugin will be disabled. ***");
-//            this.setEnabled(false);
-//            return;
-//        }
 
         loadConfig();
         setupLanguageManager();
@@ -97,23 +95,35 @@ public class RegionsPlugin extends JavaPlugin {
         getRegionManager().reload();
     }
 
-    private boolean setupEconomy() {
+    private boolean setupVault() {
+
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
             return false;
         }
+
         RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
         if (rsp == null) {
             return false;
         }
         economy = rsp.getProvider();
+
+        RegisteredServiceProvider<Permission> registration = getServer().getServicesManager().getRegistration(Permission.class);
+        if (registration == null) {
+            return false;
+        }
+        permission = registration.getProvider();
+
         return true;
     }
 
     private void loadConfig() {
 
         getDataFolder().mkdirs();
-        pluginConfig = new RegionsPluginConfig(new File(getDataFolder(), "config.yml").toPath());
-        pluginConfig.loadAndSave();
+        this.pluginConfig = new RegionsPluginConfig(new File(getDataFolder(), "config.yml").toPath());
+        this.pluginConfig.loadAndSave();
+
+        this.limitsConfig = new LimitsConfig(this, new File(getDataFolder(), pluginConfig.getLimitsConfig()).toPath());
+        this.limitsConfig.loadAndSave();
     }
 
     private void setupDatabase() {
@@ -166,7 +176,7 @@ public class RegionsPlugin extends JavaPlugin {
 
     private void registerRegionPlayerContext(PaperCommandManager commandManager) {
 
-        commandManager.getCommandContexts().registerIssuerOnlyContext(RegionPlayer.class, c -> RegionPlayer.of(c.getPlayer()));
+        commandManager.getCommandContexts().registerIssuerOnlyContext(RegionPlayer.class, c -> RegionPlayer.getOrCreate(c.getPlayer()));
     }
 
     private void registerRegionContext(PaperCommandManager commandManager) {

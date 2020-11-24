@@ -35,7 +35,7 @@ public class RegionPlayerTest {
         PlayerMock player = server.addPlayer();
         player.addAttachment(plugin, Constants.PRICE_MODIFIER_PREFIX + "2.0", true);
 
-        RegionPlayer regionPlayer = RegionPlayer.of(player);
+        RegionPlayer regionPlayer = RegionPlayer.getOrCreate(player);
         assertThat(regionPlayer.priceMultiplier()).isEqualTo(2.0);
     }
 }

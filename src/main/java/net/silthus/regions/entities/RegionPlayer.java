@@ -4,8 +4,10 @@ import io.ebean.Finder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import me.wiefferink.interactivemessenger.processing.ReplacementProvider;
 import net.silthus.ebean.BaseEntity;
 import net.silthus.regions.Constants;
+import net.silthus.regions.MessageTags;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -19,14 +21,24 @@ import javax.persistence.Transient;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static net.silthus.regions.MessageTags.*;
+
 @Entity
 @Getter
 @Setter
 @Accessors(fluent = true)
 @Table(name = "rcregions_players")
-public class RegionPlayer extends BaseEntity {
+public class RegionPlayer extends BaseEntity implements ReplacementProvider {
 
-    public static RegionPlayer of(OfflinePlayer player) {
+    public static Optional<RegionPlayer> of(OfflinePlayer player) {
+        return Optional.ofNullable(find.byId(player.getUniqueId()));
+    }
+
+    public static Optional<RegionPlayer> of(String name) {
+        return find.query().where().eq("name", name).findOneOrEmpty();
+    }
+
+    public static RegionPlayer getOrCreate(OfflinePlayer player) {
 
         RegionPlayer regionPlayer = find.byId(player.getUniqueId());
         if (regionPlayer == null) {
@@ -77,12 +89,12 @@ public class RegionPlayer extends BaseEntity {
         return priceMultiplier;
     }
 
-    public Set<RegionGroup> regionGroups() {
+    public Collection<RegionGroup> regionGroups() {
 
         return regions().stream()
                 .map(Region::group)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     public List<Region> regions(RegionGroup group) {
@@ -92,5 +104,20 @@ public class RegionPlayer extends BaseEntity {
         return regions().stream()
                 .filter(region -> group.equals(region.group()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Object provideReplacement(String variable) {
+
+        switch (variable) {
+            case playerName:
+                return name();
+            case playerId:
+                return id();
+            case MessageTags.priceMultiplier:
+                return priceMultiplier;
+        }
+
+        return null;
     }
 }

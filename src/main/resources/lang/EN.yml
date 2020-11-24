@@ -32,7 +32,7 @@
   - "    hover: %lang:action|Regions of %owner%|%"
   - "    command: /rcregions info player %owner%"
 
-"total-maximum": "You cannot have more tahn %0% Region(en) (you already have %1% in group '%2%')."
+"total-maximum": "You cannot have more then %0% regions (you already have %1% in group '%2%')."
 
 "confirm-yes": " [gray]%lang:command|Click to confirm|1%0%|%[gray] or to repeat the command."
 
@@ -40,3 +40,11 @@ autolink-deactivated: "Sign AutoLink Mode is now [green]%lang:command|inactive|/
 autolink-activated:
   - "Sign AutoLink Mode is now [red]%lang:command|active|/rcregions:admin autolink|%."
   - "Click into a region and then on a sign to link the sign with the region."
+
+limit:
+  - "[underline]%0%[/underline]"
+  - "     hover: Limits of %player%"
+
+limits-reached-total: "You reached your %0% %lang:limit|region limit|% (you alread have %region_count%/%limit_total% regions)."
+limits-reached-regions: "You reached your %0% %lang:limit|region limit|% (you alread have %region_count%/%limit_total% regions)."
+limits-reached-group: "You reached your %0% %lang:limit|region limit|% (you alread have %region_count%/%limit_total% regions)."

@@ -55,7 +55,7 @@ class MoneyCostTest {
         @BeforeEach
         void setUp() {
 
-            player = RegionPlayer.of(server.addPlayer());
+            player = RegionPlayer.getOrCreate(server.addPlayer());
             region = spy(new Region("test"));
             region.price(0.0);
             group = RegionGroup.getOrCreate("test");

@@ -20,6 +20,7 @@ import net.silthus.regions.MessageTags;
 import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.costs.CostCalucationException;
 import net.silthus.regions.costs.MoneyCost;
+import net.silthus.regions.limits.Limit;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -195,6 +196,11 @@ public class Region extends BaseEntity implements ReplacementProvider {
             }
         }
 
+        Limit.Result limits = checkLimits(player);
+        if (limits.reachedLimit()) {
+            return new Cost.Result(false, limits.error());
+        }
+
         if (group() == null) {
             Economy economy = RegionsPlugin.getPlugin(RegionsPlugin.class).getEconomy();
             return new Cost.Result(economy.has(player.getOfflinePlayer(), price),
@@ -208,6 +214,15 @@ public class Region extends BaseEntity implements ReplacementProvider {
                             result.price() + result2.price()
                     )).orElse(new Cost.Result(true, null));
         }
+    }
+
+    private Limit.Result checkLimits(RegionPlayer player) {
+
+        return RegionsPlugin.getPlugin(RegionsPlugin.class)
+                .getLimitsConfig()
+                .getPlayerLimit(player)
+                .map(playerLimit -> playerLimit.test(this))
+                .orElse(new Limit.Result(false, null, Limit.Type.NONE));
     }
 
     @Transactional
