@@ -24,7 +24,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Entity
-@Table(name = "sregions_region_groups")
+@Table(name = "rcregions_region_groups")
 @Getter
 @Setter
 @Accessors(fluent = true)

@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Entity
-@Table(name = "sregions_transactions")
+@Table(name = "rcregions_transactions")
 @Getter
 @Setter
 @Accessors(fluent = true)

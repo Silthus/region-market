@@ -45,7 +45,7 @@ import static net.silthus.regions.MessageTags.*;
 @Getter
 @Setter
 @Accessors(fluent = true)
-@Table(name = "sregions_regions")
+@Table(name = "rcregions_regions")
 public class Region extends BaseEntity implements ReplacementProvider {
 
     public static boolean exists(World world, ProtectedRegion protectedRegion) {

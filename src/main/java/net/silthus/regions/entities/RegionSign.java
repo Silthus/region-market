@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Entity
-@Table(name = "sregions_region_signs")
+@Table(name = "rcregions_region_signs")
 @Getter
 @Setter
 @Accessors(fluent = true)

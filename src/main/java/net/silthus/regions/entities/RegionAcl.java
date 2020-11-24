@@ -13,7 +13,7 @@ import javax.persistence.Table;
 @Getter
 @Setter
 @Accessors(fluent = true)
-@Table(name = "sregions_acl")
+@Table(name = "rcregions_acl")
 public class RegionAcl extends BaseEntity {
 
     @ManyToOne

@@ -1,5 +1,5 @@
 -- apply changes
-create table sregions_regions (
+create table rcregions_regions (
   id                            varchar(40) not null,
   name                          varchar(255),
   world                         varchar(40),
@@ -16,15 +16,15 @@ create table sregions_regions (
   version                       integer not null,
   when_created                  timestamp not null,
   when_modified                 timestamp not null,
-  constraint ck_sregions_regions_region_type check ( region_type in ('SELL','RENT','CONTRACT','HOTEL')),
-  constraint ck_sregions_regions_price_type check ( price_type in ('FREE','STATIC','DYNAMIC')),
-  constraint ck_sregions_regions_status check ( status in ('FREE','OCCUPIED','ABADONED')),
-  constraint pk_sregions_regions primary key (id),
-  foreign key (group_identifier) references sregions_region_groups (identifier) on delete restrict on update restrict,
-  foreign key (owner_id) references sregions_players (id) on delete restrict on update restrict
+  constraint ck_rcregions_regions_region_type check ( region_type in ('SELL','RENT','CONTRACT','HOTEL')),
+  constraint ck_rcregions_regions_price_type check ( price_type in ('FREE','STATIC','DYNAMIC')),
+  constraint ck_rcregions_regions_status check ( status in ('FREE','OCCUPIED','ABADONED')),
+  constraint pk_rcregions_regions primary key (id),
+  foreign key (group_identifier) references rcregions_region_groups (identifier) on delete restrict on update restrict,
+  foreign key (owner_id) references rcregions_players (id) on delete restrict on update restrict
 );
 
-create table sregions_acl (
+create table rcregions_acl (
   id                            varchar(40) not null,
   region_id                     varchar(40),
   player_id                     varchar(40),
@@ -32,32 +32,32 @@ create table sregions_acl (
   version                       integer not null,
   when_created                  timestamp not null,
   when_modified                 timestamp not null,
-  constraint ck_sregions_acl_access_level check ( access_level in ('OWNER','MEMBER','GUEST')),
-  constraint pk_sregions_acl primary key (id),
-  foreign key (region_id) references sregions_regions (id) on delete restrict on update restrict,
-  foreign key (player_id) references sregions_players (id) on delete restrict on update restrict
+  constraint ck_rcregions_acl_access_level check ( access_level in ('OWNER','MEMBER','GUEST')),
+  constraint pk_rcregions_acl primary key (id),
+  foreign key (region_id) references rcregions_regions (id) on delete restrict on update restrict,
+  foreign key (player_id) references rcregions_players (id) on delete restrict on update restrict
 );
 
-create table sregions_region_groups (
+create table rcregions_region_groups (
   identifier                    varchar(255) not null,
   name                          varchar(255),
   description                   varchar(255),
   version                       integer not null,
   when_created                  timestamp not null,
   when_modified                 timestamp not null,
-  constraint pk_sregions_region_groups primary key (identifier)
+  constraint pk_rcregions_region_groups primary key (identifier)
 );
 
-create table sregions_players (
+create table rcregions_players (
   id                            varchar(40) not null,
   name                          varchar(255),
   version                       integer not null,
   when_created                  timestamp not null,
   when_modified                 timestamp not null,
-  constraint pk_sregions_players primary key (id)
+  constraint pk_rcregions_players primary key (id)
 );
 
-create table sregions_region_signs (
+create table rcregions_region_signs (
   id                            varchar(40) not null,
   region_id                     varchar(40),
   x                             integer not null,
@@ -68,11 +68,11 @@ create table sregions_region_signs (
   version                       integer not null,
   when_created                  timestamp not null,
   when_modified                 timestamp not null,
-  constraint pk_sregions_region_signs primary key (id),
-  foreign key (region_id) references sregions_regions (id) on delete restrict on update restrict
+  constraint pk_rcregions_region_signs primary key (id),
+  foreign key (region_id) references rcregions_regions (id) on delete restrict on update restrict
 );
 
-create table sregions_transactions (
+create table rcregions_transactions (
   id                            varchar(40) not null,
   region_id                     varchar(40),
   player_id                     varchar(40),
@@ -81,9 +81,9 @@ create table sregions_transactions (
   version                       integer not null,
   when_created                  timestamp not null,
   when_modified                 timestamp not null,
-  constraint ck_sregions_transactions_action check ( action in ('SELL','BUY','CHANGE_OWNER')),
-  constraint pk_sregions_transactions primary key (id),
-  foreign key (region_id) references sregions_regions (id) on delete restrict on update restrict,
-  foreign key (player_id) references sregions_players (id) on delete restrict on update restrict
+  constraint ck_rcregions_transactions_action check ( action in ('SELL','BUY','CHANGE_OWNER')),
+  constraint pk_rcregions_transactions primary key (id),
+  foreign key (region_id) references rcregions_regions (id) on delete restrict on update restrict,
+  foreign key (player_id) references rcregions_players (id) on delete restrict on update restrict
 );
 

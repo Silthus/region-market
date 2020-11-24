@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 @Accessors(fluent = true)
-@Table(name = "sregions_players")
+@Table(name = "rcregions_players")
 public class RegionPlayer extends BaseEntity {
 
     public static RegionPlayer of(OfflinePlayer player) {
