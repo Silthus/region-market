@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/raidcraft/rcregions/compare/v1.3.0...v1.3.1) (2020-11-24)
+
+
+### Bug Fixes
+
+* **limits:** apply default limit to all players ([b3fc45f](https://github.com/raidcraft/rcregions/commit/b3fc45f7a18e1244879293d0033d1cca104bf82c)), closes [#8](https://github.com/raidcraft/rcregions/issues/8)
+
 # [1.3.0](https://github.com/raidcraft/rcregions/compare/v1.2.2...v1.3.0) (2020-11-24)
 
 
