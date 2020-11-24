@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/raidcraft/rcregions/compare/v1.2.1...v1.2.2) (2020-11-24)
+
+
+### Bug Fixes
+
+* **db:** rename tables to rcregions_ and create new migrations ([7363b2a](https://github.com/raidcraft/rcregions/commit/7363b2a0d42fb39ab370140c481d314a9e693619))
+
 ## [1.2.1](https://github.com/raidcraft/rcregions/compare/v1.2.0...v1.2.1) (2020-11-24)
 
 
