@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/raidcraft/rcregions/compare/v1.2.2...v1.3.0) (2020-11-24)
+
+
+### Features
+
+* **regions:** add option to define region limits that can be assigned with permissions ([225ed17](https://github.com/raidcraft/rcregions/commit/225ed17ac4a656493f53bdf014c1e2976ec9489d)), closes [#8](https://github.com/raidcraft/rcregions/issues/8)
+
 ## [1.2.2](https://github.com/raidcraft/rcregions/compare/v1.2.1...v1.2.2) (2020-11-24)
 
 
