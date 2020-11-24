@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/raidcraft/rcregions/compare/v1.2.0...v1.2.1) (2020-11-24)
+
+
+### Bug Fixes
+
+* **build:** properly shade interactive messenger ([80fdfac](https://github.com/raidcraft/rcregions/commit/80fdfac3fb16e3eb919603ce07c64cb3ec677dc4))
+
 # [1.2.0](https://github.com/raidcraft/rcregions/compare/v1.1.1...v1.2.0) (2020-11-23)
 
 
