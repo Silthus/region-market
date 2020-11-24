@@ -99,7 +99,7 @@ shadowJar {
         include(dependency('co.aikar:acf-paper:'))
         include(dependency('net.silthus.configlib:configlib-bukkit:'))
         include(dependency('com.fasterxml.jackson.core::'))
-        include(dependency('me.wiefferink:interactivemessenger:'))
+        include(dependency('net.silthus:interactivemessenger:'))
     }
     relocate 'co.aikar.commands', "shadow.${pluginName}.acf"
     relocate 'co.aikar.locales', "shadow.${pluginName}.locales"
