@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/raidcraft/rcregions/compare/v1.3.1...v1.4.0) (2020-11-29)
+
+
+### Features
+
+* add progressive region group costs ([79b2e8e](https://github.com/raidcraft/rcregions/commit/79b2e8e3e2f4d567249125db422259f97f014856)), closes [#11](https://github.com/raidcraft/rcregions/issues/11) [#10](https://github.com/raidcraft/rcregions/issues/10) [#8](https://github.com/raidcraft/rcregions/issues/8) [#9](https://github.com/raidcraft/rcregions/issues/9)
+
 ## [1.3.1](https://github.com/raidcraft/rcregions/compare/v1.3.0...v1.3.1) (2020-11-24)
 
 
