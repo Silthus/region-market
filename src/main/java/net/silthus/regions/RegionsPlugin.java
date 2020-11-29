@@ -24,7 +24,7 @@ import net.silthus.regions.entities.RegionPlayer;
 import net.silthus.regions.entities.RegionSign;
 import net.silthus.regions.entities.RegionTransaction;
 import net.silthus.regions.limits.LimitsConfig;
-import net.silthus.regions.listener.ClickListener;
+import net.silthus.regions.listener.SignClickListener;
 import net.silthus.regions.listener.SignListener;
 import net.silthus.regions.listener.SignPacketListener;
 import org.bukkit.Bukkit;
@@ -52,7 +52,7 @@ public class RegionsPlugin extends JavaPlugin {
 
     private SignPacketListener signPacketListener;
     private SignListener signListener;
-    private ClickListener clickListener;
+    private SignClickListener signClickListener;
 
     private RegionsPluginConfig pluginConfig;
     private LimitsConfig limitsConfig;
@@ -156,8 +156,8 @@ public class RegionsPlugin extends JavaPlugin {
         signListener = new SignListener(this);
         Bukkit.getPluginManager().registerEvents(signListener, this);
 
-        clickListener = new ClickListener(this);
-        Bukkit.getPluginManager().registerEvents(clickListener, this);
+        signClickListener = new SignClickListener(this);
+        Bukkit.getPluginManager().registerEvents(signClickListener, this);
     }
 
 

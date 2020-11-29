@@ -1,8 +1,13 @@
 package net.silthus.regions.util;
 
+import lombok.NonNull;
+import net.silthus.regions.entities.Region;
+import net.silthus.regions.entities.RegionPlayer;
 import org.bukkit.*;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.Sign;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -44,5 +49,24 @@ public class SignUtils {
             }
         }
         return tileEntities;
+    }
+
+    public static String[] formatRegionSign(@NonNull Region region, @Nullable RegionPlayer player) {
+
+        String[] lines = new String[4];
+
+        if (region.status() != Region.Status.OCCUPIED) {
+            lines[0] = ChatColor.GREEN + "[Grundstück]";
+            lines[1] = ChatColor.WHITE + region.name();
+            lines[2] = ChatColor.GREEN + "- Verfügbar -";
+            lines[3] = ChatColor.GREEN + "Kosten: " + ChatColor.YELLOW + region.costs(player);
+        } else {
+            lines[0] = ChatColor.RED + "[Grundstück]";
+            lines[1] = ChatColor.WHITE + region.name();
+            lines[2] = ChatColor.RED + "- Besitzer -";
+            lines[3] = ChatColor.YELLOW + region.owner().name();
+        }
+
+        return lines;
     }
 }

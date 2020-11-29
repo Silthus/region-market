@@ -12,6 +12,7 @@ import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionGroup;
 import net.silthus.regions.entities.RegionPlayer;
 import net.silthus.regions.entities.RegionSign;
+import net.silthus.regions.util.SignUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -57,16 +58,9 @@ public class SignListener implements Listener {
         Region region = optionalRegion.get();
         RegionPlayer player = RegionPlayer.getOrCreate(event.getPlayer());
 
-        if (region.status() != Region.Status.OCCUPIED) {
-            event.setLine(0, ChatColor.GREEN + "[Grundstück]");
-            event.setLine(1, ChatColor.WHITE + region.name());
-            event.setLine(3, ChatColor.GREEN + "- Verfügbar -");
-            event.setLine(4, ChatColor.GREEN + "Kosten: " + ChatColor.YELLOW + region.costs(player));
-        } else {
-            event.setLine(0, ChatColor.RED + "[Grundstück]");
-            event.setLine(1, ChatColor.WHITE + region.name());
-            event.setLine(3, ChatColor.RED + "- Besitzer -");
-            event.setLine(4, ChatColor.YELLOW + region.owner().name());
+        String[] lines = SignUtils.formatRegionSign(region, player);
+        for (int i = 0; i < lines.length; i++) {
+            event.setLine(i, lines[i]);
         }
     }
 
@@ -124,6 +118,10 @@ public class SignListener implements Listener {
         region.signs().add(regionSign);
 
         region.save();
+        String[] lines = SignUtils.formatRegionSign(region, null);
+        for (int i = 0; i < lines.length; i++) {
+            event.setLine(i, lines[i]);
+        }
         player.sendMessage(String.format(ChatColor.GREEN + "Das Grundstück %s wurde erfolgreich erstellt. Preis: %s (%s)", region.name(), plugin.getEconomy().format(region.price()), region.priceType()));
     }
 

@@ -15,11 +15,11 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 import java.util.Optional;
 
-public class ClickListener implements Listener {
+public class SignClickListener implements Listener {
 
     private final RegionsPlugin plugin;
 
-    public ClickListener(RegionsPlugin plugin) {
+    public SignClickListener(RegionsPlugin plugin) {
         this.plugin = plugin;
     }
 

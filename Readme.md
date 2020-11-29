@@ -30,3 +30,11 @@ Use the smart tab completion and help command (`/rcregions help`) to find our mo
 ### Creating Regions
 
 Every region in RCRegions requires a valid WorldGuard region as the container of the region and to manage permissions and ownership.
+
+### Region Price Calculation
+
+You can specify a price modifier for groups that gets applied for players that want to buy multiple regions. The following logic is used when calculating the price for a region.
+
+```
+region_price = SUM(base_price * [(count ^ power) * multiplier + 1] - base_price) * player_permission_multiplier * region_multiplier
+```

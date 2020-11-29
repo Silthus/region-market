@@ -2,11 +2,7 @@ package net.silthus.regions.commands;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.InvalidCommandArgument;
-import co.aikar.commands.annotation.CommandAlias;
-import co.aikar.commands.annotation.CommandCompletion;
-import co.aikar.commands.annotation.CommandPermission;
-import co.aikar.commands.annotation.Optional;
-import co.aikar.commands.annotation.Subcommand;
+import co.aikar.commands.annotation.*;
 import com.google.common.base.Strings;
 import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldedit.math.BlockVector3;
@@ -55,9 +51,9 @@ public class AdminCommands extends BaseCommand implements Listener {
     }
 
     @Subcommand("create")
-    @CommandCompletion("@wgRegions")
+    @CommandCompletion("@wgRegions auto|free|static")
     @CommandPermission("rcregions.region.create")
-    public void create(Player player, @Optional String region, @Optional String price) {
+    public void create(Player player, @Optional String region, @Optional @Default("auto") String price) {
 
         RegionManager regionManager = WorldGuard.getInstance().getPlatform().getRegionContainer().get(new BukkitWorld(player.getWorld()));
         if (regionManager == null) {
@@ -121,7 +117,7 @@ public class AdminCommands extends BaseCommand implements Listener {
 
         sellRegion.save();
         player.sendMessage(ChatColor.GREEN + "The region " + sellRegion.name()
-                + " can now be bought for: " + ChatColor.YELLOW + plugin.getEconomy().format(sellRegion.price()));
+                + " can now be bought for: " + ChatColor.YELLOW + sellRegion.costs());
     }
 
     @Subcommand("delete|del|remove")

@@ -1,0 +1,32 @@
+default-group: default
+groups:
+  ############################################ä
+  # DO NOT REMOVE OR RENAME THE DEFAULT GROUP #
+  ############################################ä
+  # 'default' is the key of the group.
+  # The key is used in commands to assign regions to a group.
+  default:
+    # The player friendly display name of this group.
+    name: Default
+    # A short and precise description what regions this group contains.
+    description: The default region group contains all regions that have no group assigned to them.
+    # Here you can specify a list of costs that apply to all regions in this group.
+    # Currently there is only the 'money' cost available, but more will follow.
+    costs:
+      # The type key of the cost.
+      money:
+        # How should the base_price of the region be calculated?
+        #   - per2m: base_price = base * m2
+        #   - per3m: base_price = base * m3
+        #   - static: base_price = base
+        type: per2m
+        base: 10.0
+        # the calculated base price is then increased depending on the number of regions the player has
+        # and the individual modifier of the player and region
+        # region_price = SUM(base_price * [(count ^ power) * multiplier + 1] - base_price) * player_permission_multiplier * region_multiplier
+        region-count-multiplier: 0.0
+        region-count-multiplier-power: 1.0
+        region-group-count-multiplier: 0.0
+        region-group-count-multiplier-power: 1.0
+        same-group-count-multiplier: 0.0
+        same-group-count-multiplier-power: 1.0

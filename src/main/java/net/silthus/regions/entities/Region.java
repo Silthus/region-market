@@ -10,6 +10,7 @@ import io.ebean.Finder;
 import io.ebean.annotation.DbEnumValue;
 import io.ebean.annotation.Transactional;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import me.wiefferink.interactivemessenger.processing.ReplacementProvider;
@@ -29,6 +30,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 
+import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
@@ -85,21 +87,8 @@ public class Region extends BaseEntity implements ReplacementProvider {
 
     public static final Finder<UUID, Region> find = new Finder<>(Region.class);
 
-    public Region(String name) {
-
-        this(null, name);
-    }
-
-    public Region(World world, String name) {
-
-        this.world = world != null ? world.getUID() : null;
-        this.worldName = world != null ? world.getName() : null;
-        this.name = name;
-        this.volume = volume();
-        this.size = size();
-    }
-
     private String name;
+
     private UUID world;
     private String worldName;
     private RegionType regionType = RegionType.SELL;
@@ -109,7 +98,6 @@ public class Region extends BaseEntity implements ReplacementProvider {
     private double priceMultiplier = 1.0;
     private long volume;
     private long size;
-
     @ManyToOne
     private RegionGroup group;
 
@@ -124,6 +112,21 @@ public class Region extends BaseEntity implements ReplacementProvider {
 
     @OneToMany(cascade = CascadeType.REMOVE)
     private List<RegionSign> signs = new ArrayList<>();
+
+    public Region(String name) {
+
+        this(null, name);
+    }
+
+    public Region(World world, String name) {
+
+        this.world = world != null ? world.getUID() : null;
+        this.worldName = world != null ? world.getName() : null;
+        this.name = name;
+        this.volume = volume();
+        this.size = size();
+        this.group = RegionGroup.getDefault();
+    }
 
     public Optional<ProtectedRegion> protectedRegion() {
 
@@ -201,12 +204,15 @@ public class Region extends BaseEntity implements ReplacementProvider {
             return new Cost.Result(false, limits.error());
         }
 
+        RegionsPlugin plugin = RegionsPlugin.getPlugin(RegionsPlugin.class);
+
         if (group() == null) {
-            Economy economy = RegionsPlugin.getPlugin(RegionsPlugin.class).getEconomy();
-            return new Cost.Result(economy.has(player.getOfflinePlayer(), price),
-                    "Du hast nicht genügend Geld! Du benötigst mindestens: " + economy.format(price), price);
+            return new Cost.Result(plugin.getEconomy().has(player.getOfflinePlayer(), price),
+                    "Du hast nicht genügend Geld! Du benötigst mindestens: " + plugin.getEconomy().format(price), price);
         } else {
-            return group().costs().stream()
+            return group()
+                    .loadCosts(plugin.getRegionManager())
+                    .costs().stream()
                     .map(cost -> cost.check(player, this))
                     .reduce((result, result2) -> new Cost.Result(
                             result.success() && result2.success(),
@@ -226,16 +232,16 @@ public class Region extends BaseEntity implements ReplacementProvider {
     }
 
     @Transactional
-    public Cost.Result buy(RegionPlayer player) {
+    public Cost.Result buy(@NonNull RegionsPlugin plugin, RegionPlayer player) {
 
         Cost.Result canBuy = canBuy(player);
         if (canBuy.failure()) {
             return canBuy;
         }
 
-        Economy economy = RegionsPlugin.getPlugin(RegionsPlugin.class).getEconomy();
-        double price = calculatePrice(player);
-        economy.withdrawPlayer(player.getOfflinePlayer(), price);
+        double price = canBuy.price();
+
+        plugin.getEconomy().withdrawPlayer(player.getOfflinePlayer(), price);
 
         owner(player);
         status(Status.OCCUPIED);
@@ -249,32 +255,21 @@ public class Region extends BaseEntity implements ReplacementProvider {
         return new Cost.Result(true, null, price);
     }
 
-    public String costs(RegionPlayer player) {
+    public String costs() {
+        return costs(null);
+    }
+
+    public String costs(@Nullable RegionPlayer player) {
 
         if (group() == null) {
             return price + "";
         } else {
-            return group().costs().stream().map(cost -> cost.display(player, this)).collect(Collectors.joining(" - "));
-        }
-    }
-
-    public double calculatePrice(RegionPlayer player) {
-
-        if (group() == null) {
-            return price;
-        } else {
-            return (Double) group.costs().stream()
-                    .filter(cost -> cost instanceof MoneyCost)
-                    .map(cost -> (MoneyCost) cost)
-                    .map(cost -> {
-                        try {
-                            return cost.calculate(player, this);
-                        } catch (CostCalucationException e) {
-                            e.printStackTrace();
-                            return 0;
-                        }
-                    }).reduce((c1, c2) -> c1.doubleValue() + c2.doubleValue())
-                    .orElse(0.0);
+            RegionsPlugin plugin = RegionsPlugin.getPlugin(RegionsPlugin.class);
+            return group()
+                    .loadCosts(plugin.getRegionManager())
+                    .costs().stream()
+                    .map(cost -> cost.display(player, this))
+                    .collect(Collectors.joining("\n - "));
         }
     }
 

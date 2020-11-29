@@ -40,7 +40,7 @@ public class RegionCommands extends BaseCommand {
 
         Cost.Result result = checkBuy(player, region);
 
-        region.buy(player);
+        region.buy(plugin, player);
         getCurrentCommandIssuer().sendMessage(ChatColor.GREEN + "Du hast das Grundstück " + ChatColor.YELLOW + region.name()
                 + ChatColor.GREEN + " für " + ChatColor.AQUA + plugin.getEconomy().format(result.price()) + ChatColor.GREEN + " gekauft.");
     }

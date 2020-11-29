@@ -12,15 +12,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Log(topic = "sRegionMarket")
+@Log(topic = "RCRegions")
 public final class RegionManager {
 
     private final RegionsPlugin plugin;
@@ -36,7 +33,7 @@ public final class RegionManager {
 
     public void load() {
 
-        loadRegionGroups(new File(plugin.getDataFolder(), config.getRegionGroupsPath()).toPath());
+        loadRegionGroups(new File(plugin.getDataFolder(), config.getRegionGroupsConfig()).toPath());
     }
 
     public void reload() {
@@ -50,6 +47,44 @@ public final class RegionManager {
     }
 
     public void loadRegionGroups(Path path) {
+        plugin.saveResource("groups.yml", false);
+        if (Files.isRegularFile(path)) {
+            loadRegionGroupsFromFile(path.toFile());
+        } else {
+            loadRegionGroupsFromPath(path);
+        }
+    }
+
+    private void loadRegionGroupsFromFile(File file) {
+
+        if (!file.exists()) {
+            log.warning("Region groups config does not exist: " + file.getAbsolutePath());
+            return;
+        }
+        try {
+            YamlConfiguration config = new YamlConfiguration();
+            config.load(file);
+
+            ConfigurationSection groups = config.getConfigurationSection("groups");
+            if (groups != null) {
+                Set<String> keys = groups.getKeys(false);
+                List<RegionGroup> regionGroups = keys.stream()
+                        .map(s -> loadRegionGroup(s, Objects.requireNonNull(groups.getConfigurationSection(s))))
+                        .flatMap(regionGroup -> regionGroup.stream().flatMap(Stream::of))
+                        .collect(Collectors.toList());
+
+                log.info("Loaded " + regionGroups.size() + "/" + keys.size() + " region groups from config " + file.getAbsolutePath());
+            } else {
+                log.warning("Region Groups config " + file.getAbsolutePath() + " contains no 'groups' section.");
+            }
+        } catch (IOException | InvalidConfigurationException e) {
+            log.severe("Invalid region groups config: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void loadRegionGroupsFromPath(Path path) {
+
         try {
             Files.createDirectories(path);
             List<File> files = Files.find(path, Integer.MAX_VALUE,
@@ -62,7 +97,7 @@ public final class RegionManager {
                     .flatMap(regionGroup -> regionGroup.stream().flatMap(Stream::of))
                     .collect(Collectors.toList());
 
-            log.info("Loaded " + regionGroups.size() + "/" + fileCount + " region groups from " + path);
+            log.info("Loaded " + regionGroups.size() + "/" + fileCount + " region groups from path " + path);
         } catch (IOException e) {
             log.severe("unable to load region groups from " + path + ": " + e.getMessage());
             e.printStackTrace();
@@ -78,22 +113,27 @@ public final class RegionManager {
         try {
             YamlConfiguration config = new YamlConfiguration();
             config.load(file);
-            config.set("id", config.getString("id", ConfigUtil.getFileIdentifier(base, file)));
-
-            RegionGroup regionGroup = RegionGroup.getOrCreate(config.getString("id"));
-            regionGroup.load(this, config);
-            regionGroup.save();
-
-            groups.put(regionGroup.identifier(), regionGroup);
-            log.info("Loaded region group: " + regionGroup.name() + " (" + regionGroup.identifier() + ")");
-
-            return Optional.of(regionGroup);
+            return loadRegionGroup(ConfigUtil.getFileIdentifier(base, file), config);
         } catch (IOException | InvalidConfigurationException e) {
             log.severe("unable to load region group config " + file.getAbsolutePath() + ": " + e.getMessage());
             e.printStackTrace();
         }
 
         return Optional.empty();
+    }
+
+    public Optional<RegionGroup> loadRegionGroup(String identifier, ConfigurationSection config) {
+
+        config.set("id", config.getString("id", identifier));
+
+        RegionGroup regionGroup = RegionGroup.getOrCreate(config.getString("id"));
+        regionGroup.load(this, config);
+        regionGroup.save();
+
+        groups.put(regionGroup.identifier(), regionGroup);
+        log.info("Loaded region group: " + regionGroup.name() + " (" + regionGroup.identifier() + ")");
+
+        return Optional.of(regionGroup);
     }
 
     public Optional<RegionGroup> getRegionGroup(String identifier) {

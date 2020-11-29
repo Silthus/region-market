@@ -9,6 +9,7 @@ import lombok.experimental.Accessors;
 import me.wiefferink.interactivemessenger.processing.Message;
 import net.silthus.regions.entities.RegionGroup;
 import net.silthus.regions.entities.RegionPlayer;
+import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.HashMap;
 import java.util.Map;
