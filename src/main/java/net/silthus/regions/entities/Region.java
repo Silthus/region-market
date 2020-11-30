@@ -5,10 +5,12 @@ import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.domains.DefaultDomain;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import com.sk89q.worldguard.protection.regions.RegionType;
 import io.ebean.ExpressionList;
 import io.ebean.Finder;
 import io.ebean.annotation.DbEnumValue;
 import io.ebean.annotation.Transactional;
+import io.ebeaninternal.server.lib.Str;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -88,7 +90,7 @@ public class Region extends BaseEntity implements ReplacementProvider {
 
     private UUID world;
     private String worldName;
-    private RegionType regionType = RegionType.SELL;
+    private RegionType regionType = com.sk89q.worldguard.protection.regions.RegionType.SELL;
     private PriceType priceType = PriceType.STATIC;
     private Status status = Status.FREE;
     private double price;
@@ -252,20 +254,21 @@ public class Region extends BaseEntity implements ReplacementProvider {
         return new Cost.Result(true, null, price);
     }
 
-    public String costs() {
+    public String[] costs() {
         return costs(null);
     }
 
-    public String costs(@Nullable RegionPlayer player) {
+    public String[] costs(@Nullable RegionPlayer player) {
 
+        RegionsPlugin plugin = RegionsPlugin.instance();
         if (group() == null) {
-            return price + "";
+            return new String[] {plugin.getEconomy().format(price)};
         } else {
             return group()
-                    .loadCosts(RegionsPlugin.instance().getRegionManager())
+                    .loadCosts(plugin.getRegionManager())
                     .costs().stream()
                     .map(cost -> cost.display(player, this))
-                    .collect(Collectors.joining("\n - "));
+                    .toArray(String[]::new);
         }
     }
 
