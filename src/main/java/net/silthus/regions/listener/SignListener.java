@@ -6,13 +6,13 @@ import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import io.ebean.Model;
+import net.silthus.regions.Messages;
 import net.silthus.regions.RegionSignParseException;
 import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionGroup;
 import net.silthus.regions.entities.RegionPlayer;
 import net.silthus.regions.entities.RegionSign;
-import net.silthus.regions.util.SignUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -58,7 +58,7 @@ public class SignListener implements Listener {
         Region region = optionalRegion.get();
         RegionPlayer player = RegionPlayer.getOrCreate(event.getPlayer());
 
-        String[] lines = SignUtils.formatRegionSign(region, player);
+        String[] lines = Messages.formatRegionSign(region, player);
         for (int i = 0; i < lines.length; i++) {
             event.setLine(i, lines[i]);
         }
@@ -118,7 +118,7 @@ public class SignListener implements Listener {
         region.signs().add(regionSign);
 
         region.save();
-        String[] lines = SignUtils.formatRegionSign(region, null);
+        String[] lines = Messages.formatRegionSign(region, null);
         for (int i = 0; i < lines.length; i++) {
             event.setLine(i, lines[i]);
         }

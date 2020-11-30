@@ -69,7 +69,7 @@ public class MoneyCost implements Cost {
         if (economy().has(offlinePlayer, cost)) {
             return new Result(true, null, cost);
         } else {
-            return new Result(false, Messages.msg("costs.money.not-enough-money", "Nicht genug Geld. Kosten: %s", economy().format(cost)));
+            return new Result(false, "Nicht genug Geld. Kosten: " + economy().format(cost));
         }
     }
 

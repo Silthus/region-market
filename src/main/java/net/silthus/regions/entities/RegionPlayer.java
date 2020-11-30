@@ -1,6 +1,7 @@
 package net.silthus.regions.entities;
 
 import io.ebean.Finder;
+import io.ebean.annotation.WhenCreated;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -18,6 +19,7 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -53,6 +55,8 @@ public class RegionPlayer extends BaseEntity implements ReplacementProvider {
     private String name;
     @Transient
     private double priceMultiplier;
+    @WhenCreated
+    private Instant lastOnline;
 
     @OneToMany
     private List<Region> regions = new ArrayList<>();
