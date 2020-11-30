@@ -6,6 +6,7 @@ import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import lombok.SneakyThrows;
 import net.milkbowl.vault.economy.Economy;
+import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionGroup;
 import net.silthus.regions.entities.RegionPlayer;
@@ -18,7 +19,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -27,12 +27,14 @@ class MoneyCostTest {
 
     private ServerMock server;
     private Economy economy;
+    private RegionsPlugin plugin;
     private MoneyCost cost;
 
     @BeforeEach
     void setUp() {
 
         server = MockBukkit.mock();
+        plugin = MockBukkit.load(RegionsPlugin.class);
         economy = mock(Economy.class);
         cost = new MoneyCost(economy);
     }
@@ -63,15 +65,15 @@ class MoneyCostTest {
             regionMock = mock(ProtectedRegion.class);
             when(region.protectedRegion()).thenReturn(Optional.of(regionMock));
             when(regionMock.volume()).thenReturn(100);
-            when(regionMock.getMinimumPoint()).thenReturn(BlockVector3.at(0, 10, 0));
-            when(regionMock.getMaximumPoint()).thenReturn(BlockVector3.at(0, 20, 0));
+            when(regionMock.getMinimumPoint()).thenReturn(BlockVector3.at(-10, 10, 10));
+            when(regionMock.getMaximumPoint()).thenReturn(BlockVector3.at(-10, 20, 10));
         }
 
         @Test
-        @DisplayName("should have correct volume size")
+        @DisplayName("should have correct m2 size")
         void volumeSize() {
 
-            assertThat(region.size()).isEqualTo(9);
+            assertThat(region.size()).isEqualTo(10);
         }
 
         @Nested
@@ -104,17 +106,6 @@ class MoneyCostTest {
                 assertThat(cost.calculate(player, region)).isEqualTo(200.0);
             }
 
-            @Test
-            @DisplayName("should error if price is dynamic but region is not part of a group")
-            void shouldErrorIfPriceIsDynamicAndNoParentIsFound() {
-
-                region.group(null);
-                region.priceType(Region.PriceType.DYNAMIC);
-
-                assertThatExceptionOfType(CostCalucationException.class)
-                        .isThrownBy(() -> cost.calculate(player, region));
-            }
-
             @SneakyThrows
             @Test
             @DisplayName("should multiply region count with configured factor")
@@ -126,7 +117,6 @@ class MoneyCostTest {
                 player.regions().add(new Region("bar"));
                 player.regions().add(new Region("foo"));
 
-                // basePrice + (regionCount * multiplier * basePrice)
                 assertThat(cost.calculate(player, region)).isEqualTo(500.0);
             }
 

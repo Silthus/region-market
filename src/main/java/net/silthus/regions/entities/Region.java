@@ -14,13 +14,10 @@ import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import me.wiefferink.interactivemessenger.processing.ReplacementProvider;
-import net.milkbowl.vault.economy.Economy;
 import net.silthus.ebean.BaseEntity;
 import net.silthus.regions.Cost;
 import net.silthus.regions.MessageTags;
 import net.silthus.regions.RegionsPlugin;
-import net.silthus.regions.costs.CostCalucationException;
-import net.silthus.regions.costs.MoneyCost;
 import net.silthus.regions.limits.Limit;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -185,7 +182,7 @@ public class Region extends BaseEntity implements ReplacementProvider {
     public long size() {
 
         return protectedRegion().map(region -> region.volume()
-                / ((region.getMaximumPoint().getBlockY() - region.getMinimumPoint().getBlockY()) + 1))
+                / (region.getMaximumPoint().getBlockY() - region.getMinimumPoint().getBlockY()))
                 .orElse(0);
     }
 
@@ -204,7 +201,7 @@ public class Region extends BaseEntity implements ReplacementProvider {
             return new Cost.Result(false, limits.error());
         }
 
-        RegionsPlugin plugin = RegionsPlugin.getPlugin(RegionsPlugin.class);
+        RegionsPlugin plugin = RegionsPlugin.instance();
 
         if (group() == null) {
             return new Cost.Result(plugin.getEconomy().has(player.getOfflinePlayer(), price),
@@ -224,7 +221,7 @@ public class Region extends BaseEntity implements ReplacementProvider {
 
     private Limit.Result checkLimits(RegionPlayer player) {
 
-        return RegionsPlugin.getPlugin(RegionsPlugin.class)
+        return RegionsPlugin.instance()
                 .getLimitsConfig()
                 .getPlayerLimit(player)
                 .map(playerLimit -> playerLimit.test(this))
@@ -264,9 +261,8 @@ public class Region extends BaseEntity implements ReplacementProvider {
         if (group() == null) {
             return price + "";
         } else {
-            RegionsPlugin plugin = RegionsPlugin.getPlugin(RegionsPlugin.class);
             return group()
-                    .loadCosts(plugin.getRegionManager())
+                    .loadCosts(RegionsPlugin.instance().getRegionManager())
                     .costs().stream()
                     .map(cost -> cost.display(player, this))
                     .collect(Collectors.joining("\n - "));
@@ -282,7 +278,7 @@ public class Region extends BaseEntity implements ReplacementProvider {
             if (!(blockAt.getState() instanceof Sign)) {
                 sign.delete();
             } else {
-                RegionsPlugin plugin = RegionsPlugin.getPlugin(RegionsPlugin.class);
+                RegionsPlugin plugin = RegionsPlugin.instance();
                 Sign block = (Sign) blockAt.getState();
                 if (status() != Status.OCCUPIED) {
                     block.setLine(0, ChatColor.GREEN + "[Grundstück]");
@@ -334,7 +330,7 @@ public class Region extends BaseEntity implements ReplacementProvider {
             case playerId:
                 return owner() != null ? owner().id() : null;
             case MessageTags.price:
-                return RegionsPlugin.getPlugin(RegionsPlugin.class).getEconomy().format(price());
+                return RegionsPlugin.instance().getEconomy().format(price());
             case priceraw:
                 return price();
             case MessageTags.priceMultiplier:

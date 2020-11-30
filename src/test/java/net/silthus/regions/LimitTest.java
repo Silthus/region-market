@@ -6,7 +6,11 @@ import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionGroup;
 import net.silthus.regions.entities.RegionPlayer;
 import net.silthus.regions.limits.Limit;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -178,8 +182,8 @@ class LimitTest {
         void shouldNotReachLimitIfRegionsHaveNoGroups() {
 
             Limit limit = new Limit().groups(1);
-            player.regions().add(new Region("test"));
-            player.regions().add(new Region("foo"));
+            player.regions().add(new Region("test").group(null));
+            player.regions().add(new Region("foo").group(null));
 
             assertThat(limit.hasReachedGroupLimit(player))
                     .extracting(Limit.Result::reachedLimit)

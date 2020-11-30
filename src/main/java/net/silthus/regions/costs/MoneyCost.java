@@ -22,17 +22,17 @@ public class MoneyCost implements Cost {
 
     private final Economy economy;
 
-    private Type type;
-    private double basePrice;
+    private Type type = Type.PER2M;
+    private double basePrice = 1.0;
 
-    private double regionCountMultiplier;
-    private double regionCountMultiplierPower;
+    private double regionCountMultiplier = 0.0;
+    private double regionCountMultiplierPower = 1.0;
 
-    private double regionGroupCountMultiplier;
-    private double regionGroupCountMultiplierPower;
+    private double regionGroupCountMultiplier = 0.0;
+    private double regionGroupCountMultiplierPower = 1.0;
 
-    private double sameGroupCountMultiplier;
-    private double sameGroupCountMultiplierPower;
+    private double sameGroupCountMultiplier = 0.0;
+    private double sameGroupCountMultiplierPower = 1.0;
 
     public MoneyCost(Economy economy) {
         this.economy = economy;
@@ -41,17 +41,17 @@ public class MoneyCost implements Cost {
     @Override
     public void load(ConfigurationSection config) {
 
-        this.type = Enums.searchEnum(Type.class, config.getString("type", Type.PER2M.name()));
-        this.basePrice = config.getDouble("base", 10.0);
+        this.type = Enums.searchEnum(Type.class, config.getString("type", type.name()));
+        this.basePrice = config.getDouble("base", basePrice);
 
-        this.regionCountMultiplier = config.getDouble("region-count-multiplier", 0.0);
-        this.regionCountMultiplierPower = config.getDouble("region-count-multiplier-power", 1.0);
+        this.regionCountMultiplier = config.getDouble("region-count-multiplier", regionCountMultiplier);
+        this.regionCountMultiplierPower = config.getDouble("region-count-multiplier-power", regionCountMultiplierPower);
 
-        this.regionGroupCountMultiplier = config.getDouble("region-group-count-multiplier", 0.0);
-        this.regionGroupCountMultiplierPower = config.getDouble("region-group-count-multiplier-power", 1.0);
+        this.regionGroupCountMultiplier = config.getDouble("region-group-count-multiplier", regionGroupCountMultiplier);
+        this.regionGroupCountMultiplierPower = config.getDouble("region-group-count-multiplier-power", regionGroupCountMultiplierPower);
 
-        this.sameGroupCountMultiplier = config.getDouble("same-group-count-multiplier", 0.0);
-        this.sameGroupCountMultiplierPower = config.getDouble("same-group-count-multiplier-power", 1.0);
+        this.sameGroupCountMultiplier = config.getDouble("same-group-count-multiplier", sameGroupCountMultiplier);
+        this.sameGroupCountMultiplierPower = config.getDouble("same-group-count-multiplier-power", sameGroupCountMultiplierPower);
     }
 
     @Override

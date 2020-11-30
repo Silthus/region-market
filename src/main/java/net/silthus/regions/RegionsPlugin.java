@@ -8,7 +8,10 @@ import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldguard.WorldGuard;
 import io.ebean.Database;
 import kr.entree.spigradle.annotations.PluginMain;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import me.wiefferink.interactivemessenger.processing.Message;
 import me.wiefferink.interactivemessenger.source.LanguageManager;
 import net.milkbowl.vault.economy.Economy;
@@ -43,7 +46,13 @@ import java.util.stream.Collectors;
 @Getter
 public class RegionsPlugin extends JavaPlugin {
 
+    @Getter
+    @Accessors(fluent = true)
+    private static RegionsPlugin instance;
+
+    @Setter(AccessLevel.PACKAGE)
     private Economy economy;
+    @Setter(AccessLevel.PACKAGE)
     private Permission permission;
     private Database database;
     private RegionManager regionManager;
@@ -61,11 +70,13 @@ public class RegionsPlugin extends JavaPlugin {
 
     public RegionsPlugin() {
         super();
+        instance = this;
     }
 
     public RegionsPlugin(
             JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file) {
         super(loader, description, dataFolder, file);
+        instance = this;
         testing = true;
     }
 

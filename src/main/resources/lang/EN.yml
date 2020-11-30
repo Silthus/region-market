@@ -36,9 +36,9 @@
 
 "confirm-yes": " [gray]%lang:command|Click to confirm|1%0%|%[gray] or to repeat the command."
 
-autolink-deactivated: "Sign AutoLink Mode is now [green]%lang:command|inactive|/rcregions:admin autolink|%."
+autolink-deactivated: "Sign AutoLink Mode is now [red]%lang:command|inactive|/rcregions:admin autolink|%."
 autolink-activated:
-  - "Sign AutoLink Mode is now [red]%lang:command|active|/rcregions:admin autolink|%."
+  - "Sign AutoLink Mode is now [green]%lang:command|active|/rcregions:admin autolink|Click to deactivate the autolink mode.|%.\n"
   - "Click into a region and then on a sign to link the sign with the region."
 
 limit: "%lang:tLimit|%region_player%|%0|%"

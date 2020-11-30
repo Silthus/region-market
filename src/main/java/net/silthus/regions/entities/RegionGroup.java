@@ -12,7 +12,6 @@ import lombok.experimental.Accessors;
 import net.silthus.regions.Cost;
 import net.silthus.regions.RegionManager;
 import net.silthus.regions.RegionsPlugin;
-import net.silthus.regions.limits.Limit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
 
@@ -23,7 +22,11 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Entity
@@ -54,7 +57,7 @@ public class RegionGroup extends Model {
             regionGroup.save();
         }
 
-        return regionGroup.loadCosts(RegionsPlugin.getPlugin(RegionsPlugin.class).getRegionManager());
+        return regionGroup.loadCosts(RegionsPlugin.instance().getRegionManager());
     }
 
     @Id
