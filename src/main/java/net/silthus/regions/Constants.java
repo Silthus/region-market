@@ -12,5 +12,5 @@ public final class Constants {
     public static final String PERMISSION_SIGN_DESTROY = "rcregions.region.sign.destroy";
     public static final String PERMISSION_SIGN_BUY = "rcregions.region.sign.buy";
 
-    public static final String BUY_REGION_COMMAND = "rcr buy %s";
+    public static final String BUY_REGION_COMMAND = "/rcr buy %s";
 }

@@ -8,13 +8,12 @@ import de.exlll.configlib.format.FieldNameFormatters;
 import net.silthus.regions.Constants;
 import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.entities.RegionPlayer;
-import net.silthus.regions.util.Enums;
 import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 
+import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class LimitsConfig extends BukkitYamlConfiguration {
 
@@ -46,7 +45,9 @@ public class LimitsConfig extends BukkitYamlConfiguration {
         );
     }
 
-    public Optional<PlayerLimit> getPlayerLimit(RegionPlayer player) {
+    public Optional<PlayerLimit> getPlayerLimit(@Nullable RegionPlayer player) {
+
+        if (player == null) return Optional.empty();
 
         return player.getBukkitPlayer().stream()
                 .map(Permissible::getEffectivePermissions)

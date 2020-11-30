@@ -13,6 +13,8 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import lombok.Data;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.silthus.regions.Messages;
 import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionSign;
@@ -47,7 +49,7 @@ public class AdminCommands extends BaseCommand implements Listener {
     public void reload() {
 
         plugin.reload();
-        getCurrentCommandIssuer().sendMessage(ChatColor.GREEN + "sRegions wurde erfolgreich neugeladen.");
+        getCurrentCommandIssuer().sendMessage(ChatColor.GREEN + "RCRegions wurde erfolgreich neugeladen.");
     }
 
     @Subcommand("create")
@@ -72,7 +74,7 @@ public class AdminCommands extends BaseCommand implements Listener {
 
             if (regionList.size() > 1) {
                 throw new InvalidCommandArgument("Found more than one region: " + regionList.stream().map(ProtectedRegion::getId).collect(Collectors.joining())
-                        + ". Please add region to the ignored regions inside config.yml. Or use the /sregions:admin create <region> command.");
+                        + ". Please add region to the ignored regions inside config.yml. Or use the /rcregions:admin create <region> command.");
             } else if (regionList.isEmpty()) {
                 throw new InvalidCommandArgument("No applicable regions found!");
             }
@@ -116,8 +118,9 @@ public class AdminCommands extends BaseCommand implements Listener {
         }
 
         sellRegion.save();
-        player.sendMessage(ChatColor.GREEN + "The region " + sellRegion.name()
-                + " can now be bought for: " + ChatColor.YELLOW + sellRegion.displayCosts());
+        player.spigot().sendMessage(new ComponentBuilder("Die Region ").color(net.md_5.bungee.api.ChatColor.GREEN)
+                .append(Messages.region(sellRegion, null)).append(" wurde erstellt und kann jetzt gekauft werden.").reset().color(net.md_5.bungee.api.ChatColor.GREEN)
+                .create());
     }
 
     @Subcommand("delete|del|remove")

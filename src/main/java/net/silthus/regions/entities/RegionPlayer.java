@@ -1,7 +1,6 @@
 package net.silthus.regions.entities;
 
 import io.ebean.Finder;
-import io.ebean.annotation.WhenCreated;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -23,7 +22,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static net.silthus.regions.MessageTags.*;
+import static net.silthus.regions.MessageTags.playerId;
+import static net.silthus.regions.MessageTags.playerName;
 
 @Entity
 @Getter
@@ -55,11 +55,10 @@ public class RegionPlayer extends BaseEntity implements ReplacementProvider {
     private String name;
     @Transient
     private double priceMultiplier;
-    @WhenCreated
     private Instant lastOnline;
 
     @OneToMany
-    private List<Region> regions = new ArrayList<>();
+    private List<OwnedRegion> ownedRegions = new ArrayList<>();
 
     RegionPlayer(OfflinePlayer player) {
 
@@ -99,6 +98,14 @@ public class RegionPlayer extends BaseEntity implements ReplacementProvider {
                 .map(Region::group)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toUnmodifiableSet());
+    }
+
+    public List<Region> regions() {
+
+        return ownedRegions().stream()
+                .filter(OwnedRegion::active)
+                .map(OwnedRegion::region)
+                .collect(Collectors.toList());
     }
 
     public List<Region> regions(RegionGroup group) {

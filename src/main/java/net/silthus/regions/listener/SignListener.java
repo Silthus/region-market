@@ -6,12 +6,12 @@ import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import io.ebean.Model;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.silthus.regions.Messages;
 import net.silthus.regions.RegionSignParseException;
 import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionGroup;
-import net.silthus.regions.entities.RegionPlayer;
 import net.silthus.regions.entities.RegionSign;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -39,29 +39,6 @@ public class SignListener implements Listener {
 
     private RegionManager getRegionManager(World world) {
         return WorldGuard.getInstance().getPlatform().getRegionContainer().get(new BukkitWorld(world));
-    }
-
-    @EventHandler(ignoreCancelled = true)
-    public void onRegionInfo(SignSendEvent event) {
-
-        String line1 = event.getLine(0);
-        if (Strings.isNullOrEmpty(line1) || !line1.equalsIgnoreCase(SIGN_TAG)) {
-            return;
-        }
-
-        Optional<Region> optionalRegion = Region.of(event.getLocation());
-        if (optionalRegion.isEmpty()) {
-            event.setCancelled(true);
-            return;
-        }
-
-        Region region = optionalRegion.get();
-        RegionPlayer player = RegionPlayer.getOrCreate(event.getPlayer());
-
-        String[] lines = Messages.formatRegionSign(region, player);
-        for (int i = 0; i < lines.length; i++) {
-            event.setLine(i, lines[i]);
-        }
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -118,11 +95,13 @@ public class SignListener implements Listener {
         region.signs().add(regionSign);
 
         region.save();
-        String[] lines = Messages.formatRegionSign(region, null);
+        String[] lines = Messages.formatRegionSign(region);
         for (int i = 0; i < lines.length; i++) {
             event.setLine(i, lines[i]);
         }
-        player.sendMessage(String.format(ChatColor.GREEN + "Das Grundstück %s wurde erfolgreich erstellt. Preis: %s (%s)", region.name(), plugin.getEconomy().format(region.price()), region.priceType()));
+        player.spigot().sendMessage(new ComponentBuilder().append("Das Grundstück ").color(net.md_5.bungee.api.ChatColor.GREEN)
+                .append(Messages.region(region, null)).append(" wurde erfogreich erstellt.").reset().color(net.md_5.bungee.api.ChatColor.GREEN)
+                .create());
     }
 
     private Region tryGetOrCreateRegion(Player player, Block sign, String[] lines) throws RegionSignParseException {

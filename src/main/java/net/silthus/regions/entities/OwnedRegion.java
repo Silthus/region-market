@@ -7,6 +7,7 @@ import lombok.experimental.Accessors;
 import net.silthus.ebean.BaseEntity;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.time.Instant;
@@ -20,8 +21,9 @@ public class OwnedRegion extends BaseEntity {
 
     @ManyToOne
     private Region region;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     private RegionPlayer player;
+    private String playerName;
     @WhenCreated
     private Instant start;
     private Instant end;
@@ -30,11 +32,7 @@ public class OwnedRegion extends BaseEntity {
 
         this.region = region;
         this.player = player;
-    }
-
-    public String name() {
-
-        return player().name();
+        this.playerName = player.name();
     }
 
     public boolean active() {

@@ -8,6 +8,7 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import net.milkbowl.vault.economy.Economy;
+import net.silthus.regions.entities.OwnedRegion;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionPlayer;
 import net.silthus.regions.limits.PlayerLimit;
@@ -23,19 +24,19 @@ import java.util.Optional;
 
 public final class Messages {
 
-    public static String[] formatRegionSign(@NonNull Region region, @Nullable RegionPlayer player) {
+    public static String[] formatRegionSign(@NonNull Region region) {
 
         String[] lines = new String[4];
 
         if (region.status() != Region.Status.OCCUPIED) {
             lines[0] = ChatColor.WHITE + region.name();
             lines[1] = ChatColor.GREEN + "- Verfügbar -";
-            lines[2] = ChatColor.YELLOW + "Größe: " + ChatColor.AQUA + region.size() + "m²";
-            lines[3] = ChatColor.YELLOW + "Kosten: " + ChatColor.AQUA + region.displayCosts(player);
+            lines[2] = region.size() + "m²" + ChatColor.YELLOW + " | " + ChatColor.AQUA + region.volume() + "m³";
+            lines[3] = ChatColor.GRAY + "" + ChatColor.ITALIC + "Klick für Details.";
         } else {
             lines[0] = ChatColor.WHITE + region.name();
             lines[1] = ChatColor.RED + "- Belegt durch -";
-            lines[2] = ChatColor.AQUA + region.owner().name();
+            lines[2] = ChatColor.GOLD + region.owner().map(OwnedRegion::playerName).orElse("Unbekannt");
             lines[3] = ChatColor.YELLOW + "seit " + ChatColor.AQUA
                     + DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
                     .withLocale(Locale.GERMAN)
@@ -46,23 +47,26 @@ public final class Messages {
         return lines;
     }
 
-    public static BaseComponent[] formatRegionInfo(@NonNull Region region, @NonNull RegionPlayer player) {
+    public static BaseComponent[] regionInfo(@NonNull Region region, @NonNull RegionPlayer player) {
 
-        Cost.Result canBuy = region.canBuy(player);
-        ChatColor canBuyColor = canBuy.success() ? ChatColor.GREEN : ChatColor.RED;
+        return regionInfo(region, player, true);
+    }
+
+    public static BaseComponent[] regionInfo(@NonNull Region region, @NonNull RegionPlayer player, boolean showBuyInfo) {
+
         ComponentBuilder builder = new ComponentBuilder("\n")
-                .append("Grundstück: ").bold(true).color(ChatColor.YELLOW)
-                    .append(region(region, player)).reset().color(canBuyColor)
-                    .append(" ").append(buy(region, player))
+                .append("Grundstück: ").color(ChatColor.YELLOW)
+                    .append(region(region, player))
+                    .append(" ").reset().append(showBuyInfo ? buy(region, player) : new BaseComponent[0])
                     .append("\n")
-                .append("Größe: ").reset().bold(true).color(ChatColor.YELLOW)
+                .append("Größe: ").reset().color(ChatColor.YELLOW)
                     .append(region.size() + "m²").reset().color(ChatColor.AQUA)
                     .append(" | ").color(ChatColor.YELLOW)
                     .append(region.volume() + "m³").color(ChatColor.AQUA)
                     .append("\n")
-                .append("Besitzer: ").reset().bold(true).color(ChatColor.YELLOW)
+                .append("Besitzer: ").reset().color(ChatColor.YELLOW)
                     .append(owner(region)).append("\n")
-                .append("Kosten: ").reset().bold(true).color(ChatColor.YELLOW).append("\n")
+                .append("Kosten: ").reset().color(ChatColor.YELLOW).append("\n")
                     .append(costs(region, player));
 
         return builder.create();
@@ -70,8 +74,8 @@ public final class Messages {
 
     public static BaseComponent[] region(@NonNull Region region, @Nullable RegionPlayer player) {
 
-        return new ComponentBuilder()
-                .append("[" + region.name() + "]")
+        return new ComponentBuilder().reset()
+                .append(region.name()).bold(true).color(ChatColor.GOLD)
                 .event(regionHover(region, player))
                 .create();
     }
@@ -80,13 +84,13 @@ public final class Messages {
 
         ComponentBuilder builder = new ComponentBuilder();
 
-        if (region.owner() != null) {
-            builder.append("[").reset().color(ChatColor.GRAY)
-                    .append(region.owner().name()).color(ChatColor.AQUA)
-                    .event(playerHover(region.owner().player()))
-                    .append("]").color(ChatColor.GRAY);
+        Optional<OwnedRegion> owner = region.owner();
+        if (owner.isPresent()) {
+            builder.reset()
+                    .append(owner.get().playerName()).color(ChatColor.AQUA).bold(true)
+                    .event(playerHover(owner.get().player()));
         } else {
-            builder.append("N/A").color(ChatColor.GRAY);
+            builder.reset().append("N/A").color(ChatColor.GRAY);
         }
 
         return builder.create();
@@ -101,13 +105,12 @@ public final class Messages {
         if (canBuy.success()) {
             return builder.append("[Kaufen]").color(ChatColor.GREEN).bold(true)
                     .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder()
-                            .append("Klicke um das Grundstück ").color(ChatColor.YELLOW)
-                            .append(region.name()).color(ChatColor.DARK_PURPLE)
-                            .append(" für ").color(ChatColor.YELLOW)
-                            .append(economy.format(canBuy.price())).color(ChatColor.AQUA)
-                            .append(" zu kaufen.").color(ChatColor.YELLOW).append("\n")
+                            .append("Grundstück: ").color(ChatColor.YELLOW)
+                            .append(region.name()).color(ChatColor.GREEN).append("\n")
                             .append("Kosten: ").color(ChatColor.YELLOW).append("\n")
-                            .append(costs(region, player)).create())))
+                            .append(costs(region, player)).append("\n")
+                            .append("Klicken um das Grundstück zu kaufen.").italic(true).color(ChatColor.GRAY)
+                            .create())))
                     .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format(Constants.BUY_REGION_COMMAND, region.id())))
                     .create();
         } else {
@@ -121,7 +124,7 @@ public final class Messages {
                         return builder.append("[?]").color(ChatColor.GRAY)
                                 .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder()
                                         .append("Dieses Grundstück gehört bereits ").color(ChatColor.RED)
-                                        .append(region.owner().name()).color(ChatColor.AQUA)
+                                        .append(region.owner().map(OwnedRegion::playerName).orElse("jemandem")).color(ChatColor.AQUA)
                                         .append(".").color(ChatColor.RED)
                                         .create()
                                 ))).create();
@@ -164,9 +167,9 @@ public final class Messages {
         for (Cost cost : region.costs()) {
             Cost.Result check = cost.check(region, player);
             if (check.success()) {
-                builder.append(cost.display(region, player)).reset().color(ChatColor.GREEN).append("\n");
+                builder.append("  - ").reset().append(cost.display(region, player)).reset().color(ChatColor.GREEN).append("\n");
             } else {
-                builder.append(cost.display(region, player)).reset().color(ChatColor.RED)
+                builder.append("  - ").reset().append(cost.display(region, player)).reset().color(ChatColor.RED).bold(true)
                         .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder(check.error()).color(ChatColor.RED).create())))
                         .append("\n");
             }
@@ -192,12 +195,9 @@ public final class Messages {
 
     public static HoverEvent regionHover(@NonNull Region region, @Nullable RegionPlayer player) {
 
-        Cost.Result canBuy = region.canBuy(player);
-        ChatColor canBuyColor = canBuy.success() ? ChatColor.GREEN : ChatColor.RED;
         ComponentBuilder builder = new ComponentBuilder()
-                .append("[Grundstück]").color(canBuyColor).append("\n")
-                .append("Name: ").reset().bold(true).color(ChatColor.YELLOW)
-                .append(region.name()).reset().color(canBuyColor).append("\n")
+                .append("Grundstück: ").reset().bold(true).color(ChatColor.YELLOW)
+                .append(region.name()).reset().color(ChatColor.GOLD).append("\n")
                 .append("Besitzer: ").reset().bold(true).color(ChatColor.YELLOW)
                 .append(owner(region)).append("\n")
                 .append("Kosten: ").reset().bold(true).color(ChatColor.YELLOW).append("\n");

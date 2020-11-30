@@ -17,10 +17,10 @@ import me.wiefferink.interactivemessenger.processing.ReplacementProvider;
 import net.silthus.ebean.BaseEntity;
 import net.silthus.regions.Cost;
 import net.silthus.regions.MessageTags;
+import net.silthus.regions.Messages;
 import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.limits.Limit;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -28,12 +28,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 
 import javax.annotation.Nullable;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -99,13 +94,10 @@ public class Region extends BaseEntity implements ReplacementProvider {
     @ManyToOne
     private RegionGroup group;
 
-    @OneToOne(cascade = CascadeType.REMOVE)
-    private OwnedRegion owner;
+    @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
+    private List<OwnedRegion> owners = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.REMOVE)
-    private List<OwnedRegion> previousOwners = new ArrayList<>();
-
-    @OneToMany(cascade = CascadeType.REMOVE)
+    @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     private List<RegionAcl> acl = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.REMOVE)
@@ -144,23 +136,30 @@ public class Region extends BaseEntity implements ReplacementProvider {
         return Optional.ofNullable(regionManager.getRegion(name()));
     }
 
+    public Optional<OwnedRegion> owner() {
+
+        return owners().stream()
+                .filter(OwnedRegion::active)
+                .findFirst();
+    }
+
     public Region owner(RegionPlayer player) {
 
-        OwnedRegion previousOwner = owner();
-        if (previousOwner != null) {
-            previousOwner.end(Instant.now());
-            previousOwner.save();
+        Optional<OwnedRegion> previousOwner = owner();
 
-            previousOwners.add(previousOwner);
-        }
+        previousOwner.ifPresent(ownedRegion -> {
+            ownedRegion.end(Instant.now());
+            ownedRegion.save();
+        });
 
-        this.owner = new OwnedRegion(this, player);
-        this.owner.save();
+        OwnedRegion newOwner = new OwnedRegion(this, player);
+        newOwner.save();
+        owners.add(newOwner);
 
         new RegionTransaction(this, player)
                 .action(RegionTransaction.Action.CHANGE_OWNER)
-                .data("previous_owner.id", previousOwner != null ? previousOwner.player().id() : null)
-                .data("previous_owner.name", previousOwner != null ? previousOwner.name() : null)
+                .data("previous_owner.id", previousOwner.map(ownedRegion -> ownedRegion.player().id()).orElse(null))
+                .data("previous_owner.name", previousOwner.map(ownedRegion -> ownedRegion.player().name()).orElse(null))
                 .data("new_owner.id", player.id())
                 .data("new_owner.name", player.name())
                 .save();
@@ -177,7 +176,7 @@ public class Region extends BaseEntity implements ReplacementProvider {
 
     public Optional<RegionPlayer> player() {
 
-        return Optional.ofNullable(owner()).map(OwnedRegion::player);
+        return owner().map(OwnedRegion::player);
     }
 
     /**
@@ -204,16 +203,17 @@ public class Region extends BaseEntity implements ReplacementProvider {
                 .orElse(0);
     }
 
-    public Cost.Result canBuy(RegionPlayer player) {
+    public Cost.Result canBuy(@NonNull RegionPlayer player) {
 
+        Optional<RegionPlayer> owner = player();
         if (status() == Status.OCCUPIED) {
-            if (owner() == null) {
+            if (owner.isEmpty()) {
                 return new Cost.Result(false, "Das Grundstück " + name() + " gehört bereits jemandem steht aber fehlerhaft in der Datenbank. " +
                         "Bitte kontaktiere einen Admin mit der Grundstücks ID: " + id(), Cost.ResultStatus.OTHER);
-            } else if (owner() != null && owner().player().equals(player)) {
+            } else if (owner.get().equals(player)) {
                 return new Cost.Result(false, "Du besitzt das Grundstück " + name() + " bereits.", Cost.ResultStatus.OWNED_BY_SELF);
             } else {
-                return new Cost.Result(false, "Das Grundstück " + name() + " gehört bereits " + owner().name(), Cost.ResultStatus.OWNED_BY_OTHER);
+                return new Cost.Result(false, "Das Grundstück " + name() + " gehört bereits " + owner().get().playerName(), Cost.ResultStatus.OWNED_BY_OTHER);
             }
         }
 
@@ -242,7 +242,7 @@ public class Region extends BaseEntity implements ReplacementProvider {
         }
     }
 
-    private Limit.Result checkLimits(RegionPlayer player) {
+    private Limit.Result checkLimits(@Nullable RegionPlayer player) {
 
         return RegionsPlugin.instance()
                 .getLimitsConfig()
@@ -252,7 +252,7 @@ public class Region extends BaseEntity implements ReplacementProvider {
     }
 
     @Transactional
-    public Cost.Result buy(@NonNull RegionsPlugin plugin, RegionPlayer player) {
+    public Cost.Result buy(@NonNull RegionsPlugin plugin, @NonNull RegionPlayer player) {
 
         Cost.Result canBuy = canBuy(player);
         if (canBuy.failure()) {
@@ -311,18 +311,10 @@ public class Region extends BaseEntity implements ReplacementProvider {
             if (!(blockAt.getState() instanceof Sign)) {
                 sign.delete();
             } else {
-                RegionsPlugin plugin = RegionsPlugin.instance();
                 Sign block = (Sign) blockAt.getState();
-                if (status() != Status.OCCUPIED) {
-                    block.setLine(0, ChatColor.GREEN + "[Grundstück]");
-                    block.setLine(1, ChatColor.WHITE + name());
-                    block.setLine(2, ChatColor.GREEN + "- Verfügbar -");
-                    block.setLine(3, ChatColor.GREEN + "Preis: " + ChatColor.YELLOW + plugin.getEconomy().format(price()));
-                } else {
-                    block.setLine(0, ChatColor.RED + "[Grundstück]");
-                    block.setLine(1, ChatColor.WHITE + name());
-                    block.setLine(2, ChatColor.RED + "- Besitzer -");
-                    block.setLine(3, ChatColor.YELLOW + owner().name());
+                String[] lines = Messages.formatRegionSign(this);
+                for (int i = 0; i < lines.length; i++) {
+                    block.setLine(i, lines[i]);
                 }
                 block.update(true);
             }
@@ -358,10 +350,10 @@ public class Region extends BaseEntity implements ReplacementProvider {
                 return size();
             case playerName:
             case MessageTags.owner:
-                return owner() != null ? owner().name() : null;
+                return owner().map(OwnedRegion::playerName).orElse(null);
             case ownerId:
             case playerId:
-                return owner() != null ? owner().player().id() : null;
+                return owner().map(OwnedRegion::player).map(BaseEntity::id).orElse(null);
             case MessageTags.price:
                 return RegionsPlugin.instance().getEconomy().format(price());
             case priceraw:
