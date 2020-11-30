@@ -1,6 +1,7 @@
 package net.silthus.regions.costs;
 
 import lombok.Data;
+import lombok.NonNull;
 import lombok.experimental.Accessors;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
@@ -60,8 +61,11 @@ public class MoneyCost implements Cost {
     }
 
     @Override
-    public Result check(Region region, RegionPlayer player) {
+    public Result check(@NonNull Region region, @Nullable RegionPlayer player) {
 
+        if (player == null) {
+            return new Result(false, "Player is NULL", ResultStatus.OTHER);
+        }
         OfflinePlayer offlinePlayer = player.getOfflinePlayer();
 
         double cost = calculate(player, region);

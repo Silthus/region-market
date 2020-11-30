@@ -1,7 +1,7 @@
 package net.silthus.regions;
 
+import co.aikar.commands.InvalidCommandArgument;
 import co.aikar.commands.PaperCommandManager;
-import com.comphenix.protocol.ProtocolLibrary;
 import com.google.common.base.Strings;
 import com.sk89q.worldedit.bukkit.BukkitPlayer;
 import com.sk89q.worldedit.bukkit.BukkitWorld;
@@ -20,18 +20,12 @@ import net.silthus.ebean.Config;
 import net.silthus.ebean.EbeanWrapper;
 import net.silthus.regions.commands.AdminCommands;
 import net.silthus.regions.commands.RegionCommands;
-import net.silthus.regions.entities.Region;
-import net.silthus.regions.entities.RegionAcl;
-import net.silthus.regions.entities.RegionGroup;
-import net.silthus.regions.entities.RegionPlayer;
-import net.silthus.regions.entities.RegionSign;
-import net.silthus.regions.entities.RegionTransaction;
+import net.silthus.regions.entities.*;
 import net.silthus.regions.limits.LimitsConfig;
+import net.silthus.regions.listener.PlayerListener;
 import net.silthus.regions.listener.SignClickListener;
 import net.silthus.regions.listener.SignListener;
-import net.silthus.regions.listener.SignPacketListener;
 import org.bukkit.Bukkit;
-import org.bukkit.command.CommandException;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -40,6 +34,7 @@ import org.bukkit.plugin.java.JavaPluginLoader;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @PluginMain
@@ -59,9 +54,9 @@ public class RegionsPlugin extends JavaPlugin {
     private PaperCommandManager commandManager;
     private LanguageManager languageManager;
 
-    private SignPacketListener signPacketListener;
     private SignListener signListener;
     private SignClickListener signClickListener;
+    private PlayerListener playerListener;
 
     private RegionsPluginConfig pluginConfig;
     private LimitsConfig limitsConfig;
@@ -146,7 +141,8 @@ public class RegionsPlugin extends JavaPlugin {
                         RegionAcl.class,
                         RegionGroup.class,
                         RegionPlayer.class,
-                        RegionTransaction.class
+                        RegionTransaction.class,
+                        OwnedRegion.class
                 )
                 .build()).connect();
     }
@@ -161,14 +157,14 @@ public class RegionsPlugin extends JavaPlugin {
 
     private void setupListeners() {
 
-        signPacketListener = new SignPacketListener(this, ProtocolLibrary.getProtocolManager());
-        Bukkit.getPluginManager().registerEvents(signPacketListener, this);
-
         signListener = new SignListener(this);
         Bukkit.getPluginManager().registerEvents(signListener, this);
 
         signClickListener = new SignClickListener(this);
         Bukkit.getPluginManager().registerEvents(signClickListener, this);
+
+        playerListener = new PlayerListener();
+        Bukkit.getPluginManager().registerEvents(playerListener, this);
     }
 
 
@@ -199,13 +195,18 @@ public class RegionsPlugin extends JavaPlugin {
             if (Strings.isNullOrEmpty(regionName)) {
                 region = Region.of(c.getPlayer().getLocation());
                 if (region.isEmpty()) {
-                    throw new CommandException("Unable to find a region at the current position.");
+                    throw new InvalidCommandArgument("Unable to find a region at the current position.");
                 }
             } else {
-                region = Region.of(c.getPlayer().getWorld(), regionName);
-                if (region.isEmpty()) {
-                    throw new CommandException("Unable to find a region with the name " + regionName);
+                try {
+                    region = Optional.ofNullable(Region.find.byId(UUID.fromString(regionName)));
+                } catch (IllegalArgumentException e) {
+                    region = Region.of(c.getPlayer().getWorld(), regionName);
                 }
+            }
+
+            if (region.isEmpty()) {
+                throw new InvalidCommandArgument("Unable to find a region with the name or id " + regionName);
             }
 
             return region.get();

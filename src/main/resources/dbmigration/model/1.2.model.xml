@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<migration xmlns="http://ebean-orm.github.io/xml/ns/dbmigration">
+    <changeSet type="apply">
+        <createTable name="rcregions_owned_regions" identityType="external" pkName="pk_rcregions_owned_regions">
+            <column name="id" type="uuid" primaryKey="true" identity="true"/>
+            <column name="region_id" type="uuid" references="rcregions_regions.id" foreignKeyName="fk_rcregions_owned_regions_region_id" foreignKeyIndex="ix_rcregions_owned_regions_region_id"/>
+            <column name="player_id" type="uuid" references="rcregions_players.id" foreignKeyName="fk_rcregions_owned_regions_player_id" foreignKeyIndex="ix_rcregions_owned_regions_player_id"/>
+            <column name="end" type="timestamp"/>
+            <column name="version" type="bigint" notnull="true"/>
+            <column name="when_created" type="timestamp" notnull="true"/>
+            <column name="when_modified" type="timestamp" notnull="true"/>
+            <column name="start" type="timestamp" notnull="true"/>
+        </createTable>
+        <addColumn tableName="rcregions_players">
+            <column name="last_online" type="timestamp"/>
+        </addColumn>
+    </changeSet>
+    <changeSet type="pendingDrops">
+        <dropColumn columnName="owner_id" tableName="rcregions_regions"/>
+    </changeSet>
+</migration>
