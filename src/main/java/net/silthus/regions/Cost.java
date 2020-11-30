@@ -5,7 +5,6 @@ import lombok.experimental.Accessors;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionPlayer;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.Player;
 
 import java.util.function.Supplier;
 
@@ -42,31 +41,31 @@ public interface Cost {
      * Calculates the cost display (description) for the given player.
      * <p>Use this method to retrieve the individual costs for each player.
      *
-     * @param player the player to display the cost for
      * @param region the region to calculate and display the cost for
+     * @param player the player to display the cost for
      * @return an individual cost display for the given player
      */
-    String display(RegionPlayer player, Region region);
+    String display(Region region, RegionPlayer player);
 
     /**
      * Checks if the player satisfies this cost.
      * <p>Use it to check and display the cost requirement.
      *
-     * @param player the player to check the cost requirement for
      * @param region the region to check the cost for
+     * @param player the player to check the cost requirement for
      * @return the test result
      */
-    Result check(RegionPlayer player, Region region);
+    Result check(Region region, RegionPlayer player);
 
     /**
      * Applies this cost to the given player removing all
-     * values that were checked with {@link #check(RegionPlayer, Region)}.
+     * values that were checked with {@link #check(Region, RegionPlayer)}.
      *
-     * @param player the player to apply this cost to
      * @param region the region to apply this cost for
+     * @param player the player to apply this cost to
      * @return the apply result
      */
-    Result apply(RegionPlayer player, Region region);
+    Result apply(Region region, RegionPlayer player);
 
     @Value
     @Accessors(fluent = true)
@@ -74,17 +73,36 @@ public interface Cost {
         boolean success;
         String error;
         double price;
+        ResultStatus status;
 
         public Result(boolean success, String error) {
             this.success = success;
             this.error = error;
             this.price = 0;
+            status = ResultStatus.UNKNOWN;
+        }
+
+        public Result(boolean success, String error, ResultStatus status) {
+
+            this.success = success;
+            this.error = error;
+            this.price = 0;
+            this.status = status;
         }
 
         public Result(boolean success, String error, double price) {
             this.success = success;
             this.error = error;
             this.price = price;
+            status = ResultStatus.UNKNOWN;
+        }
+
+        public Result(boolean success, String error, double price, ResultStatus status) {
+
+            this.success = success;
+            this.error = error;
+            this.price = price;
+            this.status = status;
         }
 
         public boolean failure() {
@@ -100,4 +118,14 @@ public interface Cost {
         Supplier<TCost> supplier;
     }
 
+    enum ResultStatus {
+        UNKNOWN,
+        OWNED_BY_OTHER,
+        OWNED_BY_SELF,
+        SUCCESS,
+        LIMITS_REACHED,
+        NOT_ENOUGH_MONEY,
+        COSTS_NOT_MET,
+        OTHER;
+    }
 }
