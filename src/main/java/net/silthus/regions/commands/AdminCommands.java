@@ -117,7 +117,7 @@ public class AdminCommands extends BaseCommand implements Listener {
 
         sellRegion.save();
         player.sendMessage(ChatColor.GREEN + "The region " + sellRegion.name()
-                + " can now be bought for: " + ChatColor.YELLOW + sellRegion.costs());
+                + " can now be bought for: " + ChatColor.YELLOW + sellRegion.displayCosts());
     }
 
     @Subcommand("delete|del|remove")

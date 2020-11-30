@@ -2,6 +2,7 @@ package net.silthus.regions.listener;
 
 import net.silthus.regions.Constants;
 import net.silthus.regions.Cost;
+import net.silthus.regions.Messages;
 import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionPlayer;
@@ -69,6 +70,8 @@ public class SignClickListener implements Listener {
                     event.getPlayer().sendMessage(ChatColor.RED + "Du kannst diese Region nicht kaufen: " + canBuy.error());
                     return;
                 }
+
+                event.getPlayer().spigot().sendMessage(Messages.formatRegionInfo(region, player));
 
                 event.getPlayer().sendMessage(ChatColor.YELLOW + "Bestätige deinen Grundstückskauf für " + ChatColor.AQUA
                         + plugin.getEconomy().format(canBuy.price()) + ChatColor.YELLOW + " mit /sregions buyconfirm " + region.name());

@@ -9,7 +9,6 @@ import net.silthus.regions.CostType;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionPlayer;
 import net.silthus.regions.util.Enums;
-import net.silthus.regions.Messages;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 
@@ -55,13 +54,13 @@ public class MoneyCost implements Cost {
     }
 
     @Override
-    public String display(RegionPlayer player, Region region) {
+    public String display(Region region, RegionPlayer player) {
 
         return economy.format(calculate(player, region));
     }
 
     @Override
-    public Result check(RegionPlayer player, Region region) {
+    public Result check(Region region, RegionPlayer player) {
 
         OfflinePlayer offlinePlayer = player.getOfflinePlayer();
 
@@ -74,7 +73,7 @@ public class MoneyCost implements Cost {
     }
 
     @Override
-    public Result apply(RegionPlayer player, Region region) {
+    public Result apply(Region region, RegionPlayer player) {
 
         EconomyResponse economyResponse = economy().withdrawPlayer(player.getOfflinePlayer(), calculate(player, region));
         return new Result(economyResponse.transactionSuccess(), economyResponse.errorMessage);

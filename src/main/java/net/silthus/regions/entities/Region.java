@@ -5,12 +5,10 @@ import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.domains.DefaultDomain;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import com.sk89q.worldguard.protection.regions.RegionType;
 import io.ebean.ExpressionList;
 import io.ebean.Finder;
 import io.ebean.annotation.DbEnumValue;
 import io.ebean.annotation.Transactional;
-import io.ebeaninternal.server.lib.Str;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -34,12 +32,13 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static net.silthus.regions.MessageTags.*;
 
@@ -90,7 +89,7 @@ public class Region extends BaseEntity implements ReplacementProvider {
 
     private UUID world;
     private String worldName;
-    private RegionType regionType = com.sk89q.worldguard.protection.regions.RegionType.SELL;
+    private RegionType regionType = RegionType.SELL;
     private PriceType priceType = PriceType.STATIC;
     private Status status = Status.FREE;
     private double price;
@@ -100,8 +99,11 @@ public class Region extends BaseEntity implements ReplacementProvider {
     @ManyToOne
     private RegionGroup group;
 
-    @ManyToOne
-    private RegionPlayer owner;
+    @OneToOne(cascade = CascadeType.REMOVE)
+    private OwnedRegion owner;
+
+    @OneToMany(cascade = CascadeType.REMOVE)
+    private List<OwnedRegion> previousOwners = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.REMOVE)
     private List<RegionAcl> acl = new ArrayList<>();
@@ -144,11 +146,20 @@ public class Region extends BaseEntity implements ReplacementProvider {
 
     public Region owner(RegionPlayer player) {
 
-        RegionPlayer previousOwner = owner();
-        this.owner = player;
+        OwnedRegion previousOwner = owner();
+        if (previousOwner != null) {
+            previousOwner.end(Instant.now());
+            previousOwner.save();
+
+            previousOwners.add(previousOwner);
+        }
+
+        this.owner = new OwnedRegion(this, player);
+        this.owner.save();
+
         new RegionTransaction(this, player)
                 .action(RegionTransaction.Action.CHANGE_OWNER)
-                .data("previous_owner.id", previousOwner != null ? previousOwner.id() : null)
+                .data("previous_owner.id", previousOwner != null ? previousOwner.player().id() : null)
                 .data("previous_owner.name", previousOwner != null ? previousOwner.name() : null)
                 .data("new_owner.id", player.id())
                 .data("new_owner.name", player.name())
@@ -162,6 +173,11 @@ public class Region extends BaseEntity implements ReplacementProvider {
         });
 
         return this;
+    }
+
+    public Optional<RegionPlayer> player() {
+
+        return Optional.ofNullable(owner()).map(OwnedRegion::player);
     }
 
     /**
@@ -192,32 +208,37 @@ public class Region extends BaseEntity implements ReplacementProvider {
 
         if (status() == Status.OCCUPIED) {
             if (owner() == null) {
-                return new Cost.Result(false, "Das Grundstück " + name() + " gehört bereits jemandem.");
+                return new Cost.Result(false, "Das Grundstück " + name() + " gehört bereits jemandem steht aber fehlerhaft in der Datenbank. " +
+                        "Bitte kontaktiere einen Admin mit der Grundstücks ID: " + id(), Cost.ResultStatus.OTHER);
+            } else if (owner() != null && owner().player().equals(player)) {
+                return new Cost.Result(false, "Du besitzt das Grundstück " + name() + " bereits.", Cost.ResultStatus.OWNED_BY_SELF);
             } else {
-                return new Cost.Result(false, "Das Grundstück " + name() + " gehört bereits " + owner().name());
+                return new Cost.Result(false, "Das Grundstück " + name() + " gehört bereits " + owner().name(), Cost.ResultStatus.OWNED_BY_OTHER);
             }
         }
 
         Limit.Result limits = checkLimits(player);
         if (limits.reachedLimit()) {
-            return new Cost.Result(false, limits.error());
+            return new Cost.Result(false, limits.error(), Cost.ResultStatus.LIMITS_REACHED);
         }
 
         RegionsPlugin plugin = RegionsPlugin.instance();
 
         if (group() == null) {
             return new Cost.Result(plugin.getEconomy().has(player.getOfflinePlayer(), price),
-                    "Du hast nicht genügend Geld! Du benötigst mindestens: " + plugin.getEconomy().format(price), price);
+                    "Du hast nicht genügend Geld! Du benötigst mindestens: " + plugin.getEconomy().format(price), price,
+                    Cost.ResultStatus.NOT_ENOUGH_MONEY);
         } else {
             return group()
                     .loadCosts(plugin.getRegionManager())
                     .costs().stream()
-                    .map(cost -> cost.check(player, this))
+                    .map(cost -> cost.check(this, player))
                     .reduce((result, result2) -> new Cost.Result(
                             result.success() && result2.success(),
                             result.error() + "\n" + result2.error(),
-                            result.price() + result2.price()
-                    )).orElse(new Cost.Result(true, null));
+                            result.price() + result2.price(),
+                            Cost.ResultStatus.COSTS_NOT_MET
+                    )).orElse(new Cost.Result(true, null, Cost.ResultStatus.SUCCESS));
         }
     }
 
@@ -251,14 +272,23 @@ public class Region extends BaseEntity implements ReplacementProvider {
         save();
         updateSigns();
 
-        return new Cost.Result(true, null, price);
+        return new Cost.Result(true, null, price, Cost.ResultStatus.SUCCESS);
     }
 
-    public String[] costs() {
-        return costs(null);
+    public List<Cost> costs() {
+
+        if (group() == null) {
+            return new ArrayList<>();
+        } else {
+            return group().costs();
+        }
     }
 
-    public String[] costs(@Nullable RegionPlayer player) {
+    public String[] displayCosts() {
+        return displayCosts(null);
+    }
+
+    public String[] displayCosts(@Nullable RegionPlayer player) {
 
         RegionsPlugin plugin = RegionsPlugin.instance();
         if (group() == null) {
@@ -267,7 +297,7 @@ public class Region extends BaseEntity implements ReplacementProvider {
             return group()
                     .loadCosts(plugin.getRegionManager())
                     .costs().stream()
-                    .map(cost -> cost.display(player, this))
+                    .map(cost -> cost.display(this, player))
                     .toArray(String[]::new);
         }
     }
@@ -331,7 +361,7 @@ public class Region extends BaseEntity implements ReplacementProvider {
                 return owner() != null ? owner().name() : null;
             case ownerId:
             case playerId:
-                return owner() != null ? owner().id() : null;
+                return owner() != null ? owner().player().id() : null;
             case MessageTags.price:
                 return RegionsPlugin.instance().getEconomy().format(price());
             case priceraw:
