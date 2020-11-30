@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/raidcraft/rcregions/compare/v1.4.0...v1.4.1) (2020-11-30)
+
+
+### Bug Fixes
+
+* **region:** volume is now correctly calculated ([a4da2e4](https://github.com/raidcraft/rcregions/commit/a4da2e42981e561e3ade6b1eb6ce76b4fcc09a98))
+
 # [1.4.0](https://github.com/raidcraft/rcregions/compare/v1.3.1...v1.4.0) (2020-11-29)
 
 
