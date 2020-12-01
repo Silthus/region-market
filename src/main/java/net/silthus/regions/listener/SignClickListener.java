@@ -33,7 +33,7 @@ public class SignClickListener implements Listener {
             return;
         }
 
-        Optional<Region> optionalRegion = Region.of(event.getClickedBlock().getLocation());
+        Optional<Region> optionalRegion = Region.atSign(event.getClickedBlock().getLocation());
         if (optionalRegion.isEmpty()) {
             return;
         }

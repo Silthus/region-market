@@ -20,18 +20,26 @@ import net.silthus.ebean.Config;
 import net.silthus.ebean.EbeanWrapper;
 import net.silthus.regions.commands.AdminCommands;
 import net.silthus.regions.commands.RegionCommands;
-import net.silthus.regions.entities.*;
+import net.silthus.regions.entities.OwnedRegion;
+import net.silthus.regions.entities.Region;
+import net.silthus.regions.entities.RegionAcl;
+import net.silthus.regions.entities.RegionGroup;
+import net.silthus.regions.entities.RegionPlayer;
+import net.silthus.regions.entities.RegionSign;
+import net.silthus.regions.entities.RegionTransaction;
 import net.silthus.regions.limits.LimitsConfig;
 import net.silthus.regions.listener.PlayerListener;
 import net.silthus.regions.listener.SignClickListener;
 import net.silthus.regions.listener.SignListener;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.UUID;
@@ -193,7 +201,16 @@ public class RegionsPlugin extends JavaPlugin {
 
             Optional<Region> region;
             if (Strings.isNullOrEmpty(regionName)) {
-                region = Region.of(c.getPlayer().getLocation());
+                Location location = c.getPlayer().getLocation();
+                region = Region.atSign(location)
+                            .or(() -> {
+                                Collection<Region> regions = Region.at(location);
+                                if (regions.size() > 1) {
+                                    throw new InvalidCommandArgument("Es wurden mehrere Grundstücke an deiner Position gefunden: "
+                                            + regions.stream().map(Region::name).collect(Collectors.joining(",")));
+                                }
+                                return regions.stream().findAny();
+                            });
                 if (region.isEmpty()) {
                     throw new InvalidCommandArgument("Unable to find a region at the current position.");
                 }

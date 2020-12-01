@@ -6,6 +6,8 @@ import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionPlayer;
 import org.bukkit.configuration.ConfigurationSection;
 
+import javax.annotation.Nullable;
+import java.util.EnumSet;
 import java.util.function.Supplier;
 
 /**
@@ -73,13 +75,13 @@ public interface Cost {
         boolean success;
         String error;
         double price;
-        ResultStatus status;
+        EnumSet<ResultStatus> status;
 
         public Result(boolean success, String error) {
             this.success = success;
             this.error = error;
             this.price = 0;
-            status = ResultStatus.UNKNOWN;
+            status = EnumSet.of(ResultStatus.UNKNOWN);
         }
 
         public Result(boolean success, String error, ResultStatus status) {
@@ -87,17 +89,25 @@ public interface Cost {
             this.success = success;
             this.error = error;
             this.price = 0;
-            this.status = status;
+            this.status = EnumSet.of(status);
         }
 
         public Result(boolean success, String error, double price) {
             this.success = success;
             this.error = error;
             this.price = price;
-            status = ResultStatus.UNKNOWN;
+            status = EnumSet.of(ResultStatus.UNKNOWN);
         }
 
         public Result(boolean success, String error, double price, ResultStatus status) {
+
+            this.success = success;
+            this.error = error;
+            this.price = price;
+            this.status = EnumSet.of(status);
+        }
+
+        public Result(boolean success, String error, double price, EnumSet<ResultStatus> status) {
 
             this.success = success;
             this.error = error;
@@ -107,6 +117,22 @@ public interface Cost {
 
         public boolean failure() {
             return !success();
+        }
+
+        public Result combine(@Nullable Result other) {
+
+            if (other == null) {
+                return this;
+            }
+
+            EnumSet<ResultStatus> statuses = EnumSet.copyOf(status());
+            statuses.addAll(other.status());
+
+            return new Result(
+                    success() && other.success(),
+                    error() + "\n" + other.error(),
+                    price() + other.price(),
+                    statuses);
         }
     }
 

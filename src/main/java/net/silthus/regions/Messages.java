@@ -72,6 +72,7 @@ public final class Messages {
         return new ComponentBuilder().reset()
                 .append(region.name()).bold(true).color(ChatColor.GOLD)
                 .event(regionHover(region, player))
+                .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/region info " + region.name()))
                 .create();
     }
 
@@ -109,51 +110,54 @@ public final class Messages {
                     .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format(Constants.BUY_REGION_COMMAND, region.id())))
                     .create();
         } else {
-            if (canBuy.status() == Cost.ResultStatus.OWNED_BY_SELF) {
+            if (canBuy.status().contains(Cost.ResultStatus.OWNED_BY_SELF)) {
                 return builder.append("[Verkaufen]").color(ChatColor.GRAY).strikethrough(true)
                         .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Diese Option steht aktuell noch nicht zur Verfügung.")))
                         .create();
             } else {
-                switch (canBuy.status()) {
-                    case OWNED_BY_OTHER:
-                        return builder.append("[?]").color(ChatColor.GRAY)
-                                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder()
-                                        .append("Dieses Grundstück gehört bereits ").color(ChatColor.RED)
-                                        .append(region.owner().map(RegionPlayer::name).orElse("jemandem")).color(ChatColor.AQUA)
-                                        .append(".").color(ChatColor.RED)
-                                        .create()
-                                ))).create();
-                    case LIMITS_REACHED:
-                        return builder.append("[Kaufen]").color(ChatColor.DARK_RED)
-                                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder()
-                                        .append("Du hast dein Grundstückslimit erreicht.").color(ChatColor.RED).append("\n")
-                                        .append(limits(player))
-                                        .create()
-                                ))).create();
-                    case NOT_ENOUGH_MONEY:
-                        double balance = economy.getBalance(player.getOfflinePlayer());
-                        return builder.append("[Kaufen]").color(ChatColor.RED).bold(true)
-                                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder()
-                                        .append("Du hast nicht genügend Geld um das Grundstück zu kaufen.").color(ChatColor.DARK_RED).append("\n")
-                                        .append("Du benötigst mindestens ").color(ChatColor.YELLOW).italic(true)
-                                        .append(economy.format(canBuy.price())).color(ChatColor.AQUA)
-                                        .append(" hast aber nur ").color(ChatColor.YELLOW).italic(true)
-                                        .append(economy.format(balance)).color(ChatColor.GREEN).append("\n")
-                                        .append("Kosten: ").color(ChatColor.YELLOW).append("\n")
-                                        .append(costs(region, player)).create()
-                                ))).create();
-                    default:
-                    case COSTS_NOT_MET:
-                        return builder.append("[Kaufen]").color(ChatColor.RED).bold(true)
-                                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder()
-                                        .append("Du erfüllst nicht die Vorraussetzungen um das Grundstück zu kaufen.").color(ChatColor.DARK_RED).append("\n")
-                                        .append("Kosten: ").color(ChatColor.YELLOW).append("\n")
-                                        .append(costs(region, player)).create()
-                                ))).create();
+                for (Cost.ResultStatus status : canBuy.status()) {
+                    switch (status) {
+                        case OWNED_BY_OTHER:
+                            return builder.append("[?]").color(ChatColor.GRAY)
+                                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder()
+                                            .append("Dieses Grundstück gehört bereits ").color(ChatColor.RED)
+                                            .append(region.owner().map(RegionPlayer::name).orElse("jemandem")).color(ChatColor.AQUA)
+                                            .append(".").color(ChatColor.RED)
+                                            .create()
+                                    ))).create();
+                        case LIMITS_REACHED:
+                            return builder.append("[Kaufen]").color(ChatColor.DARK_RED)
+                                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder()
+                                            .append("Du hast dein Grundstückslimit erreicht.").color(ChatColor.RED).append("\n")
+                                            .append(limits(player))
+                                            .create()
+                                    ))).create();
+                        case NOT_ENOUGH_MONEY:
+                            double balance = economy.getBalance(player.getOfflinePlayer());
+                            return builder.append("[Kaufen]").color(ChatColor.RED).bold(true)
+                                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder()
+                                            .append("Du hast nicht genügend Geld um das Grundstück zu kaufen.").color(ChatColor.DARK_RED).append("\n")
+                                            .append("Du benötigst mindestens ").color(ChatColor.YELLOW).italic(true)
+                                            .append(economy.format(canBuy.price())).color(ChatColor.AQUA)
+                                            .append(" hast aber nur ").color(ChatColor.YELLOW).italic(true)
+                                            .append(economy.format(balance)).color(ChatColor.GREEN).append("\n")
+                                            .append("Kosten: ").color(ChatColor.YELLOW).append("\n")
+                                            .append(costs(region, player)).create()
+                                    ))).create();
+                        default:
+                        case COSTS_NOT_MET:
+                            return builder.append("[Kaufen]").color(ChatColor.RED).bold(true)
+                                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder()
+                                            .append("Du erfüllst nicht die Vorraussetzungen um das Grundstück zu kaufen.").color(ChatColor.DARK_RED).append("\n")
+                                            .append("Kosten: ").color(ChatColor.YELLOW).append("\n")
+                                            .append(costs(region, player)).create()
+                                    ))).create();
+                    }
                 }
-
             }
         }
+
+        return new BaseComponent[0];
     }
 
     public static BaseComponent[] costs(@NonNull Region region, @NonNull RegionPlayer player) {
@@ -240,6 +244,8 @@ public final class Messages {
         for (String cost : region.displayCosts(player)) {
             builder.append(cost).color(ChatColor.AQUA).append("\n");
         }
+
+        builder.append("Klicken um die WorldGuard Informationen zu dem Grundstück anzuzeigen.").italic(true).color(ChatColor.GRAY);
 
         return new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(builder.create()));
     }

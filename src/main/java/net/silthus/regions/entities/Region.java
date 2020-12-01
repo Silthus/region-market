@@ -1,6 +1,7 @@
 package net.silthus.regions.entities;
 
 import com.sk89q.worldedit.bukkit.BukkitWorld;
+import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.domains.DefaultDomain;
 import com.sk89q.worldguard.protection.managers.RegionManager;
@@ -14,6 +15,7 @@ import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import me.wiefferink.interactivemessenger.processing.ReplacementProvider;
+import net.milkbowl.vault.economy.Economy;
 import net.silthus.ebean.BaseEntity;
 import net.silthus.regions.Cost;
 import net.silthus.regions.MessageTags;
@@ -28,12 +30,20 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 
 import javax.annotation.Nullable;
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static net.silthus.regions.MessageTags.*;
 
@@ -49,7 +59,23 @@ public class Region extends BaseEntity implements ReplacementProvider {
         return of(world, protectedRegion).isPresent();
     }
 
-    public static Optional<Region> of(Location location) {
+    public static Collection<Region> at(Location location) {
+        RegionManager regionManager = WorldGuard.getInstance().getPlatform().getRegionContainer().get(new BukkitWorld(location.getWorld()));
+
+        if (regionManager == null) {
+            return new ArrayList<>();
+        }
+
+        return regionManager.getApplicableRegions(BlockVector3.at(location.getBlockX(), location.getBlockY(), location.getBlockZ()))
+                .getRegions().stream()
+                .filter(protectedRegion -> !RegionsPlugin.instance().getPluginConfig().getIgnoredRegions().contains(protectedRegion.getId()))
+                .map(Region::of)
+                .map(region -> region.orElse(null))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    public static Optional<Region> atSign(Location location) {
 
         return RegionSign.of(location).map(RegionSign::region);
     }
@@ -231,20 +257,18 @@ public class Region extends BaseEntity implements ReplacementProvider {
         RegionsPlugin plugin = RegionsPlugin.instance();
 
         if (group() == null) {
-            return new Cost.Result(plugin.getEconomy().has(player.getOfflinePlayer(), price),
-                    "Du hast nicht genügend Geld! Du benötigst mindestens: " + plugin.getEconomy().format(price), price,
+            Economy economy = plugin.getEconomy();
+            double balance = economy.getBalance(player.getOfflinePlayer());
+            return new Cost.Result(economy.has(player.getOfflinePlayer(), price),
+                    "Du hast nicht genügend Geld (" + economy.format(balance) + ")! Du benötigst mindestens: " + economy.format(price), price,
                     Cost.ResultStatus.NOT_ENOUGH_MONEY);
         } else {
             return group()
                     .loadCosts(plugin.getRegionManager())
                     .costs().stream()
                     .map(cost -> cost.check(this, player))
-                    .reduce((result, result2) -> new Cost.Result(
-                            result.success() && result2.success(),
-                            result.error() + "\n" + result2.error(),
-                            result.price() + result2.price(),
-                            Cost.ResultStatus.COSTS_NOT_MET
-                    )).orElse(new Cost.Result(true, null, Cost.ResultStatus.SUCCESS));
+                    .reduce(Cost.Result::combine)
+                    .orElse(new Cost.Result(true, null, Cost.ResultStatus.SUCCESS));
         }
     }
 

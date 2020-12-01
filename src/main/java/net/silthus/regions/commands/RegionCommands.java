@@ -35,6 +35,14 @@ public class RegionCommands extends BaseCommand {
         this.plugin = plugin;
     }
 
+    @Subcommand("info")
+    @CommandPermission("rcregions.region.info")
+    @CommandCompletion("@regions")
+    public void info(Player player, RegionPlayer regionPlayer, Region region) {
+
+        player.spigot().sendMessage(Messages.regionInfo(region, regionPlayer));
+    }
+
     @Subcommand("buy")
     @CommandPermission("rcregions.region.buy")
     @CommandCompletion("@regions")
