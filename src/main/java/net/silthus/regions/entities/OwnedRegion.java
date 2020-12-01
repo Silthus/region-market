@@ -23,7 +23,6 @@ public class OwnedRegion extends BaseEntity {
     private Region region;
     @ManyToOne(fetch = FetchType.EAGER)
     private RegionPlayer player;
-    private String playerName;
     @WhenCreated
     private Instant start;
     private Instant end;
@@ -32,7 +31,6 @@ public class OwnedRegion extends BaseEntity {
 
         this.region = region;
         this.player = player;
-        this.playerName = player.name();
     }
 
     public boolean active() {
