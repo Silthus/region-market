@@ -73,7 +73,6 @@ public class MoneyCost implements Cost {
         double totalCosts = calculate(region, player);
 
         return new ComponentBuilder().append(economy().format(totalCosts)).color(costColor(player, totalCosts))
-                .append(" [?]").color(ChatColor.GRAY).italic(true)
                 .event(createCostHover(region, player, totalCosts)).create();
     }
 

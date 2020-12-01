@@ -70,7 +70,7 @@ public final class Messages {
     public static BaseComponent[] region(@NonNull Region region, @Nullable RegionPlayer player) {
 
         return new ComponentBuilder().reset()
-                .append(region.name()).bold(true).color(ChatColor.GOLD)
+                .append(region.name()).bold(true).color(ChatColor.GOLD).reset()
                 .event(regionHover(region, player))
                 .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/region info " + region.name()))
                 .create();
@@ -165,13 +165,12 @@ public final class Messages {
         ComponentBuilder builder = new ComponentBuilder();
         for (Cost cost : region.costs()) {
             Cost.Result check = cost.check(region, player);
-            builder.append("  - ").reset().append(cost.display(region, player)).reset();
+            builder.append("  - ").reset().append(cost.display(region, player))
+                    .bold(true);
             if (check.success()) {
                 builder.color(ChatColor.GREEN).append("\n");
             } else {
-                builder.color(ChatColor.RED).bold(true)
-                        .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder(check.error()).color(ChatColor.RED).create())))
-                        .append("\n");
+                builder.color(ChatColor.RED).append("\n");
             }
         }
 
