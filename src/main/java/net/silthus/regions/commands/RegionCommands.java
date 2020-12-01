@@ -107,16 +107,17 @@ public class RegionCommands extends BaseCommand {
     @CommandPermission("rcregions.region.buy")
     public void buyAbort(RegionPlayer player) {
 
-        if (!getCurrentCommandIssuer().isPlayer()) {
-            throw new InvalidCommandArgument("Dieser Befehl kann nur als Spieler ausgeführt werden.");
+        Region region = queuedRegionBuys.remove(player.id());
+
+        if (getCurrentCommandIssuer() == null) {
+            // the remove task was executed
+            return;
         }
 
         Optional<Player> bukkitPlayer = player.getBukkitPlayer();
         if (bukkitPlayer.isEmpty()) {
             throw new InvalidCommandArgument("Der Spieler " + player.name() + " ist nicht online oder konnte nicht gefunden werden.");
         }
-
-        Region region = queuedRegionBuys.remove(player.id());
 
         if (region != null) {
             bukkitPlayer.get().spigot().sendMessage(new ComponentBuilder().append("Der Grundstückskauf von ").color(ChatColor.RED)

@@ -14,10 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -58,6 +55,9 @@ public class RegionPlayer extends BaseEntity implements ReplacementProvider {
     private Instant lastOnline;
 
     @OneToMany
+    private List<Region> regions = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.REMOVE)
     private List<OwnedRegion> ownedRegions = new ArrayList<>();
 
     RegionPlayer(OfflinePlayer player) {

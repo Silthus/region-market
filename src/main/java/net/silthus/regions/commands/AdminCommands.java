@@ -118,7 +118,7 @@ public class AdminCommands extends BaseCommand implements Listener {
         }
 
         sellRegion.save();
-        player.spigot().sendMessage(new ComponentBuilder("Die Region ").color(net.md_5.bungee.api.ChatColor.GREEN)
+        player.spigot().sendMessage(new ComponentBuilder("Das Grundstück ").color(net.md_5.bungee.api.ChatColor.GREEN)
                 .append(Messages.region(sellRegion, null)).append(" wurde erstellt und kann jetzt gekauft werden.").reset().color(net.md_5.bungee.api.ChatColor.GREEN)
                 .create());
     }

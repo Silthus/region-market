@@ -36,7 +36,7 @@ public final class Messages {
         } else {
             lines[0] = ChatColor.WHITE + region.name();
             lines[1] = ChatColor.RED + "- Belegt durch -";
-            lines[2] = ChatColor.GOLD + region.owner().map(OwnedRegion::playerName).orElse("Unbekannt");
+            lines[2] = ChatColor.GOLD + region.owner().map(RegionPlayer::name).orElse("Unbekannt");
             lines[3] = ChatColor.YELLOW + "seit " + ChatColor.AQUA
                     + DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
                     .withLocale(Locale.GERMAN)
@@ -84,11 +84,11 @@ public final class Messages {
 
         ComponentBuilder builder = new ComponentBuilder();
 
-        Optional<OwnedRegion> owner = region.owner();
+        Optional<RegionPlayer> owner = region.owner();
         if (owner.isPresent()) {
             builder.reset()
-                    .append(owner.get().playerName()).color(ChatColor.AQUA).bold(true)
-                    .event(playerHover(owner.get().player()));
+                    .append(owner.get().name()).color(ChatColor.AQUA).bold(true)
+                    .event(playerHover(owner.get()));
         } else {
             builder.reset().append("N/A").color(ChatColor.GRAY);
         }
@@ -124,7 +124,7 @@ public final class Messages {
                         return builder.append("[?]").color(ChatColor.GRAY)
                                 .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder()
                                         .append("Dieses Grundstück gehört bereits ").color(ChatColor.RED)
-                                        .append(region.owner().map(OwnedRegion::playerName).orElse("jemandem")).color(ChatColor.AQUA)
+                                        .append(region.owner().map(RegionPlayer::name).orElse("jemandem")).color(ChatColor.AQUA)
                                         .append(".").color(ChatColor.RED)
                                         .create()
                                 ))).create();
@@ -213,7 +213,7 @@ public final class Messages {
 
         ComponentBuilder builder = new ComponentBuilder();
         ChatColor onlineColor;
-        if (player.lastOnline().isAfter(Instant.now().minus(1, ChronoUnit.MONTHS))) {
+        if (player.lastOnline().isAfter(Instant.now().minus(31, ChronoUnit.DAYS))) {
             onlineColor = ChatColor.GREEN;
         } else {
             onlineColor = ChatColor.GRAY;
