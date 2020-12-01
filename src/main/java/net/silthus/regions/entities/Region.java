@@ -1,10 +1,12 @@
 package net.silthus.regions.entities;
 
 import com.sk89q.worldedit.bukkit.BukkitWorld;
+import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.domains.DefaultDomain;
 import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import io.ebean.ExpressionList;
 import io.ebean.Finder;
@@ -25,6 +27,7 @@ import net.silthus.regions.MessageTags;
 import net.silthus.regions.Messages;
 import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.limits.Limit;
+import net.silthus.regions.util.MathUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -222,7 +225,13 @@ public class Region extends BaseEntity implements ReplacementProvider {
      */
     public long volume() {
 
-        return protectedRegion().map(ProtectedRegion::volume).orElse(0);
+        return protectedRegion().map(region -> {
+            if (region instanceof ProtectedPolygonalRegion) {
+                return (int) MathUtil.calculatePolygonalArea(region.getPoints());
+            } else {
+                return region.volume();
+            }
+        }).orElse(0);
     }
 
     /**

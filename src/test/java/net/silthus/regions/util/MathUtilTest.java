@@ -1,0 +1,46 @@
+package net.silthus.regions.util;
+
+import com.sk89q.worldedit.math.BlockVector2;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class MathUtilTest {
+
+    @Nested
+    @DisplayName("calculatePolygonalArea(...)")
+    class calculatePolygonalArea {
+
+        @Test
+        @DisplayName("should calculate size of simple polygon region")
+        void shouldCalculateCorrectSizeOfSimpleRegion() {
+
+            double volume = MathUtil.calculatePolygonalArea(Arrays.asList(
+                    BlockVector2.at(17, 266),
+                    BlockVector2.at(4, 266),
+                    BlockVector2.at(4, 279),
+                    BlockVector2.at(15, 279)
+            ));
+            assertThat(volume).isEqualTo(176);
+        }
+
+        @Test
+        @DisplayName("should calculate correct size of rectangular polygon region")
+        void shouldCalculateRecangularPolygonRegion() {
+
+            double volume = MathUtil.calculatePolygonalArea(Arrays.asList(
+                    BlockVector2.at(19, 263),
+                    BlockVector2.at(19, 276),
+                    BlockVector2.at(25, 276),
+                    BlockVector2.at(25, 269),
+                    BlockVector2.at(29, 269),
+                    BlockVector2.at(29, 263)
+                    ));
+            assertThat(volume).isEqualTo(126);
+        }
+    }
+}
