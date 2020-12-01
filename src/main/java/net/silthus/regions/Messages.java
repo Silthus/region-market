@@ -165,10 +165,11 @@ public final class Messages {
         ComponentBuilder builder = new ComponentBuilder();
         for (Cost cost : region.costs()) {
             Cost.Result check = cost.check(region, player);
+            builder.append("  - ").reset().append(cost.display(region, player)).reset();
             if (check.success()) {
-                builder.append("  - ").reset().append(cost.display(region, player)).reset().color(ChatColor.GREEN).append("\n");
+                builder.color(ChatColor.GREEN).append("\n");
             } else {
-                builder.append("  - ").reset().append(cost.display(region, player)).reset().color(ChatColor.RED).bold(true)
+                builder.color(ChatColor.RED).bold(true)
                         .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder(check.error()).color(ChatColor.RED).create())))
                         .append("\n");
             }

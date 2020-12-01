@@ -2,6 +2,8 @@ package net.silthus.regions;
 
 import lombok.Value;
 import lombok.experimental.Accessors;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.HoverEvent;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionPlayer;
 import org.bukkit.configuration.ConfigurationSection;
@@ -48,6 +50,17 @@ public interface Cost {
      * @return an individual cost display for the given player
      */
     String display(Region region, RegionPlayer player);
+
+    /**
+     * Builds a detailed breakdown for this cost.
+     *
+     * @param region the region to calculate the details for
+     * @param player the player to display the costs for
+     * @return a breakdown of for this cost
+     */
+    default BaseComponent[] details(Region region, RegionPlayer player) {
+        return new BaseComponent[0];
+    }
 
     /**
      * Checks if the player satisfies this cost.
