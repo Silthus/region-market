@@ -1,3 +1,11 @@
+## [1.5.1](https://github.com/raidcraft/rcregions/compare/v1.5.0...v1.5.1) (2020-12-01)
+
+
+### Bug Fixes
+
+* player regions calculation based off actual regions ([332fc22](https://github.com/raidcraft/rcregions/commit/332fc22b8430de00a5886a2c9d7e8317e1aa29a5))
+* **db:** remove unused player_name field from owned_region ([f84d167](https://github.com/raidcraft/rcregions/commit/f84d16736cb33253266f28c4a8ad684ed6782271))
+
 # [1.5.0](https://github.com/raidcraft/rcregions/compare/v1.4.1...v1.5.0) (2020-12-01)
 
 
