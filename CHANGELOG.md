@@ -1,3 +1,16 @@
+# [1.5.0](https://github.com/raidcraft/rcregions/compare/v1.4.1...v1.5.0) (2020-12-01)
+
+
+### Bug Fixes
+
+* correctly display playername on sign and info text ([ebd2d5e](https://github.com/raidcraft/rcregions/commit/ebd2d5ee12777cd0bdc71d2f851093ec745cd1ad))
+
+
+### Features
+
+* add nice formatting and improve overall user experience ([8181fd7](https://github.com/raidcraft/rcregions/commit/8181fd712f23894054b3c1c1290987926f924860))
+* add pretty formatting for regions ([88b8386](https://github.com/raidcraft/rcregions/commit/88b8386571b950c0742b01a9a71b01211d4a518f))
+
 ## [1.4.1](https://github.com/raidcraft/rcregions/compare/v1.4.0...v1.4.1) (2020-11-30)
 
 
