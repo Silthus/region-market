@@ -253,22 +253,28 @@ public final class Messages {
         return new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(builder.create()));
     }
 
-    public static HoverEvent playerHover(@NonNull RegionPlayer player) {
+    public static HoverEvent playerHover(@Nullable RegionPlayer player) {
+
+        if (player == null) {
+            return new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Spieler wurde nicht gefunden."));
+        }
 
         ComponentBuilder builder = new ComponentBuilder();
-        ChatColor onlineColor;
-        if (player.lastOnline().isAfter(Instant.now().minus(31, ChronoUnit.DAYS))) {
-            onlineColor = ChatColor.GREEN;
-        } else {
-            onlineColor = ChatColor.GRAY;
-        }
-        builder.append("--- ").color(ChatColor.GRAY)
-                .append(player.name()).color(onlineColor).bold(true)
-                .append(" ---").reset().color(ChatColor.GRAY).append("\n");
-
         if (player.lastOnline() != null) {
-            builder.append("Zuletzt online: ").color(onlineColor)
-                    .append(TimeUtil.formatDateTime(player.lastOnline())).append("\n");
+            ChatColor onlineColor;
+            if (player.lastOnline().isAfter(Instant.now().minus(31, ChronoUnit.DAYS))) {
+                onlineColor = ChatColor.GREEN;
+            } else {
+                onlineColor = ChatColor.GRAY;
+            }
+            builder.append("--- ").color(ChatColor.GRAY)
+                    .append(player.name()).color(onlineColor).bold(true)
+                    .append(" ---").reset().color(ChatColor.GRAY).append("\n");
+
+            if (player.lastOnline() != null) {
+                builder.append("Zuletzt online: ").color(onlineColor)
+                        .append(TimeUtil.formatDateTime(player.lastOnline())).append("\n");
+            }
         }
 
         builder.append(limits(player));
