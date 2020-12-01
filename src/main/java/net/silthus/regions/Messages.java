@@ -242,10 +242,12 @@ public final class Messages {
                 .append("Kosten: ").reset().bold(true).color(ChatColor.YELLOW).append("\n");
 
         for (String cost : region.displayCosts(player)) {
-            builder.append(cost).color(ChatColor.AQUA).append("\n");
+            builder.append(" - ").reset().color(ChatColor.GRAY)
+                    .append(cost).color(ChatColor.AQUA).append("\n");
         }
 
-        builder.append("Klicken um die WorldGuard Informationen zu dem Grundstück anzuzeigen.").italic(true).color(ChatColor.GRAY);
+        builder.append("\nKlicken um die WorldGuard Informationen zu dem Grundstück anzuzeigen.")
+                .reset().italic(true).color(ChatColor.GRAY);
 
         return new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(builder.create()));
     }

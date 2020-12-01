@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 public final class TimeUtil {
@@ -18,8 +19,10 @@ public final class TimeUtil {
             return "N/A";
         }
 
-
-        return new SimpleDateFormat(format, Locale.GERMAN).format(instant.atZone(ZoneId.systemDefault()));
+        return DateTimeFormatter.ofPattern(format)
+                .withLocale(Locale.GERMAN)
+                .withZone(ZoneId.systemDefault())
+                .format(instant);
     }
 
     public static String formatDateTime(Instant instant) {
