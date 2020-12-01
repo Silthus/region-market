@@ -1,3 +1,15 @@
+# [1.7.0](https://github.com/raidcraft/rcregions/compare/v1.6.0...v1.7.0) (2020-12-01)
+
+
+### Bug Fixes
+
+* time formatting error in region info ([f249618](https://github.com/raidcraft/rcregions/commit/f2496186b2073f3d576a3a3307b09768a49a8ef3))
+
+
+### Features
+
+* add detailed cost breakdown view ([75b1c94](https://github.com/raidcraft/rcregions/commit/75b1c940ef04ae19849dafb453eebb113e9a9f0d))
+
 # [1.6.0](https://github.com/raidcraft/rcregions/compare/v1.5.1...v1.6.0) (2020-12-01)
 
 
