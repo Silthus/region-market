@@ -109,11 +109,6 @@ public class RegionCommands extends BaseCommand {
 
         Region region = queuedRegionBuys.remove(player.id());
 
-        if (getCurrentCommandIssuer() == null) {
-            // the remove task was executed
-            return;
-        }
-
         Optional<Player> bukkitPlayer = player.getBukkitPlayer();
         if (bukkitPlayer.isEmpty()) {
             throw new InvalidCommandArgument("Der Spieler " + player.name() + " ist nicht online oder konnte nicht gefunden werden.");
@@ -124,8 +119,8 @@ public class RegionCommands extends BaseCommand {
                     .append(Messages.region(region, player))
                     .append(" wurde abgebrochen").reset().color(ChatColor.DARK_GRAY)
                     .create());
-        } else {
-            getCurrentCommandIssuer().sendMessage(ChatColor.RED + "Du hast aktuell keinen ausstehenden Grundstückskauf. Du musst erst auf ein Grundstücksschild klicken um es zu kaufen.");
+        } else if (getCurrentCommandIssuer() != null) {
+            bukkitPlayer.get().sendMessage(ChatColor.RED + "Du hast aktuell keinen ausstehenden Grundstückskauf. Du musst erst auf ein Grundstücksschild klicken um es zu kaufen.");
         }
     }
 
