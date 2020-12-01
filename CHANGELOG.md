@@ -1,3 +1,10 @@
+## [1.7.1](https://github.com/raidcraft/rcregions/compare/v1.7.0...v1.7.1) (2020-12-01)
+
+
+### Bug Fixes
+
+* show cost breakdown hover ([cdfd2f1](https://github.com/raidcraft/rcregions/commit/cdfd2f156de5f0e85b89128dff0020356eaa1fa7))
+
 # [1.7.0](https://github.com/raidcraft/rcregions/compare/v1.6.0...v1.7.0) (2020-12-01)
 
 
