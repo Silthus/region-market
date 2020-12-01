@@ -1,3 +1,16 @@
+# [1.6.0](https://github.com/raidcraft/rcregions/compare/v1.5.1...v1.6.0) (2020-12-01)
+
+
+### Bug Fixes
+
+* **cmd:** correctly display abort buy cmd ([a5e9720](https://github.com/raidcraft/rcregions/commit/a5e9720cb966d56f834d8ee186e2450b77445fed))
+
+
+### Features
+
+* **cmd:** add /rcr info command and the option to show worldguard info on click ([fb7aaa7](https://github.com/raidcraft/rcregions/commit/fb7aaa7ba5a2252ffbc827f936cc7b7207f5fae7))
+* **gui:** display player limits in region overview ([da8dd16](https://github.com/raidcraft/rcregions/commit/da8dd16191034d87fdf33f3d9ee2aafdb1136d81))
+
 ## [1.5.1](https://github.com/raidcraft/rcregions/compare/v1.5.0...v1.5.1) (2020-12-01)
 
 
