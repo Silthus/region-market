@@ -240,14 +240,9 @@ public final class Messages {
                 .append(region.name()).reset().color(ChatColor.GOLD).append("\n")
                 .append("Besitzer: ").reset().bold(true).color(ChatColor.YELLOW)
                 .append(owner(region)).append("\n")
-                .append("Kosten: ").reset().bold(true).color(ChatColor.YELLOW).append("\n");
-
-        for (String cost : region.displayCosts(player)) {
-            builder.append(" - ").reset().color(ChatColor.GRAY)
-                    .append(cost).color(ChatColor.AQUA).append("\n");
-        }
-
-        builder.append("\nKlicken um die WorldGuard Informationen zu dem Grundstück anzuzeigen.")
+                .append("Kosten: ").reset().bold(true).color(ChatColor.YELLOW).append("\n")
+                .append(region.displayCosts(player)).append("\n")
+                .append("\nKlicken um die WorldGuard Informationen zu dem Grundstück anzuzeigen.")
                 .reset().italic(true).color(ChatColor.GRAY);
 
         return new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(builder.create()));

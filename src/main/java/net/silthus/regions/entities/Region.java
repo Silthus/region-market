@@ -15,6 +15,9 @@ import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import me.wiefferink.interactivemessenger.processing.ReplacementProvider;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.milkbowl.vault.economy.Economy;
 import net.silthus.ebean.BaseEntity;
 import net.silthus.regions.Cost;
@@ -314,21 +317,25 @@ public class Region extends BaseEntity implements ReplacementProvider {
         }
     }
 
-    public String[] displayCosts() {
+    public BaseComponent[] displayCosts() {
         return displayCosts(null);
     }
 
-    public String[] displayCosts(@Nullable RegionPlayer player) {
+    public BaseComponent[] displayCosts(@Nullable RegionPlayer player) {
 
         RegionsPlugin plugin = RegionsPlugin.instance();
         if (group() == null) {
-            return new String[] {plugin.getEconomy().format(price)};
+            Economy economy = plugin.getEconomy();
+            return new ComponentBuilder().append(economy.format(price)).color(ChatColor.AQUA).create();
         } else {
             return group()
                     .loadCosts(plugin.getRegionManager())
                     .costs().stream()
                     .map(cost -> cost.display(this, player))
-                    .toArray(String[]::new);
+                    .reduce((baseComponents, baseComponents2) -> new ComponentBuilder()
+                            .append(baseComponents).append("\n")
+                            .append(baseComponents2).create())
+                    .orElse(new BaseComponent[0]);
         }
     }
 
