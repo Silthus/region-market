@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/raidcraft/rcregions/compare/v1.8.0...v1.8.1) (2020-12-01)
+
+
+### Bug Fixes
+
+* **info:** fix region costs info message ([5edeadd](https://github.com/raidcraft/rcregions/commit/5edeadd4a1a93003300f9ce4e4dc6eb256609881))
+
 # [1.8.0](https://github.com/raidcraft/rcregions/compare/v1.7.1...v1.8.0) (2020-12-01)
 
 
