@@ -17,6 +17,7 @@ import net.silthus.regions.util.TimeUtil;
 import javax.annotation.Nullable;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -162,8 +163,13 @@ public final class Messages {
 
     public static BaseComponent[] costs(@NonNull Region region, @NonNull RegionPlayer player) {
 
+        List<Cost> costs = region.costs();
+        if (costs.isEmpty()) {
+            return new BaseComponent[0];
+        }
+
         ComponentBuilder builder = new ComponentBuilder();
-        for (Cost cost : region.costs()) {
+        for (Cost cost : costs) {
             Cost.Result check = cost.check(region, player);
             builder.append("  - ").reset().append(cost.display(region, player))
                     .bold(true);

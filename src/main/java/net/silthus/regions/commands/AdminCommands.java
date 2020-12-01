@@ -19,6 +19,7 @@ import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionGroup;
 import net.silthus.regions.entities.RegionSign;
+import net.silthus.regions.util.Enums;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -200,6 +201,29 @@ public class AdminCommands extends BaseCommand implements Listener {
             region.group(group).save();
             getCurrentCommandIssuer().sendMessage(ChatColor.GREEN + "Die Gruppe des Grundstücks " + region.name()
                     + " wurde erfolgreich zu " + group.name() + " (" + group.identifier() + ") geändert.");
+        }
+
+        @Subcommand("price")
+        @CommandAlias("price")
+        @CommandCompletion("@regions free|static|dynamic")
+        public void setPriceType(Region region, String priceType, @Optional String price) {
+
+            Region.PriceType type = Enums.searchEnum(Region.PriceType.class, priceType);
+            if (type == null) {
+                throw new InvalidCommandArgument("Der Preis Typ " + priceType + " existiert nicht. Bitte nutze einen der folgenden: free, static, dynamic");
+            }
+
+            if (!Strings.isNullOrEmpty(price)) {
+                try {
+                    double value = Double.parseDouble(price);
+                    region.priceType(type).price(value).save();
+                    getCurrentCommandIssuer().sendMessage(ChatColor.GREEN + "Der Preis des Grundstücks wird jetzt ");
+                } catch (NumberFormatException e) {
+                    throw new InvalidCommandArgument(e.getMessage());
+                }
+            } else {
+                region.priceType(type).save();
+            }
         }
     }
 
