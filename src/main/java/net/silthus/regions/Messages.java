@@ -8,18 +8,16 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import net.milkbowl.vault.economy.Economy;
-import net.silthus.regions.entities.OwnedRegion;
 import net.silthus.regions.entities.Region;
+import net.silthus.regions.entities.RegionGroup;
 import net.silthus.regions.entities.RegionPlayer;
 import net.silthus.regions.limits.PlayerLimit;
+import net.silthus.regions.util.TimeUtil;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.time.temporal.ChronoUnit;
-import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 
 public final class Messages {
@@ -38,10 +36,7 @@ public final class Messages {
             lines[1] = ChatColor.RED + "- Belegt durch -";
             lines[2] = ChatColor.GOLD + region.owner().map(RegionPlayer::name).orElse("Unbekannt");
             lines[3] = ChatColor.YELLOW + "seit " + ChatColor.AQUA
-                    + DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
-                    .withLocale(Locale.GERMAN)
-                    .withZone(ZoneId.systemDefault())
-                    .format(region.whenModified());
+                    + TimeUtil.formatDateTime(region.whenModified());
         }
 
         return lines;
@@ -186,11 +181,51 @@ public final class Messages {
         }
         PlayerLimit limit = optional.get();
         return new ComponentBuilder()
-                .append("Gesamt: ").color(ChatColor.YELLOW).append(player.regions().size() + "").color(ChatColor.AQUA)
-                .append("/").color(ChatColor.YELLOW).append(limit.total() + "").color(ChatColor.RED)
-                .append(" Grundstücke").color(ChatColor.YELLOW).append("\n")
+                .append(" <| Grundstück Limits |>").bold(true).color(ChatColor.GOLD)
+                .append(limit("Gesamt: ", player.regions().size(), limit.total())).append("\n")
+                .append(limit("Stadtteile: ", player.regionGroups().size(), limit.groups())).append("\n")
+                .append(groupLimits(limit)).append("\n")
                 .create();
-        // TODO: add rest of the limits to the display
+    }
+
+    private static BaseComponent[] groupLimits(PlayerLimit limit) {
+
+        RegionPlayer player = limit.player();
+
+        ComponentBuilder builder = new ComponentBuilder();
+        for (Map.Entry<String, Integer> entry : limit.groupRegions().entrySet()) {
+            Optional<RegionGroup> group = RegionGroup.of(entry.getKey());
+            group.ifPresent(regionGroup -> builder.append(" - ").color(ChatColor.GRAY)
+                    .append(limit(regionGroup.name(), player.regions(regionGroup).size(), entry.getValue()))
+            .append("\n"));
+        }
+        return builder.create();
+    }
+
+    private static BaseComponent[] limit(String text, int current, int max) {
+
+
+        if (max == -1) {
+            return new ComponentBuilder("unlimitiert").reset().color(ChatColor.AQUA).italic(true).create();
+        } else {
+            ChatColor color;
+            double percentageUsed = (max * 1.0) / (current * 1.0);
+            if (percentageUsed == 1.0) {
+                color = ChatColor.DARK_RED;
+            } else if (percentageUsed >= 0.95) {
+                color = ChatColor.RED;
+            } else if (percentageUsed >= 0.7) {
+                color = ChatColor.GOLD;
+            } else {
+                color = ChatColor.GREEN;
+            }
+
+            return new ComponentBuilder(text).reset().color(ChatColor.YELLOW)
+                    .append(current + "").color(color)
+                    .append("/").color(ChatColor.YELLOW)
+                    .append(max + "").color(ChatColor.DARK_RED)
+                    .create();
+        }
     }
 
     public static HoverEvent regionHover(@NonNull Region region, @Nullable RegionPlayer player) {
@@ -220,9 +255,14 @@ public final class Messages {
         }
         builder.append("--- ").color(ChatColor.GRAY)
                 .append(player.name()).color(onlineColor).bold(true)
-                .append(" ---").reset().color(ChatColor.GRAY).append("\n")
-                .append("Zuletzt online: ").color(onlineColor)
-                .append(limits(player));
+                .append(" ---").reset().color(ChatColor.GRAY).append("\n");
+
+        if (player.lastOnline() != null) {
+            builder.append("Zuletzt online: ").color(onlineColor)
+                    .append(TimeUtil.formatDateTime(player.lastOnline())).append("\n");
+        }
+
+        builder.append(limits(player));
 
         return new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(builder.create()));
     }
