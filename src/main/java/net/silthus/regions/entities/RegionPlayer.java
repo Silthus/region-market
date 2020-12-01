@@ -100,14 +100,6 @@ public class RegionPlayer extends BaseEntity implements ReplacementProvider {
                 .collect(Collectors.toUnmodifiableSet());
     }
 
-    public List<Region> regions() {
-
-        return ownedRegions().stream()
-                .filter(OwnedRegion::active)
-                .map(OwnedRegion::region)
-                .collect(Collectors.toList());
-    }
-
     public List<Region> regions(RegionGroup group) {
 
         if (group == null) return new ArrayList<>();
