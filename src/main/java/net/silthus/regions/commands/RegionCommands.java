@@ -124,8 +124,8 @@ public class RegionCommands extends BaseCommand {
 
         if (region != null) {
             bukkitPlayer.get().spigot().sendMessage(new ComponentBuilder().append("Der Grundstückskauf von ").color(ChatColor.RED)
-                    .append(Messages.region(region, player))
-                    .append(" wurde abgebrochen").reset().color(ChatColor.DARK_GRAY)
+                    .append(Messages.region(region, player)).color(ChatColor.GOLD)
+                    .append(" wurde abgebrochen.").reset().color(ChatColor.RED)
                     .create());
         } else if (getCurrentCommandIssuer() != null) {
             bukkitPlayer.get().sendMessage(ChatColor.RED + "Du hast aktuell keinen ausstehenden Grundstückskauf. Du musst erst auf ein Grundstücksschild klicken um es zu kaufen.");

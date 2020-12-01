@@ -17,6 +17,7 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.silthus.regions.Messages;
 import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.entities.Region;
+import net.silthus.regions.entities.RegionGroup;
 import net.silthus.regions.entities.RegionSign;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -184,6 +185,21 @@ public class AdminCommands extends BaseCommand implements Listener {
             if (region.isEmpty()) return;
             signLinkModes.get(event.getPlayer().getUniqueId()).region(region.get());
             event.getPlayer().sendMessage(ChatColor.GRAY + "Du hast die Region " + region.get().name() + " ausgewählt. Klicke jetzt auf ein Schild.");
+        }
+    }
+
+    @Subcommand("set")
+    @CommandPermission("rcregions.region.edit")
+    public class SetCommands {
+
+        @Subcommand("parent")
+        @CommandAlias("group|area|stadtteil")
+        @CommandCompletion("@regions @groups")
+        public void setParent(Region region, RegionGroup group) {
+
+            region.group(group).save();
+            getCurrentCommandIssuer().sendMessage(ChatColor.GREEN + "Die Gruppe des Grundstücks " + region.name()
+                    + " wurde erfolgreich zu " + group.name() + " (" + group.identifier() + ") geändert.");
         }
     }
 

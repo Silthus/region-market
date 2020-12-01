@@ -182,8 +182,11 @@ public class RegionsPlugin extends JavaPlugin {
 
         registerRegionPlayerContext(commandManager);
         registerRegionContext(commandManager);
+        registerGroupsContext(commandManager);
+
         registerRegionsCompletion(commandManager);
         registerWorldGuardRegionCompletion(commandManager);
+        registerGroupsCompletion(commandManager);
 
         commandManager.registerCommand(new AdminCommands(this));
         commandManager.registerCommand(new RegionCommands(this));
@@ -230,6 +233,19 @@ public class RegionsPlugin extends JavaPlugin {
         });
     }
 
+    private void registerGroupsContext(PaperCommandManager commandManager) {
+
+        commandManager.getCommandContexts().registerContext(RegionGroup.class, c -> {
+            String identifier = c.popFirstArg();
+
+            Optional<RegionGroup> group = RegionGroup.of(identifier);
+            if (group.isEmpty()) {
+                throw new InvalidCommandArgument("Es wurde keine Regions Gruppe mit der ID " + identifier + " gefunden.");
+            }
+            return group.get();
+        });
+    }
+
     private void registerRegionsCompletion(PaperCommandManager commandManager) {
 
         commandManager.getCommandCompletions().registerAsyncCompletion("regions", context ->
@@ -238,6 +254,12 @@ public class RegionsPlugin extends JavaPlugin {
                         || context.getPlayer().getWorld().getUID().equals(region.world()))
                 .map(Region::name)
                 .collect(Collectors.toSet()));
+    }
+
+    private void registerGroupsCompletion(PaperCommandManager commandManager) {
+
+        commandManager.getCommandCompletions().registerAsyncCompletion("groups", context ->
+                RegionGroup.find.all().stream().map(RegionGroup::identifier).collect(Collectors.toSet()));
     }
 
     private void registerWorldGuardRegionCompletion(PaperCommandManager commandManager) {
