@@ -183,10 +183,10 @@ public class Region extends BaseEntity implements ReplacementProvider {
         return Optional.ofNullable(regionManager.getRegion(name()));
     }
 
-    public Region group(@NonNull RegionGroup group) {
+    public Region group(RegionGroup group) {
 
         this.group = group;
-        if (group.priceType() != null) {
+        if (group != null && group.priceType() != null) {
             priceType(group.priceType());
         }
 
