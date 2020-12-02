@@ -9,7 +9,6 @@ import org.bukkit.event.HandlerList;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public abstract class RCRegionEvent extends Event {
-
     @Getter
     private static final HandlerList handlerList = new HandlerList();
 }

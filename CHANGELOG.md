@@ -1,3 +1,10 @@
+## [1.11.2](https://github.com/raidcraft/rcregions/compare/v1.11.1...v1.11.2) (2020-12-02)
+
+
+### Bug Fixes
+
+* **api:** add static handlerlist to base events ([4d8985d](https://github.com/raidcraft/rcregions/commit/4d8985d290e57128a95b4a7d1c57062f35774315))
+
 ## [1.11.1](https://github.com/raidcraft/rcregions/compare/v1.11.0...v1.11.1) (2020-12-02)
 
 
