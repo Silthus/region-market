@@ -3,6 +3,7 @@ package net.silthus.regions;
 import co.aikar.commands.InvalidCommandArgument;
 import co.aikar.commands.PaperCommandManager;
 import com.google.common.base.Strings;
+import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.bukkit.BukkitPlayer;
 import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldguard.WorldGuard;
@@ -59,6 +60,7 @@ public class RegionsPlugin extends JavaPlugin {
     private Permission permission;
     private Database database;
     private RegionManager regionManager;
+    private SchematicManager schematicManager;
     private PaperCommandManager commandManager;
     private LanguageManager languageManager;
 
@@ -97,6 +99,7 @@ public class RegionsPlugin extends JavaPlugin {
         setupLanguageManager();
         setupDatabase();
         setupRegionManager();
+        setupSchematicManager();
         if (!isTesting()) {
             setupListeners();
             setupCommands();
@@ -161,6 +164,12 @@ public class RegionsPlugin extends JavaPlugin {
         regionManager.registerDefaults();
 
         regionManager.load();
+    }
+
+    private void setupSchematicManager() {
+
+        this.schematicManager = new SchematicManager(this, WorldEdit.getInstance());
+        Bukkit.getPluginManager().registerEvents(schematicManager, this);
     }
 
     private void setupListeners() {

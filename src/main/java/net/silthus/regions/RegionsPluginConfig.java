@@ -18,6 +18,8 @@ public class RegionsPluginConfig extends BukkitYamlConfiguration {
     @Comment("The relative path or config file where your skill region groups are located.")
     private String regionGroupsConfig = "groups.yml";
     private String limitsConfig = "limits.yml";
+    @Comment("The location where schematics of regions should be stored.")
+    private String schematics = "schematics";
     @Comment("The time in ticks how long a player has to confirm the buying of a region.")
     private long buyTimeTicks = 600L;
     @Comment({

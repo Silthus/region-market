@@ -30,7 +30,9 @@ import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionGroup;
 import net.silthus.regions.entities.RegionSign;
 import net.silthus.regions.events.CreateRegionEvent;
+import net.silthus.regions.events.CreatedRegionEvent;
 import net.silthus.regions.events.DeleteRegionEvent;
+import net.silthus.regions.events.DeletedRegionEvent;
 import net.silthus.regions.util.Enums;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -162,6 +164,8 @@ public class AdminCommands extends BaseCommand implements Listener {
                     .create();
             player.spigot().sendMessage(msg);
         }
+
+        Bukkit.getPluginManager().callEvent(new CreatedRegionEvent(sellRegion, protectedRegion));
     }
 
     @Subcommand("delete|del|remove")
@@ -177,6 +181,7 @@ public class AdminCommands extends BaseCommand implements Listener {
 
         region.delete();
         getCurrentCommandIssuer().sendMessage(ChatColor.GREEN + "Das Grundstück " + region.name() + " wurde gelöscht.");
+        Bukkit.getPluginManager().callEvent(new DeletedRegionEvent(region));
     }
 
     @Getter
