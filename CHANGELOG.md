@@ -1,3 +1,17 @@
+# [1.12.0](https://github.com/raidcraft/rcregions/compare/v1.11.2...v1.12.0) (2020-12-02)
+
+
+### Bug Fixes
+
+* allow null groups ([69cf71f](https://github.com/raidcraft/rcregions/commit/69cf71fa6679d67a5db46ffa16d4f62390b5ca1f))
+* **api:** add static handlerlist to base events ([533324f](https://github.com/raidcraft/rcregions/commit/533324fa26d8de66bda22916417233ab852d3ed8))
+
+
+### Features
+
+* implement region groups price modifier and limits ([8997efa](https://github.com/raidcraft/rcregions/commit/8997efa6114e2538fc2f07234ab8c9a440ba523f))
+* **cmd:** add basic /rcr sell dialog ([acd9f8b](https://github.com/raidcraft/rcregions/commit/acd9f8b1481a67696296861bcdefb33356afcdb7))
+
 ## [1.11.2](https://github.com/raidcraft/rcregions/compare/v1.11.1...v1.11.2) (2020-12-02)
 
 
