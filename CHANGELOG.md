@@ -1,3 +1,10 @@
+## [1.10.1](https://github.com/raidcraft/rcregions/compare/v1.10.0...v1.10.1) (2020-12-02)
+
+
+### Bug Fixes
+
+* **db:** add missing group world and wg region migrations ([fc909f3](https://github.com/raidcraft/rcregions/commit/fc909f37f24b4417c5dc3f903b96bfd8d047e66b))
+
 # [1.10.0](https://github.com/raidcraft/rcregions/compare/v1.9.0...v1.10.0) (2020-12-02)
 
 
