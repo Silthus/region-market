@@ -15,7 +15,4 @@
             <column name="last_online" type="timestamp"/>
         </addColumn>
     </changeSet>
-    <changeSet type="pendingDrops">
-        <dropColumn columnName="owner_id" tableName="rcregions_regions"/>
-    </changeSet>
 </migration>
