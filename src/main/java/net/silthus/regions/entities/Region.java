@@ -209,8 +209,7 @@ public class Region extends BaseEntity implements ReplacementProvider {
 
         owner = player;
 
-        new RegionTransaction(this, player)
-                .action(RegionTransaction.Action.CHANGE_OWNER)
+        RegionTransaction.of(this, player, RegionTransaction.Action.CHANGE_OWNER)
                 .data("previous_owner.id", previousOwner.map(ownedRegion -> ownedRegion.player().id()).orElse(null))
                 .data("previous_owner.name", previousOwner.map(ownedRegion -> ownedRegion.player().name()).orElse(null))
                 .data("new_owner.id", player.id())
@@ -337,8 +336,7 @@ public class Region extends BaseEntity implements ReplacementProvider {
 
         owner(player);
         status(Status.OCCUPIED);
-        new RegionTransaction(this, player)
-                .action(RegionTransaction.Action.BUY)
+        RegionTransaction.of(this, player, RegionTransaction.Action.BUY)
                 .data("price", price)
                 .save();
         save();
@@ -455,6 +453,11 @@ public class Region extends BaseEntity implements ReplacementProvider {
         }
 
         return null;
+    }
+
+    public double basePrice() {
+
+
     }
 
     public enum RegionType {

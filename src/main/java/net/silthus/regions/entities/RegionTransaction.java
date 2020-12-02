@@ -30,6 +30,16 @@ public class RegionTransaction extends BaseEntity {
         }
     }
 
+    public static RegionTransaction of(Region region, RegionPlayer player, Action action) {
+
+        return new RegionTransaction(region, player).action(action);
+    }
+
+    public static RegionTransaction of(Region region, Action action) {
+
+        return new RegionTransaction(region).action(action);
+    }
+
     @ManyToOne
     private Region region;
     @ManyToOne
@@ -38,7 +48,12 @@ public class RegionTransaction extends BaseEntity {
     @DbJson
     private Map<String, Object> data = new HashMap<>();
 
-    public RegionTransaction(Region region, RegionPlayer player) {
+    RegionTransaction(Region region) {
+
+        this.region = region;
+    }
+
+    RegionTransaction(Region region, RegionPlayer player) {
         this.region = region;
         this.player = player;
     }
@@ -53,7 +68,8 @@ public class RegionTransaction extends BaseEntity {
 
         SELL,
         BUY,
-        CHANGE_OWNER;
+        CHANGE_OWNER,
+        SAVE_SCHEMATIC;
 
         @DbEnumValue
         public String getValue() {

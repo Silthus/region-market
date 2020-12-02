@@ -1,22 +1,20 @@
 package net.silthus.regions;
 
-import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.bukkit.BukkitWorld;
-import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.extent.clipboard.io.BuiltInClipboardFormat;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardWriter;
-import com.sk89q.worldedit.function.operation.ForwardExtentCopy;
 import com.sk89q.worldedit.regions.Polygonal2DRegion;
-import com.sk89q.worldguard.WorldGuard;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import lombok.Getter;
+import net.silthus.ebean.BaseEntity;
 import net.silthus.regions.entities.Region;
+import net.silthus.regions.entities.RegionTransaction;
 import net.silthus.regions.events.CreatedRegionEvent;
-import net.silthus.regions.events.DeleteRegionEvent;
 import net.silthus.regions.events.DeletedRegionEvent;
+import net.silthus.regions.events.SoldRegionEvent;
+import net.silthus.regions.util.TimeUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.event.EventHandler;
@@ -25,6 +23,7 @@ import org.bukkit.event.Listener;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Optional;
 
 @Getter
@@ -32,6 +31,7 @@ public class SchematicManager implements Listener {
 
     private static final String SCHEMATIC_NAME_ORIGINAL = "original";
     private static final String SCHEMATIC_NAME_DELETED = "deleted";
+    private static final String SCHEMATIC_NAME_SOLD = "sold";
 
     private final RegionsPlugin plugin;
     private final WorldEdit worldEdit;
@@ -56,11 +56,21 @@ public class SchematicManager implements Listener {
         saveSchematic(event.getRegion(), SCHEMATIC_NAME_DELETED);
     }
 
+    @EventHandler
+    public void onSellRegion(SoldRegionEvent event) {
+
+        String dateTime = TimeUtil.formatDateTime(Instant.now(), "dd-MM-yyyy_HH-mm-ss");
+        saveSchematic(event.getRegion(), SCHEMATIC_NAME_SOLD + "_" + event.getPlayer().name() + "_" + dateTime);
+    }
+
     private void saveSchematic(Region region, String name) {
 
         createClipboard(region).ifPresent(clipboard -> {
             File destination = new File(getSchematicLocation(region), name);
             saveSchematic(clipboard, destination);
+            RegionTransaction.of(region, RegionTransaction.Action.SAVE_SCHEMATIC)
+                    .data("current_owner", region.owner().map(BaseEntity::id).orElse(null))
+                    .data("path", destination.toString()).save();
             plugin.getLogger().info("saved " + name + " state of region " + region.name() + " as a schematic at: " + destination.getAbsolutePath());
         });
     }

@@ -164,8 +164,8 @@ public class MoneyCost implements Cost {
         }
         OfflinePlayer offlinePlayer = player.getOfflinePlayer();
 
-        double cost = calculate(region, player);
-        if (economy().has(offlinePlayer, cost)) {
+        Details cost = calculate(region, player);
+        if (economy().has(offlinePlayer, cost.)) {
             return new Result(true, null, cost);
         } else {
             return new Result(false, "Nicht genug Geld. Kosten: " + economy().format(cost));
@@ -176,26 +176,27 @@ public class MoneyCost implements Cost {
     public Result apply(Region region, RegionPlayer player) {
 
         EconomyResponse economyResponse = economy().withdrawPlayer(player.getOfflinePlayer(), calculate(region, player));
-        return new Result(economyResponse.transactionSuccess(), economyResponse.errorMessage);
+        return new Details(economyResponse.transactionSuccess(), economyResponse.errorMessage);
     }
 
-    public double calculate(Region region) {
+    public Details calculate(Region region) {
 
         return calculate(region, null);
     }
 
-    public double calculate(Region region, @Nullable RegionPlayer player) {
+    public Details calculate(Region region, @Nullable RegionPlayer player) {
 
-        double price = calculateBasePrice(region) * region.priceMultiplier();
+        Details price = new Details(calculateBasePrice(region) * region.priceMultiplier());
 
         if (player != null) {
-            double basePrice = price;
+            double basePrice = price.basePrice();
 
-            price += calculatePlayerRegionMultiplier(player, basePrice);
-            price += calculatePlayerRegionGroupMultiplier(player, basePrice);
-            price += calculatePlayerSameGroupMultiplier(region, player, basePrice);
+            price.regionModifier(calculatePlayerRegionMultiplier(player, basePrice));
+            price.groupModifier(calculatePlayerRegionGroupMultiplier(player, basePrice));
+            price.sameGroupModifier(calculatePlayerSameGroupMultiplier(region, player, basePrice));
 
-            price = price * player.priceMultiplier();
+            double playerCosts = price.additionalPlayerCosts();
+            price.playerMultiplier((playerCosts * player.priceMultiplier()) - playerCosts);
         }
 
         return price;
@@ -263,5 +264,44 @@ public class MoneyCost implements Cost {
         STATIC,
         PER2M,
         PER3M
+    }
+
+    @Data
+    @Accessors(fluent = true)
+    public static class Details {
+
+        private double basePrice;
+        private double regionModifier;
+        private double groupModifier;
+        private double sameGroupModifier;
+        private double playerMultiplier;
+
+        public Details(double basePrice) {
+
+            this.basePrice = basePrice;
+        }
+
+        public double total() {
+
+            return basePrice + additionalPlayerCosts();
+        }
+
+        public double additionalPlayerCosts() {
+
+            return regionModifier + groupModifier + sameGroupModifier + playerMultiplier;
+        }
+
+        public Details combine(@Nullable Details other) {
+
+            if (other == null) {
+                return this;
+            }
+
+            return new Details(basePrice() + other.basePrice())
+                    .regionModifier(regionModifier() + other.regionModifier())
+                    .groupModifier(groupModifier() + other.groupModifier())
+                    .sameGroupModifier(sameGroupModifier() + other.sameGroupModifier())
+                    .playerMultiplier(playerMultiplier() + other.playerMultiplier());
+        }
     }
 }

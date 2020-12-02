@@ -5,6 +5,7 @@ import co.aikar.commands.InvalidCommandArgument;
 import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.CommandCompletion;
 import co.aikar.commands.annotation.CommandPermission;
+import co.aikar.commands.annotation.Flags;
 import co.aikar.commands.annotation.Subcommand;
 import lombok.NonNull;
 import net.md_5.bungee.api.ChatColor;
@@ -78,6 +79,14 @@ public class RegionCommands extends BaseCommand {
             queuedRegionBuys.put(player.id(), region);
             Bukkit.getScheduler().runTaskLater(plugin, () -> buyAbort(player), plugin.getPluginConfig().getBuyTimeTicks());
         }
+    }
+
+    @Subcommand("sell")
+    @CommandPermission("rcregions.region.sell")
+    @CommandCompletion("@regions")
+    public void sell(RegionPlayer player, @Flags("owner") Region region) {
+
+        region.basePrice()
     }
 
     @Subcommand("buyconfirm|confirm")

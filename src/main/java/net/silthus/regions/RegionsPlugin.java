@@ -17,6 +17,7 @@ import me.wiefferink.interactivemessenger.processing.Message;
 import me.wiefferink.interactivemessenger.source.LanguageManager;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
+import net.silthus.ebean.BaseEntity;
 import net.silthus.ebean.Config;
 import net.silthus.ebean.EbeanWrapper;
 import net.silthus.regions.commands.AdminCommands;
@@ -236,6 +237,12 @@ public class RegionsPlugin extends JavaPlugin {
 
             if (region.isEmpty()) {
                 throw new InvalidCommandArgument("Unable to find a region with the name or id " + regionName);
+            }
+
+            if (c.hasFlag("owner") && c.getPlayer() != null) {
+                if (!c.getPlayer().getUniqueId().equals(region.get().owner().map(BaseEntity::id).orElse(null))) {
+                    throw new InvalidCommandArgument("Dir gehört diese Region nicht.");
+                }
             }
 
             return region.get();
