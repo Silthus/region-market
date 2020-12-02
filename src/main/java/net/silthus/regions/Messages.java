@@ -61,6 +61,8 @@ public final class Messages {
                     .append(" | ").color(ChatColor.YELLOW)
                     .append(region.volume() + "m³").color(ChatColor.AQUA)
                     .append("\n")
+                .append("Stadtteil: ").reset().color(ChatColor.YELLOW)
+                    .append(group(region)).append("\n")
                 .append("Besitzer: ").reset().color(ChatColor.YELLOW)
                     .append(owner(region)).append("\n")
                 .append("Kosten: ").reset().color(ChatColor.YELLOW).append("\n")
@@ -72,7 +74,7 @@ public final class Messages {
     public static BaseComponent[] region(@NonNull Region region, @Nullable RegionPlayer player) {
 
         return new ComponentBuilder().reset()
-                .append(region.name()).bold(true).color(ChatColor.GOLD).reset()
+                .append(region.name()).bold(true).color(ChatColor.GOLD)
                 .event(regionHover(region, player))
                 .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/region info " + region.name()))
                 .create();
@@ -94,6 +96,18 @@ public final class Messages {
         return builder.create();
     }
 
+    public static BaseComponent[] group(@NonNull Region region) {
+
+        ComponentBuilder builder = new ComponentBuilder();
+
+        if (region.group() == null) {
+            return builder.append("N/A").color(ChatColor.GRAY).italic(true).create();
+        }
+
+        return builder.append(region.group().name()).bold(true).color(ChatColor.DARK_AQUA)
+                .event(groupHover(region.group())).create();
+    }
+
     public static BaseComponent[] buy(@NonNull Region region, @NonNull RegionPlayer player) {
 
         ComponentBuilder builder = new ComponentBuilder();
@@ -107,13 +121,13 @@ public final class Messages {
                             .append(region.name()).color(ChatColor.GREEN).append("\n")
                             .append("Kosten: ").color(ChatColor.YELLOW).append("\n")
                             .append(costs(region, player)).append("\n")
-                            .append("Klicken um das Grundstück zu kaufen.").italic(true).color(ChatColor.GRAY)
+                            .append("Klicken um das Grundstück zu kaufen.").reset().italic(true).color(ChatColor.GRAY)
                             .create())))
                     .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format(Constants.BUY_REGION_COMMAND, region.id())))
                     .create();
         } else {
             if (canBuy.status().contains(Cost.ResultStatus.OWNED_BY_SELF)) {
-                return builder.append("[Verkaufen]").color(ChatColor.GRAY).strikethrough(true)
+                return builder.append("[Verkaufen]").color(ChatColor.RED)
                         .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Klicke um das Grundstück zu verkaufen. Es folgt ein Dialog mit mehr Details.")))
                         .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/rcr sell " + region.id()))
                         .create();
@@ -165,23 +179,26 @@ public final class Messages {
 
     public static BaseComponent[] sell(@NonNull Region region, @Nullable RegionPlayer player) {
 
-        return new ComponentBuilder("[").color(ChatColor.YELLOW).append("VERKAUF").color(ChatColor.RED).append("] ").color(ChatColor.YELLOW)
-                .append(region(region, player)).append("\n").reset()
+        return new ComponentBuilder().append("-->  ").color(ChatColor.DARK_AQUA).append("[").color(ChatColor.YELLOW).append("VERKAUF").color(ChatColor.RED)
+                .append("] ").color(ChatColor.YELLOW).append("--- ").color(ChatColor.DARK_AQUA)
+                .append(region(region, player)).append(" --- ").reset().color(ChatColor.DARK_AQUA)
+                .append("[").color(ChatColor.YELLOW).append("VERKAUF").color(ChatColor.RED).append("] ").color(ChatColor.YELLOW)
+                .append("<---").color(ChatColor.DARK_AQUA).append("\n").reset()
                 .append("--> ").color(ChatColor.DARK_AQUA)
                 .append(" [").color(ChatColor.YELLOW).append("SERVER").color(ChatColor.GREEN)
                 .event(sellServerHover(region))
                 .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/rcr sell server " + region.id()))
-                .append("] ").color(ChatColor.YELLOW)
+                .append("] ").reset().color(ChatColor.YELLOW)
                 .append("--- ").color(ChatColor.DARK_AQUA).append("[").color(ChatColor.YELLOW)
                 .append("DIREKT").color(ChatColor.GREEN)
                 .event(sellDirectHover(region))
                 .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/rcr sell direct " + region.id()))
-                .append("] ").color(ChatColor.YELLOW)
+                .append("] ").reset().color(ChatColor.YELLOW)
                 .append("--- ").color(ChatColor.DARK_AQUA).append("[").color(ChatColor.YELLOW)
-                .append("AUKTION").color(ChatColor.GREEN)
+                .append("AUKTION").color(ChatColor.GRAY).strikethrough(true)
                 .event(sellAuctionHover(region))
-                .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/rcr sell auction" + region.id()))
-                .append("] ").color(ChatColor.YELLOW)
+                .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/rcr sell auction " + region.id()))
+                .append("] ").reset().color(ChatColor.YELLOW)
                 .append("<---").color(ChatColor.DARK_AQUA)
                 .create();
     }
@@ -195,8 +212,8 @@ public final class Messages {
                 .append(" des Basispreises (").color(ChatColor.WHITE).append(economy.format(region.basePrice())).color(ChatColor.GRAY)
                 .append(") an den Server verkaufen: ").color(ChatColor.WHITE)
                 .append(economy.format(region.basePrice() * region.group().sellModifier())).color(ChatColor.GREEN)
-                .append("\n")
-                .append("Wenn du an den Server verkaufst erhältst du sofort das Geld und verlierst aber auch sofort alle Rechte auf dem Grundstück.").color(ChatColor.GRAY).append("\n")
+                .append("\n\n")
+                .append("Wenn du an den Server verkaufst erhältst du sofort das Geld und verlierst aber auch sofort alle Rechte auf dem Grundstück.").color(ChatColor.GRAY).append("\n\n")
                 .append("Stelle sicher dass du vorher alle deine Kisten geleert hast.").color(ChatColor.RED).append("\n\n")
                 .append("Klicke um dein Grundstück an den Server zu verkaufen.").color(ChatColor.GRAY).italic(true)
                 .create();
@@ -207,11 +224,11 @@ public final class Messages {
 
         Economy economy = RegionsPlugin.instance().getEconomy();
 
-        BaseComponent[] msg = new ComponentBuilder("Beim direkten Verkauf kannst du selbst einen Preis für dein Grundstück bestimmen.").append("\n")
+        BaseComponent[] msg = new ComponentBuilder("Beim direkten Verkauf kannst du selbst einen Preis für dein Grundstück bestimmen.").append("\n\n")
                 .append("Das Grundstück steht dann für andere Spieler frei zum Verkauf und sobald es gekauft wurde erhältst du dein Geld und verlierst die Rechte auf dem Grundstück.").append("\n")
                 .append("Der Mindestpreis für das Grundstück darf nicht unterhalb des Basispreises von ")
-                .append(economy.format(region.basePrice())).color(ChatColor.AQUA).append(" liegen.").append("\n")
-                .append("Der Käufter zahlt zusätzlich Steuern basierend auf der Menge seiner Grundstücke.").append("\n")
+                .append(economy.format(region.basePrice())).color(ChatColor.AQUA).append(" liegen.").reset().append("\n\n")
+                .append("Der Käufer zahlt zusätzlich Steuern basierend auf der Menge seiner Grundstücke.").color(ChatColor.GRAY).append("\n\n")
                 .append("Bedenke dass du zwar die Rechte behältst, dass Grundstück aber jederzeit gekauft werden kann und deine Rechte dann sofort weg sind.").color(ChatColor.RED).append("\n\n")
                 .append("Klicke um dein Grundstück direkt an Spieler zu verkaufen.").color(ChatColor.GRAY).italic(true)
                 .create();
@@ -224,14 +241,44 @@ public final class Messages {
         return new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder("Diese Funktion steht aktuell noch nicht zur Verfügung.").create()));
     }
 
-    public static BaseComponent[] costs(@NonNull Region region, @NonNull RegionPlayer player) {
+    private static HoverEvent groupHover(@Nullable RegionGroup group) {
 
-        List<Cost> costs = region.costs();
-        if (costs.isEmpty()) {
-            return new BaseComponent[0];
+        if (group == null) {
+            return new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Der Stadtteil existiert nicht."));
+        }
+        ComponentBuilder builder = new ComponentBuilder();
+
+        List<Region> regions = group.regions();
+        long occupiedRegions = regions.stream().filter(region -> region.status() == Region.Status.OCCUPIED).count();
+
+        double sellFactor = 1.0 - group.sellModifier();
+        ChatColor sellColor;
+        if (sellFactor <= 0.2) {
+            sellColor = ChatColor.GREEN;
+        } else if (sellFactor >= 0.8) {
+            sellColor = ChatColor.RED;
+        } else {
+            sellColor = ChatColor.GOLD;
         }
 
+        builder.append(group.name()).color(ChatColor.DARK_AQUA).append("\n")
+                .append(group.description()).color(ChatColor.GRAY).italic(true).append("\n\n")
+                .append("Regionen: ").reset().color(ChatColor.YELLOW)
+                .append(occupiedRegions + "").color(ChatColor.AQUA).append("/").color(ChatColor.YELLOW)
+                .append(regions.size() + "").color(ChatColor.RED).append(" (belegt/gesamt)").color(ChatColor.GRAY).italic(true).append("\n")
+                .append("Verkaufssteuern: ").reset().color(ChatColor.YELLOW).append(MathUtil.toPercent(sellFactor)).color(sellColor);
+
+        return new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(builder.create()));
+    }
+
+    public static BaseComponent[] costs(@NonNull Region region, @Nullable RegionPlayer player) {
+
         ComponentBuilder builder = new ComponentBuilder();
+        List<Cost> costs = region.costs();
+        if (costs.isEmpty()) {
+            return builder.append(" - Kostenlos").color(ChatColor.GREEN).create();
+        }
+
         for (Cost cost : costs) {
             Cost.Result check = cost.check(region, player);
             builder.append("  - ").reset().append(cost.display(region, player))
@@ -304,12 +351,12 @@ public final class Messages {
     public static HoverEvent regionHover(@NonNull Region region, @Nullable RegionPlayer player) {
 
         ComponentBuilder builder = new ComponentBuilder()
-                .append("Grundstück: ").reset().bold(true).color(ChatColor.YELLOW)
-                .append(region.name()).reset().color(ChatColor.GOLD).append("\n")
-                .append("Besitzer: ").reset().bold(true).color(ChatColor.YELLOW)
+                .append("Grundstück: ").color(ChatColor.YELLOW)
+                .append(region.name()).color(ChatColor.GOLD).append("\n")
+                .append("Besitzer: ").color(ChatColor.YELLOW)
                 .append(owner(region)).append("\n")
-                .append("Kosten: ").reset().bold(true).color(ChatColor.YELLOW).append("\n")
-                .append(region.displayCosts(player)).append("\n")
+                .append("Kosten: ").reset().color(ChatColor.YELLOW).append("\n")
+                .append(costs(region, player)).append("\n")
                 .append("\nKlicken um die WorldGuard Informationen zu dem Grundstück anzuzeigen.")
                 .reset().italic(true).color(ChatColor.GRAY);
 

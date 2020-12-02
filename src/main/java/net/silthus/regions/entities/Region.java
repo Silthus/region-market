@@ -138,7 +138,7 @@ public class Region extends BaseEntity implements ReplacementProvider {
     @ManyToOne
     private RegionPlayer owner;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     private RegionGroup group;
 
     @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
@@ -181,6 +181,16 @@ public class Region extends BaseEntity implements ReplacementProvider {
         }
 
         return Optional.ofNullable(regionManager.getRegion(name()));
+    }
+
+    public Region group(@NonNull RegionGroup group) {
+
+        this.group = group;
+        if (group.priceType() != null) {
+            priceType(group.priceType());
+        }
+
+        return this;
     }
 
     public Optional<RegionPlayer> owner() {
@@ -303,7 +313,6 @@ public class Region extends BaseEntity implements ReplacementProvider {
                     Cost.ResultStatus.NOT_ENOUGH_MONEY);
         } else {
             return group()
-                    .loadCosts(plugin.getRegionManager())
                     .costs().stream()
                     .map(cost -> cost.check(this, player))
                     .reduce(Cost.Result::combine)
@@ -372,7 +381,6 @@ public class Region extends BaseEntity implements ReplacementProvider {
             return new ComponentBuilder().append(economy.format(price)).color(ChatColor.AQUA).create();
         } else {
             return group()
-                    .loadCosts(plugin.getRegionManager())
                     .costs().stream()
                     .map(cost -> cost.display(this, player))
                     .reduce((baseComponents, baseComponents2) -> new ComponentBuilder()
@@ -461,7 +469,15 @@ public class Region extends BaseEntity implements ReplacementProvider {
 
     public double basePrice() {
 
-        return price() * priceMultiplier();
+        List<Cost> costs = costs();
+
+        return costs.stream()
+                .filter(cost -> cost instanceof MoneyCost)
+                .map(cost -> (MoneyCost) cost)
+                .map(moneyCost -> moneyCost.calculate(this))
+                .map(MoneyCost.Details::regionBasePrice)
+                .reduce(Double::sum)
+                .orElse(price() * priceMultiplier());
     }
 
     public enum RegionType {

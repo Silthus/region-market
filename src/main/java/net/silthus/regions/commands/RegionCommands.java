@@ -132,7 +132,7 @@ public class RegionCommands extends BaseCommand {
 
     @Subcommand("sell")
     @CommandPermission("rcregions.region.sell")
-    public class Sell {
+    public class Sell extends BaseCommand {
 
         @Default
         @CommandCompletion("@regions")
@@ -153,6 +153,30 @@ public class RegionCommands extends BaseCommand {
             if (!getCurrentCommandIssuer().isPlayer()) {
                 throw new InvalidCommandArgument("Nur Spieler können Grundstücke verkaufen.");
             }
+
+            getCurrentCommandIssuer().sendMessage(ChatColor.RED + "Grundstücke können aktuell noch nicht verkauft werden.");
+        }
+
+        @Subcommand("direct")
+        @CommandPermission("rcregions.region.sell.direct")
+        public void sellDirect(RegionPlayer player, Region region) {
+
+            if (!getCurrentCommandIssuer().isPlayer()) {
+                throw new InvalidCommandArgument("Nur Spieler können Grundstücke verkaufen.");
+            }
+
+            getCurrentCommandIssuer().sendMessage(ChatColor.RED + "Grundstücke können aktuell noch nicht verkauft werden.");
+        }
+
+        @Subcommand("auction")
+        @CommandPermission("rcregions.region.sell.auction")
+        public void sellAuction(RegionPlayer player, Region region) {
+
+            if (!getCurrentCommandIssuer().isPlayer()) {
+                throw new InvalidCommandArgument("Nur Spieler können Grundstücke verkaufen.");
+            }
+
+            getCurrentCommandIssuer().sendMessage(ChatColor.RED + "Grundstücke können aktuell noch nicht verkauft werden.");
         }
     }
 

@@ -60,7 +60,7 @@ public interface Cost {
      * @param player the player to check the cost requirement for
      * @return the test result
      */
-    Result check(Region region, RegionPlayer player);
+    Result check(@NonNull Region region, @Nullable RegionPlayer player);
 
     /**
      * Applies this cost to the given player removing all
@@ -70,7 +70,7 @@ public interface Cost {
      * @param player the player to apply this cost to
      * @return the apply result
      */
-    Result apply(Region region, RegionPlayer player);
+    Result apply(@NonNull Region region, @Nullable RegionPlayer player);
 
     @Value
     @Accessors(fluent = true)

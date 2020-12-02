@@ -12,6 +12,7 @@ import org.bukkit.event.HandlerList;
 @EqualsAndHashCode(callSuper = true)
 public class SoldRegionEvent extends RegionEvent {
 
+    @Getter
     private static final HandlerList handlerList = new HandlerList();
 
     private final RegionPlayer player;

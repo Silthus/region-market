@@ -110,7 +110,18 @@ public class AdminCommands extends BaseCommand implements Listener {
         }
 
         Region sellRegion = new Region(player.getWorld(), protectedRegion.getId());
-        if (Strings.isNullOrEmpty(price) || price.startsWith("dynamic") || price.startsWith("auto")) {
+        ProtectedRegion wgParent = protectedRegion.getParent();
+        if (plugin.getPluginConfig().isAutoMapParent()) {
+            RegionGroup.ofWorldGuardRegion(wgParent).ifPresent(sellRegion::group);
+        }
+
+        if (Strings.isNullOrEmpty(price)) {
+            if (sellRegion.group().priceType() != null) {
+                sellRegion.priceType(sellRegion.group().priceType());
+            } else {
+                sellRegion.priceType(Region.PriceType.DYNAMIC);
+            }
+        } else if (price.startsWith("dynamic") || price.startsWith("auto")) {
             sellRegion.priceType(Region.PriceType.DYNAMIC);
             if (!Strings.isNullOrEmpty(price)) {
                 String[] strings = price.split(":");
@@ -133,11 +144,6 @@ public class AdminCommands extends BaseCommand implements Listener {
             } catch (NumberFormatException e) {
                 throw new InvalidCommandArgument(price + " is not a valid price.");
             }
-        }
-
-        ProtectedRegion wgParent = protectedRegion.getParent();
-        if (plugin.getPluginConfig().isAutoMapParent()) {
-            RegionGroup.ofWorldGuardRegion(wgParent).ifPresent(sellRegion::group);
         }
 
         CreateRegionEvent event = new CreateRegionEvent(sellRegion, protectedRegion);
@@ -201,7 +207,7 @@ public class AdminCommands extends BaseCommand implements Listener {
     }
 
     @Subcommand("wgparents")
-    @CommandCompletion("override")
+    @CommandCompletion("@groups override")
     @CommandPermission("rcregions.region.worldguard.setparent")
     public void wgParents(RegionGroup group, @Optional String mode) {
 
@@ -272,10 +278,9 @@ public class AdminCommands extends BaseCommand implements Listener {
 
     @Subcommand("set")
     @CommandPermission("rcregions.region.edit")
-    public class SetCommands {
+    public class SetCommands extends BaseCommand {
 
         @Subcommand("parent")
-        @CommandAlias("group|area|stadtteil")
         @CommandCompletion("@regions @groups")
         public void setParent(Region region, RegionGroup group) {
 
@@ -300,7 +305,6 @@ public class AdminCommands extends BaseCommand implements Listener {
         }
 
         @Subcommand("price")
-        @CommandAlias("price")
         @CommandCompletion("@regions free|static|dynamic")
         public void setPriceType(Region region, String priceType, @Optional String price) {
 

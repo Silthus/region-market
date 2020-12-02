@@ -47,6 +47,7 @@ public class MoneyCost implements Cost {
     public void load(ConfigurationSection config) {
 
         this.type = Enums.searchEnum(Type.class, config.getString("type", type.name()));
+        if (type == null) type = Type.PER2M;
         this.basePrice = config.getDouble("base", basePrice);
 
         this.regionCountMultiplier = config.getDouble("region-count-multiplier", regionCountMultiplier);

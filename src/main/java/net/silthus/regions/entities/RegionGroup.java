@@ -1,5 +1,6 @@
 package net.silthus.regions.entities;
 
+import com.google.common.base.Strings;
 import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
@@ -16,6 +17,7 @@ import lombok.experimental.Accessors;
 import net.silthus.regions.Cost;
 import net.silthus.regions.RegionManager;
 import net.silthus.regions.RegionsPlugin;
+import net.silthus.regions.util.Enums;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
@@ -68,7 +70,7 @@ public class RegionGroup extends Model {
             regionGroup.save();
         }
 
-        return regionGroup.loadCosts(RegionsPlugin.instance().getRegionManager());
+        return regionGroup;
     }
 
     @Id
@@ -79,6 +81,7 @@ public class RegionGroup extends Model {
     private String worldGuardRegion;
     @DbDefault("1.0")
     private double sellModifier = 1.0;
+    private Region.PriceType priceType;
 
     RegionGroup(String identifier) {
 
@@ -113,6 +116,7 @@ public class RegionGroup extends Model {
         world(config.getString("world", "world"));
         worldGuardRegion(config.getString("worldguard-region"));
         sellModifier(config.getDouble("sell-modifier", 1.0));
+        priceType(Enums.searchEnum(Region.PriceType.class, config.getString("price-type")));
 
         ConfigurationSection costsSection = config.getConfigurationSection("costs");
         if (costsSection != null) {
@@ -130,6 +134,10 @@ public class RegionGroup extends Model {
 
         if (wgRegion != null && wgRegion.get() != null) {
             return Optional.ofNullable(wgRegion.get());
+        }
+
+        if (Strings.isNullOrEmpty(worldGuardRegion)) {
+            return Optional.empty();
         }
 
         World world = Bukkit.getWorld(this.world);
@@ -150,19 +158,30 @@ public class RegionGroup extends Model {
         return Optional.ofNullable(region);
     }
 
+    public List<Cost> costs() {
+
+        return loadCosts();
+    }
+
+    @PostLoad
+    public List<Cost> loadCosts() {
+
+        return loadCosts(RegionsPlugin.instance().getRegionManager());
+    }
+
     /**
      * Loads the costs objects based on the configuration data stored in the database.
      *
      * @param regionManager the regionmanager used to loaded the costs
      */
-    RegionGroup loadCosts(RegionManager regionManager) {
+    private List<Cost> loadCosts(RegionManager regionManager) {
 
         if (costsConfig == null || costsConfig.isEmpty()) {
-            return this;
+            return new ArrayList<>();
         }
 
-        if (!costs().isEmpty()) {
-            return this;
+        if (!costs.isEmpty()) {
+            return costs;
         }
 
         MemoryConfiguration costsSection = new MemoryConfiguration();
@@ -171,12 +190,12 @@ public class RegionGroup extends Model {
         }
         loadCosts(regionManager, costsSection);
 
-        return this;
+        return costs;
     }
 
-    RegionGroup loadCosts(RegionManager regionManager, ConfigurationSection costsSection) {
+    private void loadCosts(RegionManager regionManager, ConfigurationSection costsSection) {
 
-        if (costsSection == null) return this;
+        if (costsSection == null) return;
 
         costs.clear();
 
@@ -184,8 +203,6 @@ public class RegionGroup extends Model {
             regionManager.getCost(costsKey, costsSection.getConfigurationSection(costsKey))
                     .ifPresent(costs::add);
         }
-
-        return this;
     }
 
     public List<Region> playerRegions(RegionPlayer player) {

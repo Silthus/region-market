@@ -14,6 +14,7 @@ import org.bukkit.event.HandlerList;
 @EqualsAndHashCode(callSuper = true)
 public class BuyRegionEvent extends RegionEvent implements Cancellable {
 
+    @Getter
     private static final HandlerList handlerList = new HandlerList();
 
     private final RegionPlayer player;

@@ -68,9 +68,6 @@ public class SchematicManager implements Listener {
         createClipboard(region).ifPresent(clipboard -> {
             File destination = new File(getSchematicLocation(region), name);
             saveSchematic(clipboard, destination);
-            RegionTransaction.of(region, RegionTransaction.Action.SAVE_SCHEMATIC)
-                    .data("current_owner", region.owner().map(BaseEntity::id).orElse(null))
-                    .data("path", destination.toString()).save();
             plugin.getLogger().info("saved " + name + " state of region " + region.name() + " as a schematic at: " + destination.getAbsolutePath());
         });
     }

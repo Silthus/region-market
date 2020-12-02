@@ -12,6 +12,7 @@ import org.bukkit.event.HandlerList;
 @EqualsAndHashCode(callSuper = true)
 public class DeletedRegionEvent extends RegionEvent {
 
+    @Getter
     private static final HandlerList handlerList = new HandlerList();
 
     public DeletedRegionEvent(Region region) {
