@@ -139,7 +139,7 @@ public final class Messages {
                                     .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder()
                                             .append("Du hast nicht genügend Geld um das Grundstück zu kaufen.").color(ChatColor.DARK_RED).append("\n")
                                             .append("Du benötigst mindestens ").color(ChatColor.YELLOW).italic(true)
-                                            .append(economy.format(canBuy.price())).color(ChatColor.AQUA)
+                                            .append(economy.format(canBuy.price().total())).color(ChatColor.AQUA)
                                             .append(" hast aber nur ").color(ChatColor.YELLOW).italic(true)
                                             .append(economy.format(balance)).color(ChatColor.GREEN).append("\n")
                                             .append("Kosten: ").color(ChatColor.YELLOW).append("\n")

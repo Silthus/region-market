@@ -25,6 +25,7 @@ import net.silthus.regions.Cost;
 import net.silthus.regions.MessageTags;
 import net.silthus.regions.Messages;
 import net.silthus.regions.RegionsPlugin;
+import net.silthus.regions.costs.MoneyCost;
 import net.silthus.regions.events.BoughtRegionEvent;
 import net.silthus.regions.events.BuyRegionEvent;
 import net.silthus.regions.limits.Limit;
@@ -293,9 +294,11 @@ public class Region extends BaseEntity implements ReplacementProvider {
 
         if (group() == null) {
             Economy economy = plugin.getEconomy();
+            double totalCosts = price() * priceMultiplier();
             double balance = economy.getBalance(player.getOfflinePlayer());
-            return new Cost.Result(economy.has(player.getOfflinePlayer(), price),
-                    "Du hast nicht genügend Geld (" + economy.format(balance) + ")! Du benötigst mindestens: " + economy.format(price), price,
+            return new Cost.Result(economy.has(player.getOfflinePlayer(), totalCosts),
+                    "Du hast nicht genügend Geld (" + economy.format(balance) + ")! Du benötigst mindestens: " + economy.format(price),
+                    new MoneyCost.Details().basePrice(price).regionModifier(priceMultiplier()),
                     Cost.ResultStatus.NOT_ENOUGH_MONEY);
         } else {
             return group()
@@ -331,13 +334,13 @@ public class Region extends BaseEntity implements ReplacementProvider {
             return canBuy;
         }
 
-        double price = canBuy.price();
-        plugin.getEconomy().withdrawPlayer(player.getOfflinePlayer(), price);
+        MoneyCost.Details price = canBuy.price();
+        plugin.getEconomy().withdrawPlayer(player.getOfflinePlayer(), price.total());
 
         owner(player);
         status(Status.OCCUPIED);
         RegionTransaction.of(this, player, RegionTransaction.Action.BUY)
-                .data("price", price)
+                .data("price", this.price)
                 .save();
         save();
         updateSigns();
@@ -453,11 +456,6 @@ public class Region extends BaseEntity implements ReplacementProvider {
         }
 
         return null;
-    }
-
-    public double basePrice() {
-
-
     }
 
     public enum RegionType {

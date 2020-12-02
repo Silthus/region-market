@@ -64,7 +64,7 @@ public class RegionCommands extends BaseCommand {
                     .append("Grundstück ").color(ChatColor.YELLOW)
                     .append(Messages.region(region, player))
                     .append(" für ").reset().color(ChatColor.YELLOW)
-                    .append(plugin.getEconomy().format(result.price())).color(ChatColor.AQUA)
+                    .append(plugin.getEconomy().format(result.price().total())).color(ChatColor.AQUA)
                     .append(" kaufen?").reset().color(ChatColor.YELLOW)
                     .append(" [JA]").reset().color(ChatColor.GREEN).bold(true)
                         .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder()
@@ -86,7 +86,7 @@ public class RegionCommands extends BaseCommand {
     @CommandCompletion("@regions")
     public void sell(RegionPlayer player, @Flags("owner") Region region) {
 
-        region.basePrice()
+
     }
 
     @Subcommand("buyconfirm|confirm")
@@ -114,7 +114,7 @@ public class RegionCommands extends BaseCommand {
         region.buy(plugin, player);
         bukkitPlayer.get().spigot().sendMessage(new ComponentBuilder().append("Du hast das Grundstück ").color(ChatColor.GREEN)
                 .append(Messages.region(region, player)).append(" für ").reset().color(ChatColor.GREEN)
-                .append(plugin.getEconomy().format(result.price())).color(ChatColor.AQUA)
+                .append(plugin.getEconomy().format(result.price().total())).color(ChatColor.AQUA)
                 .append(" gekauft.").reset().color(ChatColor.GREEN)
         .create());
     }
