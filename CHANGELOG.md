@@ -1,3 +1,16 @@
+# [1.9.0](https://github.com/raidcraft/rcregions/compare/v1.8.1...v1.9.0) (2020-12-02)
+
+
+### Bug Fixes
+
+* rougly calculate polygon region ([20d16aa](https://github.com/raidcraft/rcregions/commit/20d16aa887f7715b271df5d975be9286257d2a42))
+* **info:** npe in player hover if player lastonline is null ([8f71b73](https://github.com/raidcraft/rcregions/commit/8f71b73aa5c782a61a2fc67d13f28ffc9ec5ca9f))
+
+
+### Features
+
+* **cmd:** add command to set price and size ([df1a1cc](https://github.com/raidcraft/rcregions/commit/df1a1cc6a660589f024a29e56f04fbb84124cff3))
+
 ## [1.8.1](https://github.com/raidcraft/rcregions/compare/v1.8.0...v1.8.1) (2020-12-01)
 
 
