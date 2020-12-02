@@ -25,6 +25,7 @@ import net.silthus.regions.Cost;
 import net.silthus.regions.MessageTags;
 import net.silthus.regions.Messages;
 import net.silthus.regions.RegionsPlugin;
+import net.silthus.regions.costs.MoneyCost;
 import net.silthus.regions.events.BoughtRegionEvent;
 import net.silthus.regions.events.BuyRegionEvent;
 import net.silthus.regions.limits.Limit;
@@ -137,7 +138,7 @@ public class Region extends BaseEntity implements ReplacementProvider {
     @ManyToOne
     private RegionPlayer owner;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     private RegionGroup group;
 
     @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
@@ -182,6 +183,16 @@ public class Region extends BaseEntity implements ReplacementProvider {
         return Optional.ofNullable(regionManager.getRegion(name()));
     }
 
+    public Region group(RegionGroup group) {
+
+        this.group = group;
+        if (group != null && group.priceType() != null) {
+            priceType(group.priceType());
+        }
+
+        return this;
+    }
+
     public Optional<RegionPlayer> owner() {
 
         return Optional.ofNullable(owner);
@@ -209,8 +220,7 @@ public class Region extends BaseEntity implements ReplacementProvider {
 
         owner = player;
 
-        new RegionTransaction(this, player)
-                .action(RegionTransaction.Action.CHANGE_OWNER)
+        RegionTransaction.of(this, player, RegionTransaction.Action.CHANGE_OWNER)
                 .data("previous_owner.id", previousOwner.map(ownedRegion -> ownedRegion.player().id()).orElse(null))
                 .data("previous_owner.name", previousOwner.map(ownedRegion -> ownedRegion.player().name()).orElse(null))
                 .data("new_owner.id", player.id())
@@ -222,6 +232,7 @@ public class Region extends BaseEntity implements ReplacementProvider {
             DefaultDomain defaultDomain = new DefaultDomain();
             defaultDomain.addPlayer(player.id());
             region.setOwners(defaultDomain);
+            region.setMembers(new DefaultDomain());
         });
 
         return this;
@@ -294,13 +305,14 @@ public class Region extends BaseEntity implements ReplacementProvider {
 
         if (group() == null) {
             Economy economy = plugin.getEconomy();
+            double totalCosts = price() * priceMultiplier();
             double balance = economy.getBalance(player.getOfflinePlayer());
-            return new Cost.Result(economy.has(player.getOfflinePlayer(), price),
-                    "Du hast nicht genügend Geld (" + economy.format(balance) + ")! Du benötigst mindestens: " + economy.format(price), price,
+            return new Cost.Result(economy.has(player.getOfflinePlayer(), totalCosts),
+                    "Du hast nicht genügend Geld (" + economy.format(balance) + ")! Du benötigst mindestens: " + economy.format(price),
+                    new MoneyCost.Details().basePrice(price).regionModifier(priceMultiplier()),
                     Cost.ResultStatus.NOT_ENOUGH_MONEY);
         } else {
             return group()
-                    .loadCosts(plugin.getRegionManager())
                     .costs().stream()
                     .map(cost -> cost.check(this, player))
                     .reduce(Cost.Result::combine)
@@ -332,14 +344,13 @@ public class Region extends BaseEntity implements ReplacementProvider {
             return canBuy;
         }
 
-        double price = canBuy.price();
-        plugin.getEconomy().withdrawPlayer(player.getOfflinePlayer(), price);
+        MoneyCost.Details price = canBuy.price();
+        plugin.getEconomy().withdrawPlayer(player.getOfflinePlayer(), price.total());
 
         owner(player);
         status(Status.OCCUPIED);
-        new RegionTransaction(this, player)
-                .action(RegionTransaction.Action.BUY)
-                .data("price", price)
+        RegionTransaction.of(this, player, RegionTransaction.Action.BUY)
+                .data("price", this.price)
                 .save();
         save();
         updateSigns();
@@ -370,7 +381,6 @@ public class Region extends BaseEntity implements ReplacementProvider {
             return new ComponentBuilder().append(economy.format(price)).color(ChatColor.AQUA).create();
         } else {
             return group()
-                    .loadCosts(plugin.getRegionManager())
                     .costs().stream()
                     .map(cost -> cost.display(this, player))
                     .reduce((baseComponents, baseComponents2) -> new ComponentBuilder()
@@ -455,6 +465,19 @@ public class Region extends BaseEntity implements ReplacementProvider {
         }
 
         return null;
+    }
+
+    public double basePrice() {
+
+        List<Cost> costs = costs();
+
+        return costs.stream()
+                .filter(cost -> cost instanceof MoneyCost)
+                .map(cost -> (MoneyCost) cost)
+                .map(moneyCost -> moneyCost.calculate(this))
+                .map(MoneyCost.Details::regionBasePrice)
+                .reduce(Double::sum)
+                .orElse(price() * priceMultiplier());
     }
 
     public enum RegionType {

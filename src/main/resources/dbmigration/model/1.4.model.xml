@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<migration xmlns="http://ebean-orm.github.io/xml/ns/dbmigration">
+    <changeSet type="apply">
+        <addColumn tableName="rcregions_region_groups">
+            <column name="sell_modifier" type="double" defaultValue="1.0" notnull="true"/>
+        </addColumn>
+        <alterColumn columnName="action" tableName="rcregions_transactions" type="varchar(14)" currentType="varchar(12)" currentNotnull="false" checkConstraint="check ( action in ('SELL','BUY','CHANGE_OWNER','SAVE_SCHEMATIC'))" checkConstraintName="ck_rcregions_transactions_action"/>
+    </changeSet>
+</migration>

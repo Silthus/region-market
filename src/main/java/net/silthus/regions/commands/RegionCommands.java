@@ -2,10 +2,7 @@ package net.silthus.regions.commands;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.InvalidCommandArgument;
-import co.aikar.commands.annotation.CommandAlias;
-import co.aikar.commands.annotation.CommandCompletion;
-import co.aikar.commands.annotation.CommandPermission;
-import co.aikar.commands.annotation.Subcommand;
+import co.aikar.commands.annotation.*;
 import lombok.NonNull;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -35,6 +32,7 @@ public class RegionCommands extends BaseCommand {
         this.plugin = plugin;
     }
 
+    @Default
     @Subcommand("info")
     @CommandPermission("rcregions.region.info")
     @CommandCompletion("@regions")
@@ -63,7 +61,7 @@ public class RegionCommands extends BaseCommand {
                     .append("Grundstück ").color(ChatColor.YELLOW)
                     .append(Messages.region(region, player))
                     .append(" für ").reset().color(ChatColor.YELLOW)
-                    .append(plugin.getEconomy().format(result.price())).color(ChatColor.AQUA)
+                    .append(plugin.getEconomy().format(result.price().total())).color(ChatColor.AQUA)
                     .append(" kaufen?").reset().color(ChatColor.YELLOW)
                     .append(" [JA]").reset().color(ChatColor.GREEN).bold(true)
                         .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder()
@@ -105,7 +103,7 @@ public class RegionCommands extends BaseCommand {
         region.buy(plugin, player);
         bukkitPlayer.get().spigot().sendMessage(new ComponentBuilder().append("Du hast das Grundstück ").color(ChatColor.GREEN)
                 .append(Messages.region(region, player)).append(" für ").reset().color(ChatColor.GREEN)
-                .append(plugin.getEconomy().format(result.price())).color(ChatColor.AQUA)
+                .append(plugin.getEconomy().format(result.price().total())).color(ChatColor.AQUA)
                 .append(" gekauft.").reset().color(ChatColor.GREEN)
         .create());
     }
@@ -129,6 +127,56 @@ public class RegionCommands extends BaseCommand {
                     .create());
         } else if (getCurrentCommandIssuer() != null) {
             bukkitPlayer.get().sendMessage(ChatColor.RED + "Du hast aktuell keinen ausstehenden Grundstückskauf. Du musst erst auf ein Grundstücksschild klicken um es zu kaufen.");
+        }
+    }
+
+    @Subcommand("sell")
+    @CommandPermission("rcregions.region.sell")
+    public class Sell extends BaseCommand {
+
+        @Default
+        @CommandCompletion("@regions")
+        public void sell(RegionPlayer player, @Flags("owner") Region region) {
+
+            if (!getCurrentCommandIssuer().isPlayer()) {
+                throw new InvalidCommandArgument("Nur Spieler können Grundstücke verkaufen.");
+            }
+
+            Player bukkitPlayer = getCurrentCommandIssuer().getIssuer();
+            bukkitPlayer.spigot().sendMessage(Messages.sell(region, player));
+        }
+
+        @Subcommand("server")
+        @CommandPermission("rcregions.region.sell.server")
+        public void sellServer(RegionPlayer player, Region region) {
+
+            if (!getCurrentCommandIssuer().isPlayer()) {
+                throw new InvalidCommandArgument("Nur Spieler können Grundstücke verkaufen.");
+            }
+
+            getCurrentCommandIssuer().sendMessage(ChatColor.RED + "Grundstücke können aktuell noch nicht verkauft werden.");
+        }
+
+        @Subcommand("direct")
+        @CommandPermission("rcregions.region.sell.direct")
+        public void sellDirect(RegionPlayer player, Region region) {
+
+            if (!getCurrentCommandIssuer().isPlayer()) {
+                throw new InvalidCommandArgument("Nur Spieler können Grundstücke verkaufen.");
+            }
+
+            getCurrentCommandIssuer().sendMessage(ChatColor.RED + "Grundstücke können aktuell noch nicht verkauft werden.");
+        }
+
+        @Subcommand("auction")
+        @CommandPermission("rcregions.region.sell.auction")
+        public void sellAuction(RegionPlayer player, Region region) {
+
+            if (!getCurrentCommandIssuer().isPlayer()) {
+                throw new InvalidCommandArgument("Nur Spieler können Grundstücke verkaufen.");
+            }
+
+            getCurrentCommandIssuer().sendMessage(ChatColor.RED + "Grundstücke können aktuell noch nicht verkauft werden.");
         }
     }
 

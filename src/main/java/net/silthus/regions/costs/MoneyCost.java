@@ -47,6 +47,7 @@ public class MoneyCost implements Cost {
     public void load(ConfigurationSection config) {
 
         this.type = Enums.searchEnum(Type.class, config.getString("type", type.name()));
+        if (type == null) type = Type.PER2M;
         this.basePrice = config.getDouble("base", basePrice);
 
         this.regionCountMultiplier = config.getDouble("region-count-multiplier", regionCountMultiplier);
@@ -70,16 +71,16 @@ public class MoneyCost implements Cost {
                     ))).create();
         }
 
-        double totalCosts = calculate(region, player);
+        Details cost = calculate(region, player);
 
-        return new ComponentBuilder().append(economy().format(totalCosts)).color(costColor(player, totalCosts))
-                .event(createCostHover(region, player, totalCosts)).create();
+        return new ComponentBuilder().append(economy().format(cost.total())).color(costColor(player, cost.total()))
+                .event(createCostHover(region, player, cost)).create();
     }
 
-    private HoverEvent createCostHover(@NonNull Region region, @Nullable RegionPlayer player, double totalCosts) {
+    private HoverEvent createCostHover(@NonNull Region region, @Nullable RegionPlayer player, Details cost) {
 
         ComponentBuilder builder = new ComponentBuilder();
-        double basePrice = calculateBasePrice(region);
+        double basePrice = cost.basePrice();
         builder.append("o ").append(economy.format(basePrice)).color(ChatColor.AQUA);
         switch (region.priceType()) {
             case STATIC:
@@ -100,48 +101,43 @@ public class MoneyCost implements Cost {
         }
         builder.reset().color(ChatColor.GRAY).italic(true).append("\n").reset();
 
-        double adjustedBasePrice = basePrice * region.priceMultiplier();
-        double basePriceDiff = adjustedBasePrice - basePrice;
-        if (basePriceDiff < 0.0) {
-            builder.append(" -").append(economy.format(Math.abs(basePriceDiff))).color(ChatColor.GREEN);
-        } else if (basePriceDiff > 0.0) {
-            builder.append(" +").append(economy.format(basePriceDiff)).color(ChatColor.RED);
+        if (cost.regionModifier() < 0.0) {
+            builder.append(" -").append(economy.format(Math.abs(cost.regionModifier()))).color(ChatColor.GREEN);
+        } else if (cost.regionModifier() > 0.0) {
+            builder.append(" +").append(economy.format(cost.regionModifier())).color(ChatColor.RED);
         }
-        if (basePriceDiff != 0.0) {
+        if (cost.regionModifier() != 0.0) {
             builder.append(" (x" + region.priceMultiplier()).append(" Grundstücksfaktor)")
                     .color(ChatColor.GRAY).italic(true).append("\n").reset();
         }
 
         if (player != null) {
-            double regionMultiplier = calculatePlayerRegionMultiplier(player, adjustedBasePrice);
-            if (regionMultiplier > 0) {
-                builder.append(" +").append(economy().format(regionMultiplier)).color(ChatColor.RED);
-            } else if (regionMultiplier < 0) {
-                builder.append(" -").append(economy().format(regionMultiplier)).color(ChatColor.GREEN);
+            if (cost.playerRegionsModifier() > 0) {
+                builder.append(" +").append(economy().format(cost.playerRegionsModifier())).color(ChatColor.RED);
+            } else if (cost.playerRegionsModifier() < 0) {
+                builder.append(" -").append(economy().format(cost.playerRegionsModifier())).color(ChatColor.GREEN);
             }
-            if (regionMultiplier != 0.0) {
+            if (cost.playerRegionsModifier() != 0.0) {
                 builder.append(" (x" + player.regions().size()).append(" Grundstücke)")
                         .color(ChatColor.GRAY).italic(true).append("\n").reset();
             }
 
-            double regionGroupMultiplier = calculatePlayerRegionGroupMultiplier(player, adjustedBasePrice);
-            if (regionGroupMultiplier > 0) {
-                builder.append(" +").append(economy().format(regionGroupMultiplier)).color(ChatColor.RED);
-            } else if (regionGroupMultiplier < 0) {
-                builder.append(" -").append(economy().format(regionGroupMultiplier)).color(ChatColor.GREEN);
+            if (cost.groupModifier() > 0) {
+                builder.append(" +").append(economy().format(cost.groupModifier())).color(ChatColor.RED);
+            } else if (cost.groupModifier() < 0) {
+                builder.append(" -").append(economy().format(cost.groupModifier())).color(ChatColor.GREEN);
             }
-            if (regionGroupMultiplier != 0.0) {
+            if (cost.groupModifier() != 0.0) {
                 builder.append(" (x" + player.regionGroups().size()).append(" Stadtteile)")
                         .color(ChatColor.GRAY).italic(true).append("\n").reset();
             }
 
-            double sameGroupMultiplier = calculatePlayerSameGroupMultiplier(region, player, adjustedBasePrice);
-            if (sameGroupMultiplier > 0) {
-                builder.append(" +").append(economy().format(sameGroupMultiplier)).color(ChatColor.RED);
-            } else if (sameGroupMultiplier < 0) {
-                builder.append(" -").append(economy().format(sameGroupMultiplier)).color(ChatColor.GREEN);
+            if (cost.sameGroupModifier() > 0) {
+                builder.append(" +").append(economy().format(cost.sameGroupModifier())).color(ChatColor.RED);
+            } else if (cost.sameGroupModifier() < 0) {
+                builder.append(" -").append(economy().format(cost.sameGroupModifier())).color(ChatColor.GREEN);
             }
-            if (sameGroupMultiplier != 0.0) {
+            if (cost.sameGroupModifier() != 0.0) {
                 builder.append(" (x" + player.regions(region.group()).size()).append(" ")
                         .append(region.group().name()).append(" Grundstücke)")
                         .color(ChatColor.GRAY).italic(true).append("\n").reset();
@@ -150,8 +146,7 @@ public class MoneyCost implements Cost {
 
         builder.append("--------------------").color(ChatColor.DARK_GRAY).append("\n")
                 .append("Summe: ").color(ChatColor.YELLOW)
-                .append(economy().format(totalCosts)).color(costColor(player, totalCosts)).append("\n");
-
+                .append(economy().format(cost.total())).color(costColor(player, cost.total())).append("\n");
 
         return new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(builder.create()));
     }
@@ -164,38 +159,42 @@ public class MoneyCost implements Cost {
         }
         OfflinePlayer offlinePlayer = player.getOfflinePlayer();
 
-        double cost = calculate(region, player);
-        if (economy().has(offlinePlayer, cost)) {
+        Details cost = calculate(region, player);
+        if (economy().has(offlinePlayer, cost.total())) {
             return new Result(true, null, cost);
         } else {
-            return new Result(false, "Nicht genug Geld. Kosten: " + economy().format(cost));
+            return new Result(false, "Nicht genug Geld. Kosten: " + economy().format(cost.total()));
         }
     }
 
     @Override
     public Result apply(Region region, RegionPlayer player) {
 
-        EconomyResponse economyResponse = economy().withdrawPlayer(player.getOfflinePlayer(), calculate(region, player));
-        return new Result(economyResponse.transactionSuccess(), economyResponse.errorMessage);
+        Details price = calculate(region, player);
+        EconomyResponse economyResponse = economy().withdrawPlayer(player.getOfflinePlayer(), price.total());
+        return new Result(economyResponse.transactionSuccess(), economyResponse.errorMessage, price, ResultStatus.SUCCESS);
     }
 
-    public double calculate(Region region) {
+    public Details calculate(Region region) {
 
         return calculate(region, null);
     }
 
-    public double calculate(Region region, @Nullable RegionPlayer player) {
+    public Details calculate(Region region, @Nullable RegionPlayer player) {
 
-        double price = calculateBasePrice(region) * region.priceMultiplier();
+        Details price = new Details()
+                .basePrice(calculateBasePrice(region));
+        price.regionModifier((price.basePrice() * region.priceMultiplier()) - price.basePrice());
 
         if (player != null) {
-            double basePrice = price;
+            double basePrice = price.regionBasePrice();
 
-            price += calculatePlayerRegionMultiplier(player, basePrice);
-            price += calculatePlayerRegionGroupMultiplier(player, basePrice);
-            price += calculatePlayerSameGroupMultiplier(region, player, basePrice);
+            price.playerRegionsModifier(calculatePlayerRegionMultiplier(player, basePrice));
+            price.groupModifier(calculatePlayerRegionGroupMultiplier(player, basePrice));
+            price.sameGroupModifier(calculatePlayerSameGroupMultiplier(region, player, basePrice));
 
-            price = price * player.priceMultiplier();
+            double playerCosts = price.additionalPlayerCosts();
+            price.playerMultiplier((playerCosts * player.priceMultiplier()) - playerCosts);
         }
 
         return price;
@@ -263,5 +262,47 @@ public class MoneyCost implements Cost {
         STATIC,
         PER2M,
         PER3M
+    }
+
+    @Data
+    @Accessors(fluent = true)
+    public static class Details {
+
+        private double basePrice;
+        private double regionModifier;
+        private double playerRegionsModifier;
+        private double groupModifier;
+        private double sameGroupModifier;
+        private double playerMultiplier;
+
+        public double total() {
+
+            return basePrice + regionModifier() + additionalPlayerCosts();
+        }
+
+        public double regionBasePrice() {
+
+            return basePrice() + regionModifier();
+        }
+
+        public double additionalPlayerCosts() {
+
+            return playerRegionsModifier + groupModifier + sameGroupModifier + playerMultiplier;
+        }
+
+        public Details combine(@Nullable Details other) {
+
+            if (other == null) {
+                return this;
+            }
+
+            return new Details()
+                    .basePrice(basePrice() + other.basePrice())
+                    .regionModifier(regionModifier() + other.regionModifier())
+                    .playerRegionsModifier(playerRegionsModifier() + other.playerRegionsModifier())
+                    .groupModifier(groupModifier() + other.groupModifier())
+                    .sameGroupModifier(sameGroupModifier() + other.sameGroupModifier())
+                    .playerMultiplier(playerMultiplier() + other.playerMultiplier());
+        }
     }
 }

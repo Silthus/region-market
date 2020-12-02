@@ -94,7 +94,7 @@ class MoneyCostTest {
             void shouldUseStaticPriceByDefault() {
 
                 region.price(100.0);
-                assertThat(cost.calculate(region, player)).isEqualTo(100.0);
+                assertThat(cost.calculate(region, player).total()).isEqualTo(100.0);
             }
 
             @SneakyThrows
@@ -105,7 +105,7 @@ class MoneyCostTest {
                 region.price(100.0);
                 region.priceMultiplier(2.0);
 
-                assertThat(cost.calculate(region, player)).isEqualTo(200.0);
+                assertThat(cost.calculate(region, player).total()).isEqualTo(200.0);
             }
 
             @SneakyThrows
@@ -119,7 +119,7 @@ class MoneyCostTest {
                 player.regions().add(new Region("bar"));
                 player.regions().add(new Region("foo"));
 
-                assertThat(cost.calculate(region, player)).isEqualTo(500.0);
+                assertThat(cost.calculate(region, player).total()).isEqualTo(500.0);
             }
 
             @SneakyThrows
@@ -131,7 +131,7 @@ class MoneyCostTest {
                 cost.basePrice(100.0);
                 cost.regionCountMultiplier(2.0);
 
-                assertThat(cost.calculate(region, player)).isEqualTo(100.0);
+                assertThat(cost.calculate(region, player).total()).isEqualTo(100.0);
             }
 
             @SneakyThrows
@@ -147,7 +147,7 @@ class MoneyCostTest {
                 cost.basePrice(100.0);
                 cost.regionGroupCountMultiplier(2.0);
 
-                assertThat(cost.calculate(region, player)).isEqualTo(300.0);
+                assertThat(cost.calculate(region, player).total()).isEqualTo(300.0);
             }
 
             @SneakyThrows
@@ -162,7 +162,7 @@ class MoneyCostTest {
                 cost.basePrice(100.0);
                 cost.sameGroupCountMultiplier(2.0);
 
-                assertThat(cost.calculate(region, player)).isEqualTo(500.0);
+                assertThat(cost.calculate(region, player).total()).isEqualTo(500.0);
             }
 
             @SneakyThrows
@@ -172,7 +172,7 @@ class MoneyCostTest {
 
                 region.priceType(Region.PriceType.FREE);
 
-                assertThat(cost.calculate(region, player)).isEqualTo(0);
+                assertThat(cost.calculate(region, player).total()).isEqualTo(0);
             }
         }
 
@@ -192,7 +192,7 @@ class MoneyCostTest {
             void shouldUseStaticPriceByDefault() {
 
                 region.price(100.0);
-                assertThat(cost.calculate(region, player)).isEqualTo(100.0);
+                assertThat(cost.calculate(region, player).total()).isEqualTo(100.0);
             }
 
             @SneakyThrows
@@ -207,7 +207,7 @@ class MoneyCostTest {
                 player.regions().add(new Region("bar"));
                 player.regions().add(new Region("foo"));
 
-                assertThat(cost.calculate(region, player)).isEqualTo(100000.0);
+                assertThat(cost.calculate(region, player).total()).isEqualTo(100000.0);
             }
 
             @SneakyThrows
@@ -222,7 +222,7 @@ class MoneyCostTest {
                 player.regions().add(new Region("foo"));
 
                 // basePrice + (regionCount * multiplier * basePrice)
-                assertThat(cost.calculate(region, player)).isEqualTo(50000.0);
+                assertThat(cost.calculate(region, player).total()).isEqualTo(50000.0);
             }
 
             @SneakyThrows
@@ -234,7 +234,7 @@ class MoneyCostTest {
                 cost.basePrice(100.0);
                 cost.regionCountMultiplier(2.0);
 
-                assertThat(cost.calculate(region, player)).isEqualTo(10000.0);
+                assertThat(cost.calculate(region, player).total()).isEqualTo(10000.0);
             }
 
             @SneakyThrows
@@ -250,7 +250,7 @@ class MoneyCostTest {
                 cost.basePrice(100.0);
                 cost.regionGroupCountMultiplier(2.0);
 
-                assertThat(cost.calculate(region, player)).isEqualTo(30000.0);
+                assertThat(cost.calculate(region, player).total()).isEqualTo(30000.0);
             }
 
             @SneakyThrows
@@ -265,7 +265,7 @@ class MoneyCostTest {
                 cost.basePrice(100.0);
                 cost.sameGroupCountMultiplier(2.0);
 
-                assertThat(cost.calculate(region, player)).isEqualTo(50000.0);
+                assertThat(cost.calculate(region, player).total()).isEqualTo(50000.0);
             }
 
             @SneakyThrows
@@ -275,7 +275,7 @@ class MoneyCostTest {
 
                 region.priceType(Region.PriceType.FREE);
 
-                assertThat(cost.calculate(region, player)).isEqualTo(0);
+                assertThat(cost.calculate(region, player).total()).isEqualTo(0);
             }
         }
 
@@ -295,7 +295,7 @@ class MoneyCostTest {
             void shouldUseStaticPriceByDefault() {
 
                 region.price(100.0);
-                assertThat(cost.calculate(region, player)).isEqualTo(100.0);
+                assertThat(cost.calculate(region, player).total()).isEqualTo(100.0);
             }
 
             @SneakyThrows
@@ -310,7 +310,7 @@ class MoneyCostTest {
                 player.regions().add(new Region("foo"));
 
                 // basePrice + (regionCount * multiplier * basePrice)
-                assertThat(cost.calculate(region, player)).isEqualTo(5000.0);
+                assertThat(cost.calculate(region, player).total()).isEqualTo(5000.0);
             }
 
             @SneakyThrows
@@ -325,7 +325,7 @@ class MoneyCostTest {
                 player.regions().add(new Region("bar"));
                 player.regions().add(new Region("foo"));
 
-                assertThat(cost.calculate(region, player)).isEqualTo(10000.0);
+                assertThat(cost.calculate(region, player).total()).isEqualTo(10000.0);
             }
 
             @SneakyThrows
@@ -337,7 +337,7 @@ class MoneyCostTest {
                 cost.basePrice(100.0);
                 cost.regionCountMultiplier(2.0);
 
-                assertThat(cost.calculate(region, player)).isEqualTo(1000.0);
+                assertThat(cost.calculate(region, player).total()).isEqualTo(1000.0);
             }
 
             @SneakyThrows
@@ -353,7 +353,7 @@ class MoneyCostTest {
                 cost.basePrice(100.0);
                 cost.regionGroupCountMultiplier(2.0);
 
-                assertThat(cost.calculate(region, player)).isEqualTo(3000.0);
+                assertThat(cost.calculate(region, player).total()).isEqualTo(3000.0);
             }
 
             @SneakyThrows
@@ -368,7 +368,7 @@ class MoneyCostTest {
                 cost.basePrice(100.0);
                 cost.sameGroupCountMultiplier(2.0);
 
-                assertThat(cost.calculate(region, player)).isEqualTo(5000.0);
+                assertThat(cost.calculate(region, player).total()).isEqualTo(5000.0);
             }
 
             @SneakyThrows
@@ -378,7 +378,7 @@ class MoneyCostTest {
 
                 region.priceType(Region.PriceType.FREE);
 
-                assertThat(cost.calculate(region, player)).isEqualTo(0);
+                assertThat(cost.calculate(region, player).total()).isEqualTo(0);
             }
         }
     }

@@ -4,6 +4,7 @@ import lombok.NonNull;
 import lombok.Value;
 import lombok.experimental.Accessors;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.silthus.regions.costs.MoneyCost;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionPlayer;
 import org.bukkit.configuration.ConfigurationSection;
@@ -59,7 +60,7 @@ public interface Cost {
      * @param player the player to check the cost requirement for
      * @return the test result
      */
-    Result check(Region region, RegionPlayer player);
+    Result check(@NonNull Region region, @Nullable RegionPlayer player);
 
     /**
      * Applies this cost to the given player removing all
@@ -69,20 +70,20 @@ public interface Cost {
      * @param player the player to apply this cost to
      * @return the apply result
      */
-    Result apply(Region region, RegionPlayer player);
+    Result apply(@NonNull Region region, @Nullable RegionPlayer player);
 
     @Value
     @Accessors(fluent = true)
     class Result {
         boolean success;
         String error;
-        double price;
+        MoneyCost.Details price;
         EnumSet<ResultStatus> status;
 
         public Result(boolean success, String error) {
             this.success = success;
             this.error = error;
-            this.price = 0;
+            this.price = new MoneyCost.Details();
             status = EnumSet.of(ResultStatus.UNKNOWN);
         }
 
@@ -90,18 +91,18 @@ public interface Cost {
 
             this.success = success;
             this.error = error;
-            this.price = 0;
+            this.price = new MoneyCost.Details();
             this.status = EnumSet.of(status);
         }
 
-        public Result(boolean success, String error, double price) {
+        public Result(boolean success, String error, MoneyCost.Details price) {
             this.success = success;
             this.error = error;
             this.price = price;
             status = EnumSet.of(ResultStatus.UNKNOWN);
         }
 
-        public Result(boolean success, String error, double price, ResultStatus status) {
+        public Result(boolean success, String error, MoneyCost.Details price, ResultStatus status) {
 
             this.success = success;
             this.error = error;
@@ -109,7 +110,7 @@ public interface Cost {
             this.status = EnumSet.of(status);
         }
 
-        public Result(boolean success, String error, double price, EnumSet<ResultStatus> status) {
+        public Result(boolean success, String error, MoneyCost.Details price, EnumSet<ResultStatus> status) {
 
             this.success = success;
             this.error = error;
@@ -133,7 +134,7 @@ public interface Cost {
             return new Result(
                     success() && other.success(),
                     error() + "\n" + other.error(),
-                    price() + other.price(),
+                    price().combine(other.price()),
                     statuses);
         }
     }

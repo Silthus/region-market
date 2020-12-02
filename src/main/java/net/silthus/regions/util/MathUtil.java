@@ -29,4 +29,10 @@ public final class MathUtil {
 
         return Math.abs(sum) / 2.0;
     }
+
+    public static String toPercent(double factor) {
+
+        return ((int) (factor * 100)) + "%";
+    }
+
 }
