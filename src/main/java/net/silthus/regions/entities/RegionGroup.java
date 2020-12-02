@@ -6,6 +6,7 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import de.exlll.configlib.annotation.ConfigurationElement;
 import io.ebean.Finder;
 import io.ebean.Model;
+import io.ebean.annotation.DbDefault;
 import io.ebean.annotation.DbJson;
 import io.ebean.annotation.WhenCreated;
 import io.ebean.annotation.WhenModified;
@@ -76,6 +77,8 @@ public class RegionGroup extends Model {
     private String description;
     private String world;
     private String worldGuardRegion;
+    @DbDefault("1.0")
+    private double sellModifier = 1.0;
 
     RegionGroup(String identifier) {
 
@@ -109,6 +112,7 @@ public class RegionGroup extends Model {
         description(config.getString("description", ""));
         world(config.getString("world", "world"));
         worldGuardRegion(config.getString("worldguard-region"));
+        sellModifier(config.getDouble("sell-modifier", 1.0));
 
         ConfigurationSection costsSection = config.getConfigurationSection("costs");
         if (costsSection != null) {

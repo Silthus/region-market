@@ -12,6 +12,7 @@ import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionGroup;
 import net.silthus.regions.entities.RegionPlayer;
 import net.silthus.regions.limits.PlayerLimit;
+import net.silthus.regions.util.MathUtil;
 import net.silthus.regions.util.TimeUtil;
 
 import javax.annotation.Nullable;
@@ -113,7 +114,8 @@ public final class Messages {
         } else {
             if (canBuy.status().contains(Cost.ResultStatus.OWNED_BY_SELF)) {
                 return builder.append("[Verkaufen]").color(ChatColor.GRAY).strikethrough(true)
-                        .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Diese Option steht aktuell noch nicht zur Verfügung.")))
+                        .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Klicke um das Grundstück zu verkaufen. Es folgt ein Dialog mit mehr Details.")))
+                        .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/rcr sell " + region.id()))
                         .create();
             } else {
                 for (Cost.ResultStatus status : canBuy.status()) {
@@ -159,6 +161,67 @@ public final class Messages {
         }
 
         return new BaseComponent[0];
+    }
+
+    public static BaseComponent[] sell(@NonNull Region region, @Nullable RegionPlayer player) {
+
+        return new ComponentBuilder("[").color(ChatColor.YELLOW).append("VERKAUF").color(ChatColor.RED).append("] ").color(ChatColor.YELLOW)
+                .append(region(region, player)).append("\n").reset()
+                .append("--> ").color(ChatColor.DARK_AQUA)
+                .append(" [").color(ChatColor.YELLOW).append("SERVER").color(ChatColor.GREEN)
+                .event(sellServerHover(region))
+                .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/rcr sell server " + region.id()))
+                .append("] ").color(ChatColor.YELLOW)
+                .append("--- ").color(ChatColor.DARK_AQUA).append("[").color(ChatColor.YELLOW)
+                .append("DIREKT").color(ChatColor.GREEN)
+                .event(sellDirectHover(region))
+                .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/rcr sell direct " + region.id()))
+                .append("] ").color(ChatColor.YELLOW)
+                .append("--- ").color(ChatColor.DARK_AQUA).append("[").color(ChatColor.YELLOW)
+                .append("AUKTION").color(ChatColor.GREEN)
+                .event(sellAuctionHover(region))
+                .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/rcr sell auction" + region.id()))
+                .append("] ").color(ChatColor.YELLOW)
+                .append("<---").color(ChatColor.DARK_AQUA)
+                .create();
+    }
+
+    public static HoverEvent sellServerHover(@NonNull Region region) {
+
+        Economy economy = RegionsPlugin.instance().getEconomy();
+
+        BaseComponent[] msg = new ComponentBuilder("Du kannst dein Grundstück für ").color(ChatColor.WHITE)
+                .append(MathUtil.toPercent(region.group().sellModifier())).color(ChatColor.GREEN)
+                .append(" des Basispreises (").color(ChatColor.WHITE).append(economy.format(region.basePrice())).color(ChatColor.GRAY)
+                .append(") an den Server verkaufen: ").color(ChatColor.WHITE)
+                .append(economy.format(region.basePrice() * region.group().sellModifier())).color(ChatColor.GREEN)
+                .append("\n")
+                .append("Wenn du an den Server verkaufst erhältst du sofort das Geld und verlierst aber auch sofort alle Rechte auf dem Grundstück.").color(ChatColor.GRAY).append("\n")
+                .append("Stelle sicher dass du vorher alle deine Kisten geleert hast.").color(ChatColor.RED).append("\n\n")
+                .append("Klicke um dein Grundstück an den Server zu verkaufen.").color(ChatColor.GRAY).italic(true)
+                .create();
+        return new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(msg));
+    }
+
+    private static HoverEvent sellDirectHover(@NonNull Region region) {
+
+        Economy economy = RegionsPlugin.instance().getEconomy();
+
+        BaseComponent[] msg = new ComponentBuilder("Beim direkten Verkauf kannst du selbst einen Preis für dein Grundstück bestimmen.").append("\n")
+                .append("Das Grundstück steht dann für andere Spieler frei zum Verkauf und sobald es gekauft wurde erhältst du dein Geld und verlierst die Rechte auf dem Grundstück.").append("\n")
+                .append("Der Mindestpreis für das Grundstück darf nicht unterhalb des Basispreises von ")
+                .append(economy.format(region.basePrice())).color(ChatColor.AQUA).append(" liegen.").append("\n")
+                .append("Der Käufter zahlt zusätzlich Steuern basierend auf der Menge seiner Grundstücke.").append("\n")
+                .append("Bedenke dass du zwar die Rechte behältst, dass Grundstück aber jederzeit gekauft werden kann und deine Rechte dann sofort weg sind.").color(ChatColor.RED).append("\n\n")
+                .append("Klicke um dein Grundstück direkt an Spieler zu verkaufen.").color(ChatColor.GRAY).italic(true)
+                .create();
+
+        return new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(msg));
+    }
+
+    private static HoverEvent sellAuctionHover(@NonNull Region region) {
+
+        return new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder("Diese Funktion steht aktuell noch nicht zur Verfügung.").create()));
     }
 
     public static BaseComponent[] costs(@NonNull Region region, @NonNull RegionPlayer player) {

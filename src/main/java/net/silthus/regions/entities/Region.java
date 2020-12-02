@@ -222,6 +222,7 @@ public class Region extends BaseEntity implements ReplacementProvider {
             DefaultDomain defaultDomain = new DefaultDomain();
             defaultDomain.addPlayer(player.id());
             region.setOwners(defaultDomain);
+            region.setMembers(new DefaultDomain());
         });
 
         return this;
@@ -456,6 +457,11 @@ public class Region extends BaseEntity implements ReplacementProvider {
         }
 
         return null;
+    }
+
+    public double basePrice() {
+
+        return price() * priceMultiplier();
     }
 
     public enum RegionType {
