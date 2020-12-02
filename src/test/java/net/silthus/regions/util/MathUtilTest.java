@@ -1,6 +1,7 @@
 package net.silthus.regions.util;
 
 import com.sk89q.worldedit.math.BlockVector2;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,7 @@ import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Disabled
 class MathUtilTest {
 
     @Nested

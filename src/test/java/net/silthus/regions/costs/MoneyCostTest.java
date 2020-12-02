@@ -57,16 +57,18 @@ class MoneyCostTest {
         @BeforeEach
         void setUp() {
 
+            regionMock = mock(ProtectedRegion.class);
             player = RegionPlayer.getOrCreate(server.addPlayer());
             region = spy(new Region("test"));
+
+            when(region.protectedRegion()).thenReturn(Optional.of(regionMock));
+            when(regionMock.getMinimumPoint()).thenReturn(BlockVector3.at(-10, 10, 10));
+            when(regionMock.getMaximumPoint()).thenReturn(BlockVector3.at(-10, 20, 10));
+
+            region.volume(100);
             region.price(0.0);
             group = RegionGroup.getOrCreate("test");
             region.group(group);
-            regionMock = mock(ProtectedRegion.class);
-            when(region.protectedRegion()).thenReturn(Optional.of(regionMock));
-            when(regionMock.volume()).thenReturn(100);
-            when(regionMock.getMinimumPoint()).thenReturn(BlockVector3.at(-10, 10, 10));
-            when(regionMock.getMaximumPoint()).thenReturn(BlockVector3.at(-10, 20, 10));
         }
 
         @Test
