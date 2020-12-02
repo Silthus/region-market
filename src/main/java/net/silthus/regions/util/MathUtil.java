@@ -8,24 +8,25 @@ public final class MathUtil {
 
     public static double calculatePolygonalArea(List<BlockVector2> points) {
 
-        double sum = 0;
-        for (int i = 0; i < points.size() ; i++)
+        // https://www.wikihow.com/Calculate-the-Area-of-a-Polygon#Finding-the-Area-of-Irregular-Polygons
+
+        BlockVector2[] vectors = points.toArray(new BlockVector2[0]);
+
+        int sum = 0;
+        for (int i = 0; i < vectors.length ; i++)
         {
-            BlockVector2 point = points.get(i);
-            if (i == 0)
-            {
-                sum += point.getBlockX() * (points.get(i + 1).getBlockZ() - points.get(points.size() - 1).getBlockZ());
+            int xSum = 0;
+            int zSum = 0;
+            if (i < vectors.length - 1) {
+                xSum = vectors[i].getX() * vectors[i + 1].getZ();
+                zSum = vectors[i].getZ() * vectors[i + 1].getX();
+            } else if (i == vectors.length - 1) {
+                xSum = vectors[i].getX() * vectors[0].getZ();
+                zSum = vectors[i].getZ() * vectors[0].getX();
             }
-            else if (i < points.size() - 1)
-            {
-                sum += point.getBlockX() * (points.get(0).getBlockZ() - points.get(i - 1).getBlockZ());
-            }
-            else
-            {
-                sum +=  point.getBlockX() * (points.get(i + 1).getBlockZ() - points.get(i - 1).getBlockZ());
-            }
+            sum += xSum - zSum;
         }
 
-        return 0.5 * Math.abs(sum);
+        return Math.abs(sum) / 2.0;
     }
 }

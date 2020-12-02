@@ -9,11 +9,16 @@ import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import lombok.Data;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import net.silthus.regions.Messages;
 import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.entities.Region;
@@ -123,6 +128,20 @@ public class AdminCommands extends BaseCommand implements Listener {
         player.spigot().sendMessage(new ComponentBuilder("Das Grundstück ").color(net.md_5.bungee.api.ChatColor.GREEN)
                 .append(Messages.region(sellRegion, null)).append(" wurde erstellt und kann jetzt gekauft werden.").reset().color(net.md_5.bungee.api.ChatColor.GREEN)
                 .create());
+
+        if (protectedRegion instanceof ProtectedPolygonalRegion) {
+            BaseComponent[] msg = new ComponentBuilder().append("Bei der Region handelt es sich um eine Polygon Region und das Volumen kann nicht richtig berechnet werden. ")
+                    .color(net.md_5.bungee.api.ChatColor.RED).append("Bitte setze die ")
+                    .append("[m²]").color(net.md_5.bungee.api.ChatColor.AQUA).bold(true)
+                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Klicken um die Größe des Grundstücks festzulegen.")))
+                    .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/rcra set size " + sellRegion.name() + " "))
+                    .append(" oder ").reset().color(net.md_5.bungee.api.ChatColor.RED)
+                    .append("[m³]").color(net.md_5.bungee.api.ChatColor.AQUA).bold(true)
+                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Klicken um das Volumen des Grundstücks festzulegen.")))
+                    .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/rcra set volume " + sellRegion.name() + " "))
+                    .create();
+            player.spigot().sendMessage(msg);
+        }
     }
 
     @Subcommand("delete|del|remove")
@@ -217,13 +236,47 @@ public class AdminCommands extends BaseCommand implements Listener {
                 try {
                     double value = Double.parseDouble(price);
                     region.priceType(type).price(value).save();
-                    getCurrentCommandIssuer().sendMessage(ChatColor.GREEN + "Der Preis des Grundstücks wird jetzt ");
                 } catch (NumberFormatException e) {
                     throw new InvalidCommandArgument(e.getMessage());
                 }
             } else {
                 region.priceType(type).save();
             }
+            String message = ChatColor.GREEN + "Der Preis des Grundstücks wird jetzt ";
+            switch (type) {
+                case STATIC:
+                    message += "auf " + plugin.getEconomy().format(region.price()) + " festgelegt.";
+                    break;
+                case DYNAMIC:
+                    message += "automatisch berechnet.";
+                    break;
+                case FREE:
+                    message = ChatColor.GREEN + "Das Grundstück ist jetzt kostenlos.";
+                    break;
+            }
+            getCurrentCommandIssuer().sendMessage(message);
+        }
+
+        @Subcommand("size")
+        @CommandCompletion("@regions")
+        public void setSize(Region region, long size) {
+
+            region.size(size).save();
+            getCurrentCommandIssuer().sendMessage(ChatColor.GREEN + "The Größe des Grundstücks wurde auf "
+                    + ChatColor.AQUA + region.size() + "m² " + ChatColor.GREEN + " und "
+                    + ChatColor.AQUA + region.volume() + "m³ " + ChatColor.GREEN + " gesetzt."
+            );
+        }
+
+        @Subcommand("volume")
+        @CommandCompletion("@regions")
+        public void setVolume(Region region, long volume) {
+
+            region.volume(volume).save();
+            getCurrentCommandIssuer().sendMessage(ChatColor.GREEN + "The Größe des Grundstücks wurde auf "
+                    + ChatColor.AQUA + region.size() + "m² " + ChatColor.GREEN + " und "
+                    + ChatColor.AQUA + region.volume() + "m³ " + ChatColor.GREEN + " gesetzt."
+            );
         }
     }
 
