@@ -29,6 +29,8 @@ import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionGroup;
 import net.silthus.regions.entities.RegionSign;
+import net.silthus.regions.events.CreateRegionEvent;
+import net.silthus.regions.events.DeleteRegionEvent;
 import net.silthus.regions.util.Enums;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -136,6 +138,12 @@ public class AdminCommands extends BaseCommand implements Listener {
             RegionGroup.ofWorldGuardRegion(wgParent).ifPresent(sellRegion::group);
         }
 
+        CreateRegionEvent event = new CreateRegionEvent(sellRegion, protectedRegion);
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) {
+            throw new InvalidCommandArgument("Die Erstellung der Region wurde von einem Plugin abgebrochen.");
+        }
+
         sellRegion.save();
         player.spigot().sendMessage(new ComponentBuilder("Das Grundstück ").color(net.md_5.bungee.api.ChatColor.GREEN)
                 .append(Messages.region(sellRegion, null)).append(" wurde erstellt und kann jetzt gekauft werden.").reset().color(net.md_5.bungee.api.ChatColor.GREEN)
@@ -160,6 +168,12 @@ public class AdminCommands extends BaseCommand implements Listener {
     @CommandCompletion("@regions")
     @CommandPermission("rcregions.region.delete")
     public void delete(Region region) {
+
+        DeleteRegionEvent event = new DeleteRegionEvent(region);
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) {
+            throw new InvalidCommandArgument("Das Löschen der Region wurde von einem Plugin abgebrochen.");
+        }
 
         region.delete();
         getCurrentCommandIssuer().sendMessage(ChatColor.GREEN + "Das Grundstück " + region.name() + " wurde gelöscht.");

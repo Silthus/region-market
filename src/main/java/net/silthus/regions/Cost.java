@@ -154,6 +154,7 @@ public interface Cost {
         LIMITS_REACHED,
         NOT_ENOUGH_MONEY,
         COSTS_NOT_MET,
-        OTHER;
+        OTHER,
+        EVENT_CANCELLED;
     }
 }

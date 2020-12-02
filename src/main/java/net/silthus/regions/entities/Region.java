@@ -25,6 +25,8 @@ import net.silthus.regions.Cost;
 import net.silthus.regions.MessageTags;
 import net.silthus.regions.Messages;
 import net.silthus.regions.RegionsPlugin;
+import net.silthus.regions.events.BoughtRegionEvent;
+import net.silthus.regions.events.BuyRegionEvent;
 import net.silthus.regions.limits.Limit;
 import net.silthus.regions.util.MathUtil;
 import org.bukkit.Bukkit;
@@ -319,12 +321,18 @@ public class Region extends BaseEntity implements ReplacementProvider {
     public Cost.Result buy(@NonNull RegionsPlugin plugin, @NonNull RegionPlayer player) {
 
         Cost.Result canBuy = canBuy(player);
+        BuyRegionEvent buyRegionEvent = new BuyRegionEvent(this, player, canBuy);
+        Bukkit.getPluginManager().callEvent(buyRegionEvent);
+
+        if (buyRegionEvent.isCancelled()) {
+            return new Cost.Result(false, "Das Kaufen der Region wurde durch ein Plugin verhindert.", Cost.ResultStatus.EVENT_CANCELLED).combine(canBuy);
+        }
+
         if (canBuy.failure()) {
             return canBuy;
         }
 
         double price = canBuy.price();
-
         plugin.getEconomy().withdrawPlayer(player.getOfflinePlayer(), price);
 
         owner(player);
@@ -335,6 +343,8 @@ public class Region extends BaseEntity implements ReplacementProvider {
                 .save();
         save();
         updateSigns();
+
+        Bukkit.getPluginManager().callEvent(new BoughtRegionEvent(this, player, canBuy));
 
         return new Cost.Result(true, null, price, Cost.ResultStatus.SUCCESS);
     }

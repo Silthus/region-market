@@ -1,9 +1,9 @@
 package net.silthus.regions.events;
 
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import net.silthus.regions.Cost;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionPlayer;
 import org.bukkit.event.Cancellable;
@@ -12,18 +12,16 @@ import org.bukkit.event.HandlerList;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class BuyRegionEvent extends RegionEvent implements Cancellable {
+public class CreateRegionEvent extends RegionEvent implements Cancellable {
 
     private static final HandlerList handlerList = new HandlerList();
 
-    private final RegionPlayer player;
-    private Cost.Result buyResult;
+    private final ProtectedRegion worldGuardRegion;
     private boolean cancelled;
 
-    public BuyRegionEvent(Region region, RegionPlayer player, Cost.Result buyResult) {
+    public CreateRegionEvent(Region region, ProtectedRegion worldGuardRegion) {
         super(region);
-        this.player = player;
-        this.buyResult = buyResult;
+        this.worldGuardRegion = worldGuardRegion;
     }
 
     @Override

@@ -12,15 +12,14 @@ import org.bukkit.event.HandlerList;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class BuyRegionEvent extends RegionEvent implements Cancellable {
+public class BoughtRegionEvent extends RegionEvent {
 
     private static final HandlerList handlerList = new HandlerList();
 
     private final RegionPlayer player;
     private Cost.Result buyResult;
-    private boolean cancelled;
 
-    public BuyRegionEvent(Region region, RegionPlayer player, Cost.Result buyResult) {
+    public BoughtRegionEvent(Region region, RegionPlayer player, Cost.Result buyResult) {
         super(region);
         this.player = player;
         this.buyResult = buyResult;
