@@ -1,5 +1,8 @@
 package net.silthus.regions.entities;
 
+import com.sk89q.worldedit.bukkit.BukkitWorld;
+import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import de.exlll.configlib.annotation.ConfigurationElement;
 import io.ebean.Finder;
 import io.ebean.Model;
@@ -12,10 +15,14 @@ import lombok.experimental.Accessors;
 import net.silthus.regions.Cost;
 import net.silthus.regions.RegionManager;
 import net.silthus.regions.RegionsPlugin;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
 
+import javax.annotation.Nullable;
 import javax.persistence.*;
+import java.lang.ref.WeakReference;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -39,6 +46,18 @@ public class RegionGroup extends Model {
         return Optional.ofNullable(find.byId(identifier));
     }
 
+    public static Optional<RegionGroup> ofWorldGuardRegion(@Nullable ProtectedRegion region) {
+
+        if (region == null) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(find.query()
+                .where().eq("world_guard_region", region.getId())
+                .findOne()
+        );
+    }
+
     public static RegionGroup getOrCreate(String identifier) {
 
         RegionGroup regionGroup = find.byId(identifier);
@@ -55,6 +74,8 @@ public class RegionGroup extends Model {
     private String identifier;
     private String name;
     private String description;
+    private String world;
+    private String worldGuardRegion;
 
     RegionGroup(String identifier) {
 
@@ -79,11 +100,15 @@ public class RegionGroup extends Model {
     private Map<String, Object> costsConfig = new HashMap<>();
     @Transient
     private List<Cost> costs = new ArrayList<>();
+    @Transient
+    private WeakReference<ProtectedRegion> wgRegion;
 
     public RegionGroup load(RegionManager regionManager, ConfigurationSection config) {
 
         name(config.getString("name", identifier()));
         description(config.getString("description", ""));
+        world(config.getString("world", "world"));
+        worldGuardRegion(config.getString("worldguard-region"));
 
         ConfigurationSection costsSection = config.getConfigurationSection("costs");
         if (costsSection != null) {
@@ -95,6 +120,30 @@ public class RegionGroup extends Model {
         }
 
         return this;
+    }
+
+    public Optional<ProtectedRegion> worldGuardRegion() {
+
+        if (wgRegion != null && wgRegion.get() != null) {
+            return Optional.ofNullable(wgRegion.get());
+        }
+
+        World world = Bukkit.getWorld(this.world);
+        if (world == null) {
+            return Optional.empty();
+        }
+
+        com.sk89q.worldguard.protection.managers.RegionManager regionManager = WorldGuard.getInstance().getPlatform().getRegionContainer().get(new BukkitWorld(world));
+        if (regionManager == null) {
+            return Optional.empty();
+        }
+
+        ProtectedRegion region = regionManager.getRegion(worldGuardRegion);
+        if (region != null) {
+            wgRegion = new WeakReference<>(region);
+        }
+
+        return Optional.ofNullable(region);
     }
 
     /**

@@ -61,7 +61,7 @@ class MoneyCostTest {
             player = RegionPlayer.getOrCreate(server.addPlayer());
             region = spy(new Region("test"));
 
-            when(region.protectedRegion()).thenReturn(Optional.of(regionMock));
+            when(region.worldGuardRegion()).thenReturn(Optional.of(regionMock));
             when(regionMock.getMinimumPoint()).thenReturn(BlockVector3.at(-10, 10, 10));
             when(regionMock.getMaximumPoint()).thenReturn(BlockVector3.at(-10, 20, 10));
 

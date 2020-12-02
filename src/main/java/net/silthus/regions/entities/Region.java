@@ -109,6 +109,15 @@ public class Region extends BaseEntity implements ReplacementProvider {
                 .findOneOrEmpty();
     }
 
+    public static Region getOrCreate(World world, ProtectedRegion region) {
+
+        return of(world, region).orElseGet(() -> {
+            Region rg = new Region(world, region.getId());
+            rg.save();
+            return rg;
+        });
+    }
+
     public static final Finder<UUID, Region> find = new Finder<>(Region.class);
 
     private String name;
@@ -156,7 +165,7 @@ public class Region extends BaseEntity implements ReplacementProvider {
         this.group = RegionGroup.getDefault();
     }
 
-    public Optional<ProtectedRegion> protectedRegion() {
+    public Optional<ProtectedRegion> worldGuardRegion() {
 
         World world = Bukkit.getWorld(world());
         if (world == null) {
@@ -207,7 +216,7 @@ public class Region extends BaseEntity implements ReplacementProvider {
                 .save();
         save();
 
-        protectedRegion().ifPresent(region -> {
+        worldGuardRegion().ifPresent(region -> {
             DefaultDomain defaultDomain = new DefaultDomain();
             defaultDomain.addPlayer(player.id());
             region.setOwners(defaultDomain);
@@ -224,7 +233,7 @@ public class Region extends BaseEntity implements ReplacementProvider {
 
     public Region size(long size) {
         this.size = size;
-        this.volume = protectedRegion()
+        this.volume = worldGuardRegion()
                 .map(region -> size * (region.getMaximumPoint().getBlockY() - region.getMinimumPoint().getBlockY()))
                 .orElse(0L);
         return this;
@@ -238,7 +247,7 @@ public class Region extends BaseEntity implements ReplacementProvider {
      */
     private long calcVolume() {
 
-        return protectedRegion().map(region -> {
+        return worldGuardRegion().map(region -> {
             if (region instanceof ProtectedPolygonalRegion) {
                 return (int) MathUtil.calculatePolygonalArea(region.getPoints());
             } else {
@@ -255,7 +264,7 @@ public class Region extends BaseEntity implements ReplacementProvider {
      */
     private long calcSize() {
 
-        return protectedRegion().map(region -> volume()
+        return worldGuardRegion().map(region -> volume()
                 / (region.getMaximumPoint().getBlockY() - region.getMinimumPoint().getBlockY()))
                 .orElse(0L);
     }

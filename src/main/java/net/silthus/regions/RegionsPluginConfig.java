@@ -20,6 +20,16 @@ public class RegionsPluginConfig extends BukkitYamlConfiguration {
     private String limitsConfig = "limits.yml";
     @Comment("The time in ticks how long a player has to confirm the buying of a region.")
     private long buyTimeTicks = 600L;
+    @Comment({
+            "Set to true to automatically set the parent WorldGuard region defined in the group config.",
+            "You can always manually update the parent regions with the command /rcra wgparents <group>"
+    })
+    private boolean autosetWorldGuardParent = true;
+    @Comment({
+            "Set to true to automatically map groups based on existing WorldGuard parents.",
+            "You can always manually trigger this with the command /rcra autogroup <group>"
+    })
+    private boolean autoMapParent = true;
     private List<String> ignoredRegions = new ArrayList<>();
     private DatabaseConfig database = new DatabaseConfig();
 

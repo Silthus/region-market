@@ -2,7 +2,12 @@ package net.silthus.regions.commands;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.InvalidCommandArgument;
-import co.aikar.commands.annotation.*;
+import co.aikar.commands.annotation.CommandAlias;
+import co.aikar.commands.annotation.CommandCompletion;
+import co.aikar.commands.annotation.CommandPermission;
+import co.aikar.commands.annotation.Default;
+import co.aikar.commands.annotation.Optional;
+import co.aikar.commands.annotation.Subcommand;
 import com.google.common.base.Strings;
 import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldedit.math.BlockVector3;
@@ -28,6 +33,7 @@ import net.silthus.regions.util.Enums;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
@@ -40,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @CommandAlias("rcra|rcregions:admin|sregions:admin|sra|srma")
 public class AdminCommands extends BaseCommand implements Listener {
@@ -124,6 +131,11 @@ public class AdminCommands extends BaseCommand implements Listener {
             }
         }
 
+        ProtectedRegion wgParent = protectedRegion.getParent();
+        if (plugin.getPluginConfig().isAutoMapParent()) {
+            RegionGroup.ofWorldGuardRegion(wgParent).ifPresent(sellRegion::group);
+        }
+
         sellRegion.save();
         player.spigot().sendMessage(new ComponentBuilder("Das Grundstück ").color(net.md_5.bungee.api.ChatColor.GREEN)
                 .append(Messages.region(sellRegion, null)).append(" wurde erstellt und kann jetzt gekauft werden.").reset().color(net.md_5.bungee.api.ChatColor.GREEN)
@@ -169,43 +181,74 @@ public class AdminCommands extends BaseCommand implements Listener {
         }
     }
 
-    @EventHandler(ignoreCancelled = true)
-    public void onClick(PlayerInteractEvent event) {
+    @Subcommand("wgparents")
+    @CommandCompletion("override")
+    @CommandPermission("rcregions.region.worldguard.setparent")
+    public void wgParents(RegionGroup group, @Optional String mode) {
 
-        if (!signLinkModes.containsKey(event.getPlayer().getUniqueId())) {
-            return;
+        if (group.worldGuardRegion().isEmpty()) {
+            throw new InvalidCommandArgument("Die WorldGuard Region der Gruppe " + group.name() + " existiert nicht.");
         }
 
-        RegionManager regionManager = WorldGuard.getInstance().getPlatform().getRegionContainer().get(new BukkitWorld(event.getPlayer().getWorld()));
-        Block block = event.getClickedBlock();
-        if (regionManager == null || block == null) {
-            return;
+        group.regions().stream()
+                .map(Region::worldGuardRegion)
+                .flatMap(protectedRegion -> protectedRegion.stream().flatMap(Stream::of))
+                .forEach(protectedRegion -> {
+                    try {
+                        if (protectedRegion.getParent() == null || "override".equalsIgnoreCase(mode)) {
+                            protectedRegion.setParent(group.worldGuardRegion().get());
+                        }
+                    } catch (ProtectedRegion.CircularInheritanceException e) {
+                        getCurrentCommandIssuer().sendMessage(ChatColor.RED + "WorldGuard Region für "
+                                + protectedRegion.getId() + " kann nicht gesetzt werden: " + e.getMessage());
+                    }
+                });
+        getCurrentCommandIssuer().sendMessage(ChatColor.GREEN + "Die Parent WorldGuard Regionen für alle Grundstücke in der "
+                + group.name() + " Gruppe wurden erfolgreich gesetzt.");
+    }
+
+    @Subcommand("autogroup")
+    @CommandCompletion("@groups all|existing")
+    @CommandPermission("rcregions.region.worldguard.autoparent")
+    public void autoParent(RegionGroup group, @Default("existing") String scope) {
+
+        java.util.Optional<ProtectedRegion> parent = group.worldGuardRegion();
+        if (parent.isEmpty()) {
+            throw new InvalidCommandArgument("Die Gruppe " + group.name() + " hat keine validate WorldGuard Region konfiguriert.");
+        }
+        World world = Bukkit.getWorld(group.world());
+        if (world == null) {
+            throw new InvalidCommandArgument("Die Welt " + group.world() + " aus der Gruppenconfig " + group.name() + " existiert nicht.");
+
+        }
+        RegionManager regionManager = WorldGuard.getInstance().getPlatform().getRegionContainer().get(new BukkitWorld(world));
+        if (regionManager == null) {
+            throw new InvalidCommandArgument("Der WorldGuard Regionmanager für die Welt " + world.getName() + " wurde nicht gefunden.");
         }
 
-        if (block.getState() instanceof Sign) {
-            Region region = signLinkModes.get(event.getPlayer().getUniqueId()).region();
-            if (region != null) {
-                new RegionSign(region, event.getClickedBlock()).save();
-                region.updateSigns();
-                event.getPlayer().sendMessage(ChatColor.GREEN + "Die Region " + region.name() + " wurde mit dem Schild verknüpft.");
-            }
-            event.setCancelled(true);
-            return;
-        }
-
-        List<String> regions = regionManager.getApplicableRegionsIDs(BlockVector3.at(block.getX(), block.getY(), block.getZ())).stream()
-                .filter(s -> !plugin.getPluginConfig().getIgnoredRegions().contains(s))
+        List<ProtectedRegion> regions = regionManager.getRegions().values().stream()
+                .filter(region -> region.getParent() != null)
+                .filter(region -> parent.get().equals(region.getParent()))
                 .collect(Collectors.toList());
-        if (regions.isEmpty()) return;
-        if (regions.size() > 1) {
-            event.getPlayer().sendMessage(ChatColor.RED + "Es befinden sich mehrere Regionen an der Stelle: " + String.join("", regions));
-            event.getPlayer().sendMessage(ChatColor.RED + "Bitte erstelle manuell ein Schild. 1. Zeile: [region] - 2. Zeile: Name der WorldGuard Region");
-        } else {
-            java.util.Optional<Region> region = Region.of(event.getPlayer().getWorld(), regions.get(0));
-            if (region.isEmpty()) return;
-            signLinkModes.get(event.getPlayer().getUniqueId()).region(region.get());
-            event.getPlayer().sendMessage(ChatColor.GRAY + "Du hast die Region " + region.get().name() + " ausgewählt. Klicke jetzt auf ein Schild.");
+
+        int count = 0;
+        int newRegions = 0;
+        for (ProtectedRegion protectedRegion : regions) {
+            java.util.Optional<Region> optionalRegion = Region.of(protectedRegion);
+            if (optionalRegion.isEmpty() && "all".equalsIgnoreCase(scope)) {
+                new Region(world, protectedRegion.getId())
+                        .group(group)
+                        .save();
+                newRegions++;
+                count++;
+            } else if (optionalRegion.isPresent()) {
+                optionalRegion.get().group(group).save();
+                count++;
+            }
         }
+
+        getCurrentCommandIssuer().sendMessage(ChatColor.GREEN + "Die Gruppe " + group.name()
+                + " wurde bei " + count + "/" + regions.size() + " (neu: " + newRegions + ") als Gruppe gesetzt.");
     }
 
     @Subcommand("set")
@@ -218,6 +261,21 @@ public class AdminCommands extends BaseCommand implements Listener {
         public void setParent(Region region, RegionGroup group) {
 
             region.group(group).save();
+
+            if (plugin.getPluginConfig().isAutosetWorldGuardParent()) {
+                group.worldGuardRegion().ifPresent(parent -> {
+                    region.worldGuardRegion().ifPresent(protectedRegion -> {
+                        try {
+                            protectedRegion.setParent(parent);
+                            getCurrentCommandIssuer().sendMessage(ChatColor.GREEN + "Der WorldGuard Parent für die Region wurde auf " + parent.getId() + " gesetzt.");
+                        } catch (ProtectedRegion.CircularInheritanceException e) {
+                            getCurrentCommandIssuer().sendMessage("Cannot set circular parent of region: " + e.getMessage());
+                            e.printStackTrace();
+                        }
+                    });
+                });
+            }
+
             getCurrentCommandIssuer().sendMessage(ChatColor.GREEN + "Die Gruppe des Grundstücks " + region.name()
                     + " wurde erfolgreich zu " + group.name() + " (" + group.identifier() + ") geändert.");
         }
@@ -277,6 +335,45 @@ public class AdminCommands extends BaseCommand implements Listener {
                     + ChatColor.AQUA + region.size() + "m² " + ChatColor.GREEN + " und "
                     + ChatColor.AQUA + region.volume() + "m³ " + ChatColor.GREEN + " gesetzt."
             );
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onClick(PlayerInteractEvent event) {
+
+        if (!signLinkModes.containsKey(event.getPlayer().getUniqueId())) {
+            return;
+        }
+
+        RegionManager regionManager = WorldGuard.getInstance().getPlatform().getRegionContainer().get(new BukkitWorld(event.getPlayer().getWorld()));
+        Block block = event.getClickedBlock();
+        if (regionManager == null || block == null) {
+            return;
+        }
+
+        if (block.getState() instanceof Sign) {
+            Region region = signLinkModes.get(event.getPlayer().getUniqueId()).region();
+            if (region != null) {
+                new RegionSign(region, event.getClickedBlock()).save();
+                region.updateSigns();
+                event.getPlayer().sendMessage(ChatColor.GREEN + "Die Region " + region.name() + " wurde mit dem Schild verknüpft.");
+            }
+            event.setCancelled(true);
+            return;
+        }
+
+        List<String> regions = regionManager.getApplicableRegionsIDs(BlockVector3.at(block.getX(), block.getY(), block.getZ())).stream()
+                .filter(s -> !plugin.getPluginConfig().getIgnoredRegions().contains(s))
+                .collect(Collectors.toList());
+        if (regions.isEmpty()) return;
+        if (regions.size() > 1) {
+            event.getPlayer().sendMessage(ChatColor.RED + "Es befinden sich mehrere Regionen an der Stelle: " + String.join("", regions));
+            event.getPlayer().sendMessage(ChatColor.RED + "Bitte erstelle manuell ein Schild. 1. Zeile: [region] - 2. Zeile: Name der WorldGuard Region");
+        } else {
+            java.util.Optional<Region> region = Region.of(event.getPlayer().getWorld(), regions.get(0));
+            if (region.isEmpty()) return;
+            signLinkModes.get(event.getPlayer().getUniqueId()).region(region.get());
+            event.getPlayer().sendMessage(ChatColor.GRAY + "Du hast die Region " + region.get().name() + " ausgewählt. Klicke jetzt auf ein Schild.");
         }
     }
 
