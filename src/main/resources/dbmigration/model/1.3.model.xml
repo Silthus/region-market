@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<migration xmlns="http://ebean-orm.github.io/xml/ns/dbmigration">
+    <changeSet type="apply">
+        <addColumn tableName="rcregions_regions">
+            <column name="owner_id" type="uuid" references="rcregions_players.id" foreignKeyName="fk_rcregions_regions_owner_id" foreignKeyIndex="ix_rcregions_regions_owner_id"/>
+        </addColumn>
+        <addColumn tableName="rcregions_region_groups">
+            <column name="world" type="varchar"/>
+            <column name="world_guard_region" type="varchar"/>
+        </addColumn>
+    </changeSet>
+</migration>
