@@ -1,3 +1,11 @@
+# [1.11.0](https://github.com/raidcraft/rcregions/compare/v1.10.1...v1.11.0) (2020-12-02)
+
+
+### Features
+
+* add saving of created and deleted regions as schematics ([c40c795](https://github.com/raidcraft/rcregions/commit/c40c79591c4628f566e3cc64bfca5c44ad446a4c))
+* **api:** add events for buy and create region ([8824bfe](https://github.com/raidcraft/rcregions/commit/8824bfe4117258cd5f5b5991da25f1b960e36cda))
+
 ## [1.10.1](https://github.com/raidcraft/rcregions/compare/v1.10.0...v1.10.1) (2020-12-02)
 
 
