@@ -1,7 +1,6 @@
 package net.silthus.regions.entities;
 
 import com.sk89q.worldedit.bukkit.BukkitWorld;
-import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.domains.DefaultDomain;
@@ -152,8 +151,8 @@ public class Region extends BaseEntity implements ReplacementProvider {
         this.world = world != null ? world.getUID() : null;
         this.worldName = world != null ? world.getName() : null;
         this.name = name;
-        this.volume = volume();
-        this.size = size();
+        this.volume = calcVolume();
+        this.size = calcSize();
         this.group = RegionGroup.getDefault();
     }
 
@@ -217,13 +216,27 @@ public class Region extends BaseEntity implements ReplacementProvider {
         return this;
     }
 
+    public Region volume(long volume) {
+        this.volume = volume;
+        this.size = calcSize();
+        return this;
+    }
+
+    public Region size(long size) {
+        this.size = size;
+        this.volume = protectedRegion()
+                .map(region -> size * (region.getMaximumPoint().getBlockY() - region.getMinimumPoint().getBlockY()))
+                .orElse(0L);
+        return this;
+    }
+
     /**
      * Gets the m3 volume of the region.
      * <p>This is the total amount of blocks inside the region.
      *
      * @return the m³ volume of the region
      */
-    public long volume() {
+    private long calcVolume() {
 
         return protectedRegion().map(region -> {
             if (region instanceof ProtectedPolygonalRegion) {
@@ -240,11 +253,11 @@ public class Region extends BaseEntity implements ReplacementProvider {
      *
      * @return the m² size of the region
      */
-    public long size() {
+    private long calcSize() {
 
-        return protectedRegion().map(region -> region.volume()
+        return protectedRegion().map(region -> volume()
                 / (region.getMaximumPoint().getBlockY() - region.getMinimumPoint().getBlockY()))
-                .orElse(0);
+                .orElse(0L);
     }
 
     public Cost.Result canBuy(@NonNull RegionPlayer player) {
@@ -391,9 +404,9 @@ public class Region extends BaseEntity implements ReplacementProvider {
             case regionName:
                 return name();
             case regionVolume:
-                return volume();
+                return calcVolume();
             case regionSize:
-                return size();
+                return calcSize();
             case playerName:
             case MessageTags.owner:
                 return owner().map(RegionPlayer::name).orElse(null);
