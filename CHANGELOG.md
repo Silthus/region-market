@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/raidcraft/rcregions/compare/v1.9.0...v1.10.0) (2020-12-02)
+
+
+### Features
+
+* **cmd:** add option to auto set worldguard parent or group ([b102071](https://github.com/raidcraft/rcregions/commit/b10207129d20839462644a9df4a1edaa21bd7d3d))
+
 # [1.9.0](https://github.com/raidcraft/rcregions/compare/v1.8.1...v1.9.0) (2020-12-02)
 
 
