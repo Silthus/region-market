@@ -1,3 +1,10 @@
+## [1.11.1](https://github.com/raidcraft/rcregions/compare/v1.11.0...v1.11.1) (2020-12-02)
+
+
+### Bug Fixes
+
+* **db:** fix pending drops migration of owner_id on regions table ([2521384](https://github.com/raidcraft/rcregions/commit/25213842064759e6238eb2335fb146019b21f642))
+
 # [1.11.0](https://github.com/raidcraft/rcregions/compare/v1.10.1...v1.11.0) (2020-12-02)
 
 
