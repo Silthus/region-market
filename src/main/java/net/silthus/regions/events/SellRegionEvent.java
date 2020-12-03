@@ -20,7 +20,7 @@ public class SellRegionEvent extends RegionEvent implements Cancellable {
     private double price;
     private boolean cancelled;
 
-    protected SellRegionEvent(Region region, RegionPlayer player, double price) {
+    public SellRegionEvent(Region region, RegionPlayer player, double price) {
         super(region);
         this.player = player;
         this.price = price;

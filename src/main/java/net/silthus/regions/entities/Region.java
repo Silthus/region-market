@@ -14,6 +14,7 @@ import io.ebean.annotation.Transactional;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.Value;
 import lombok.experimental.Accessors;
 import me.wiefferink.interactivemessenger.processing.ReplacementProvider;
 import net.md_5.bungee.api.ChatColor;
@@ -21,10 +22,7 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.milkbowl.vault.economy.Economy;
 import net.silthus.ebean.BaseEntity;
-import net.silthus.regions.Cost;
-import net.silthus.regions.MessageTags;
-import net.silthus.regions.Messages;
-import net.silthus.regions.RegionsPlugin;
+import net.silthus.regions.*;
 import net.silthus.regions.costs.MoneyCost;
 import net.silthus.regions.events.BoughtRegionEvent;
 import net.silthus.regions.events.BuyRegionEvent;
@@ -36,6 +34,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
+import org.bukkit.entity.Player;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
@@ -222,7 +221,7 @@ public class Region extends BaseEntity implements ReplacementProvider {
                 .findFirst();
     }
 
-    public Region owner(RegionPlayer player) {
+    public Region owner(@Nullable RegionPlayer player) {
 
         Optional<OwnedRegion> previousOwner = activeOwnedRegion();
 
@@ -240,17 +239,19 @@ public class Region extends BaseEntity implements ReplacementProvider {
         RegionTransaction.of(this, player, RegionTransaction.Action.CHANGE_OWNER)
                 .data("previous_owner.id", previousOwner.map(ownedRegion -> ownedRegion.player().id()).orElse(null))
                 .data("previous_owner.name", previousOwner.map(ownedRegion -> ownedRegion.player().name()).orElse(null))
-                .data("new_owner.id", player.id())
-                .data("new_owner.name", player.name())
+                .data("new_owner.id", Optional.ofNullable(player).map(BaseEntity::id).orElse(null))
+                .data("new_owner.name", Optional.ofNullable(player).map(RegionPlayer::name).orElse(null))
                 .save();
         save();
 
-        worldGuardRegion().ifPresent(region -> {
-            DefaultDomain defaultDomain = new DefaultDomain();
-            defaultDomain.addPlayer(player.id());
-            region.setOwners(defaultDomain);
-            region.setMembers(new DefaultDomain());
-        });
+        if (player != null) {
+            worldGuardRegion().ifPresent(region -> {
+                DefaultDomain defaultDomain = new DefaultDomain();
+                defaultDomain.addPlayer(player.id());
+                region.setOwners(defaultDomain);
+                region.setMembers(new DefaultDomain());
+            });
+        }
 
         return this;
     }
@@ -495,6 +496,16 @@ public class Region extends BaseEntity implements ReplacementProvider {
                 .map(MoneyCost.Details::regionBasePrice)
                 .reduce(Double::sum)
                 .orElse(price() * priceMultiplier());
+    }
+
+    public double sellServerPrice(@NonNull RegionPlayer player) {
+
+        return basePrice() * group().sellModifier();
+    }
+
+    public boolean isOwner(Player player) {
+
+        return owner != null && owner.id().equals(player.getUniqueId());
     }
 
     public enum RegionType {

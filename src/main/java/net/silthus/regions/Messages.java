@@ -191,7 +191,7 @@ public final class Messages {
                 .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/rcr sell server " + region.id()))
                 .append("] ").reset().color(ChatColor.YELLOW)
                 .append("--- ").color(ChatColor.DARK_AQUA).append("[").color(ChatColor.YELLOW)
-                .append("DIREKT").color(ChatColor.GREEN)
+                .append("DIREKT").color(ChatColor.GRAY).strikethrough(true)
                 .event(sellDirectHover(region))
                 .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/rcr sell direct " + region.id()))
                 .append("] ").reset().color(ChatColor.YELLOW)

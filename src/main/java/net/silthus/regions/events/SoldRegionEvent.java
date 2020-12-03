@@ -18,7 +18,7 @@ public class SoldRegionEvent extends RegionEvent {
     private final RegionPlayer player;
     private double price;
 
-    protected SoldRegionEvent(Region region, RegionPlayer player) {
+    public SoldRegionEvent(Region region, RegionPlayer player) {
         super(region);
         this.player = player;
     }
