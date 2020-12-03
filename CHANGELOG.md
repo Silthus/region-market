@@ -1,3 +1,10 @@
+## [1.12.1](https://github.com/raidcraft/rcregions/compare/v1.12.0...v1.12.1) (2020-12-03)
+
+
+### Bug Fixes
+
+* cache costs loading ([82b5036](https://github.com/raidcraft/rcregions/commit/82b50367f19bd466e080c062398dc16b1b16f709))
+
 # [1.12.0](https://github.com/raidcraft/rcregions/compare/v1.11.2...v1.12.0) (2020-12-02)
 
 
