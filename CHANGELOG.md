@@ -1,3 +1,18 @@
+# [1.13.0](https://github.com/raidcraft/rcregions/compare/v1.12.1...v1.13.0) (2020-12-03)
+
+
+### Bug Fixes
+
+* **cmd:** make 0 costs regions free ([8302500](https://github.com/raidcraft/rcregions/commit/8302500d0b7afc55c463811750e212bd6fba1e1f))
+
+
+### Features
+
+* add option to sell regions to the server ([8f6ed0d](https://github.com/raidcraft/rcregions/commit/8f6ed0d96477f892d4f3840a3e240a37bd5f8756))
+* **cmd:** add /rcr limits command ([170a1cb](https://github.com/raidcraft/rcregions/commit/170a1cb2e774df852ba0dbae8059110e0ed46cc5))
+* autoset default group if region group is empty ([000df9f](https://github.com/raidcraft/rcregions/commit/000df9f2a64c010ff17188f617b74ac86feb6873))
+* **cmd:** add option to specify region group on creation ([5c86c72](https://github.com/raidcraft/rcregions/commit/5c86c7211801435a9ce0dd8e79ac13925b2eb73b))
+
 ## [1.12.1](https://github.com/raidcraft/rcregions/compare/v1.12.0...v1.12.1) (2020-12-03)
 
 
