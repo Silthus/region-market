@@ -176,19 +176,6 @@ class LimitTest {
                     .extracting(Limit.Result::reachedLimit)
                     .isEqualTo(true);
         }
-
-        @Test
-        @DisplayName("should not reach limit for regions without a group")
-        void shouldNotReachLimitIfRegionsHaveNoGroups() {
-
-            Limit limit = new Limit().groups(1);
-            player.regions().add(new Region("test").group(null));
-            player.regions().add(new Region("foo").group(null));
-
-            assertThat(limit.hasReachedGroupLimit(player))
-                    .extracting(Limit.Result::reachedLimit)
-                    .isEqualTo(false);
-        }
     }
 
     @Nested

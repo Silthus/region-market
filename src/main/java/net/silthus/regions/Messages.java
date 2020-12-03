@@ -27,11 +27,12 @@ public final class Messages {
     public static String[] formatRegionSign(@NonNull Region region) {
 
         String[] lines = new String[4];
+        Economy economy = RegionsPlugin.instance().getEconomy();
 
         if (region.status() != Region.Status.OCCUPIED) {
             lines[0] = ChatColor.WHITE + region.name();
             lines[1] = ChatColor.GREEN + "- Verfügbar -";
-            lines[2] = region.size() + "m²" + ChatColor.YELLOW + " | " + ChatColor.AQUA + region.volume() + "m³";
+            lines[2] = ChatColor.GREEN + economy.format(region.basePrice()) + ChatColor.YELLOW + " | " + ChatColor.AQUA + region.size() + "m²";
             lines[3] = ChatColor.GRAY + "" + ChatColor.ITALIC + "Klick für Details.";
         } else {
             lines[0] = ChatColor.WHITE + region.name();
@@ -115,7 +116,7 @@ public final class Messages {
         Cost.Result canBuy = region.canBuy(player);
         Economy economy = RegionsPlugin.instance().getEconomy();
         if (canBuy.success()) {
-            return builder.append("[Kaufen]").color(ChatColor.GREEN).bold(true)
+            return builder.append("[Kaufen]").color(ChatColor.GREEN)
                     .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder()
                             .append("Grundstück: ").color(ChatColor.YELLOW)
                             .append(region.name()).color(ChatColor.GREEN).append("\n")
@@ -127,7 +128,7 @@ public final class Messages {
                     .create();
         } else {
             if (canBuy.status().contains(Cost.ResultStatus.OWNED_BY_SELF)) {
-                return builder.append("[Verkaufen]").color(ChatColor.RED)
+                return builder.append("[Verkaufen]").color(ChatColor.GREEN)
                         .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Klicke um das Grundstück zu verkaufen. Es folgt ein Dialog mit mehr Details.")))
                         .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/rcr sell " + region.id()))
                         .create();
@@ -301,7 +302,8 @@ public final class Messages {
         }
         PlayerLimit limit = optional.get();
         return new ComponentBuilder()
-                .append(" <| Grundstück Limits |>").bold(true).color(ChatColor.GOLD)
+                .append("--- [ ").color(ChatColor.DARK_AQUA).append("Grundstück Limits").color(ChatColor.GOLD)
+                .append(" ] ---").color(ChatColor.DARK_AQUA).append("\n")
                 .append(limit("Gesamt: ", player.regions().size(), limit.total())).append("\n")
                 .append(limit("Stadtteile: ", player.regionGroups().size(), limit.groups())).append("\n")
                 .append(groupLimits(limit)).append("\n")
@@ -316,7 +318,7 @@ public final class Messages {
         for (Map.Entry<String, Integer> entry : limit.groupRegions().entrySet()) {
             Optional<RegionGroup> group = RegionGroup.of(entry.getKey());
             group.ifPresent(regionGroup -> builder.append(" - ").color(ChatColor.GRAY)
-                    .append(limit(regionGroup.name(), player.regions(regionGroup).size(), entry.getValue()))
+                    .append(limit(regionGroup.name() + ": ", player.regions(regionGroup).size(), entry.getValue()))
             .append("\n"));
         }
         return builder.create();
@@ -324,9 +326,10 @@ public final class Messages {
 
     private static BaseComponent[] limit(String text, int current, int max) {
 
+        ComponentBuilder builder = new ComponentBuilder(text).reset().color(ChatColor.YELLOW);
 
         if (max == -1) {
-            return new ComponentBuilder("unlimitiert").reset().color(ChatColor.AQUA).italic(true).create();
+            return builder.append(" unlimitiert").reset().color(ChatColor.AQUA).italic(true).create();
         } else {
             ChatColor color;
             double percentageUsed = (max * 1.0) / (current * 1.0);
@@ -340,7 +343,7 @@ public final class Messages {
                 color = ChatColor.GREEN;
             }
 
-            return new ComponentBuilder(text).reset().color(ChatColor.YELLOW)
+            return builder
                     .append(current + "").color(color)
                     .append("/").color(ChatColor.YELLOW)
                     .append(max + "").color(ChatColor.DARK_RED)
@@ -366,7 +369,7 @@ public final class Messages {
     public static HoverEvent playerHover(@Nullable RegionPlayer player) {
 
         if (player == null) {
-            return new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Spieler wurde nicht gefunden."));
+            return new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Der Spieler wurde nicht gefunden."));
         }
 
         ComponentBuilder builder = new ComponentBuilder();
@@ -382,8 +385,8 @@ public final class Messages {
                     .append(" ---").reset().color(ChatColor.GRAY).append("\n");
 
             if (player.lastOnline() != null) {
-                builder.append("Zuletzt online: ").color(onlineColor)
-                        .append(TimeUtil.formatDateTime(player.lastOnline())).append("\n");
+                builder.append("Zuletzt online: ").color(ChatColor.YELLOW)
+                        .append(TimeUtil.formatDateTime(player.lastOnline())).color(onlineColor).append("\n\n");
             }
         }
 

@@ -41,6 +41,15 @@ public class RegionCommands extends BaseCommand {
         player.spigot().sendMessage(Messages.regionInfo(region, regionPlayer));
     }
 
+
+    @Subcommand("limits")
+    @CommandPermission("rcregions.region.limits")
+    @CommandCompletion("@players")
+    public void limits(Player player, RegionPlayer regionPlayer) {
+
+        player.spigot().sendMessage(Messages.limits(regionPlayer));
+    }
+
     @Subcommand("buy")
     @CommandPermission("rcregions.region.buy")
     @CommandCompletion("@regions")

@@ -56,9 +56,9 @@ public class LimitsConfig extends BukkitYamlConfiguration {
                 .filter(permission -> permission.startsWith(Constants.LIMITS_PREFIX))
                 .map(s -> s.replace(Constants.LIMITS_PREFIX, ""))
                 .map(s -> limits.get(s))
-                .map(limit -> limits.get(defaultLimit))
                 .filter(Objects::nonNull)
                 .reduce(Limit::combine)
+                .or(() -> Optional.ofNullable(limits.get(defaultLimit)))
                 .map(limit -> new PlayerLimit(player, limit))
                 .map(PlayerLimit::loadPlayerLimits);
     }
