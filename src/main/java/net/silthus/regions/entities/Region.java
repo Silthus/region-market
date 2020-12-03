@@ -168,6 +168,23 @@ public class Region extends BaseEntity implements ReplacementProvider {
         this.group = RegionGroup.getDefault();
     }
 
+    public RegionGroup group() {
+
+        if (this.group != null) {
+            return this.group;
+        }
+
+        Optional<ProtectedRegion> region = worldGuardRegion();
+        if (region.isPresent() && RegionsPlugin.instance().getPluginConfig().isAutoMapParent()) {
+            RegionGroup.ofWorldGuardRegion(region.get().getParent()).ifPresent(g -> this.group = g);
+        } else {
+            this.group = RegionGroup.getDefault();
+        }
+        save();
+
+        return this.group;
+    }
+
     public Optional<ProtectedRegion> worldGuardRegion() {
 
         World world = Bukkit.getWorld(world());
