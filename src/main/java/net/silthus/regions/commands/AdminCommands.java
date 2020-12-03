@@ -131,7 +131,11 @@ public class AdminCommands extends BaseCommand implements Listener {
                 String[] strings = price.split(":");
                 if (strings.length > 1) {
                     try {
-                        sellRegion.price(Double.parseDouble(strings[1]));
+                        double sellPrice = Double.parseDouble(strings[1]);
+                        if (sellPrice == 0) {
+                            sellRegion.priceType(Region.PriceType.FREE);
+                        }
+                        sellRegion.price(sellPrice);
                     } catch (NumberFormatException e) {
                         throw new InvalidCommandArgument(strings[1] + " is not a valid price.");
                     }
