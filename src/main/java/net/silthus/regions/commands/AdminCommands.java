@@ -71,9 +71,9 @@ public class AdminCommands extends BaseCommand implements Listener {
     }
 
     @Subcommand("create")
-    @CommandCompletion("@wgRegions auto|free|static")
+    @CommandCompletion("@wgRegions @groups auto|free|static")
     @CommandPermission("rcregions.region.create")
-    public void create(Player player, @Optional String region, @Optional @Default("auto") String price) {
+    public void create(Player player, @Optional String region, @Optional RegionGroup group, @Optional @Default("auto") String price) {
 
         RegionManager regionManager = WorldGuard.getInstance().getPlatform().getRegionContainer().get(new BukkitWorld(player.getWorld()));
         if (regionManager == null) {
@@ -111,8 +111,12 @@ public class AdminCommands extends BaseCommand implements Listener {
 
         Region sellRegion = new Region(player.getWorld(), protectedRegion.getId());
         ProtectedRegion wgParent = protectedRegion.getParent();
-        if (plugin.getPluginConfig().isAutoMapParent()) {
+        if (group == null && plugin.getPluginConfig().isAutoMapParent()) {
             RegionGroup.ofWorldGuardRegion(wgParent).ifPresent(sellRegion::group);
+        } else if (group == null) {
+            sellRegion.group(RegionGroup.getDefault());
+        } else {
+            sellRegion.group(group);
         }
 
         if (Strings.isNullOrEmpty(price)) {
