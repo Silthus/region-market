@@ -184,6 +184,23 @@ public class Region extends BaseEntity implements ReplacementProvider {
         return this.group;
     }
 
+    public Region priceType(PriceType priceType) {
+
+        this.priceType = priceType;
+        switch (priceType) {
+            case FREE:
+            case DYNAMIC:
+                price(0);
+                break;
+            case STATIC:
+                priceMultiplier(1.0);
+                break;
+        }
+        save();
+
+        return this;
+    }
+
     public Optional<ProtectedRegion> worldGuardRegion() {
 
         World world = Bukkit.getWorld(world());
