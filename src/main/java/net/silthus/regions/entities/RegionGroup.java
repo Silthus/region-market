@@ -124,7 +124,7 @@ public class RegionGroup extends Model {
             costsSection.getKeys(true).forEach(s -> costsConfig.put(s, costsSection.get(s)));
             save();
 
-            loadCosts(regionManager, costsSection);
+            this.costs = loadCosts(regionManager, costsSection);
         }
 
         return this;
@@ -166,7 +166,13 @@ public class RegionGroup extends Model {
     @PostLoad
     public List<Cost> loadCosts() {
 
-        return loadCosts(RegionsPlugin.instance().getRegionManager());
+        if (!costs.isEmpty()) {
+            return costs;
+        }
+
+        this.costs = loadCosts(RegionsPlugin.instance().getRegionManager());
+
+        return costs;
     }
 
     /**
@@ -188,27 +194,27 @@ public class RegionGroup extends Model {
         for (Map.Entry<String, Object> entry : costsConfig().entrySet()) {
             costsSection.set(entry.getKey(), entry.getValue());
         }
-        loadCosts(regionManager, costsSection);
 
-        return costs;
+        return loadCosts(regionManager, costsSection);
     }
 
-    private void loadCosts(RegionManager regionManager, ConfigurationSection costsSection) {
+    private List<Cost> loadCosts(RegionManager regionManager, ConfigurationSection costsSection) {
 
-        if (costsSection == null) return;
+        if (costsSection == null) return new ArrayList<>();
 
         costs.clear();
 
-        for (String costsKey : costsSection.getKeys(false)) {
-            regionManager.getCost(costsKey, costsSection.getConfigurationSection(costsKey))
-                    .ifPresent(costs::add);
-        }
+        return costsSection.getKeys(false).stream()
+                .map(s -> regionManager.getCost(s, costsSection.getConfigurationSection(s)))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
     }
 
-    public List<Region> playerRegions(RegionPlayer player) {
+    public List<Region> playerRegions(@Nullable RegionPlayer player) {
 
         return regions().stream()
-                .filter(region -> region.owner().equals(player))
+                .filter(region -> region.owner().equals(Optional.ofNullable(player)))
                 .collect(Collectors.toList());
     }
 }
