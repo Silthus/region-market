@@ -1,3 +1,10 @@
+## [1.13.1](https://github.com/raidcraft/rcregions/compare/v1.13.0...v1.13.1) (2020-12-04)
+
+
+### Bug Fixes
+
+* set base price to 0 when switching to dynamic price ([6c36d48](https://github.com/raidcraft/rcregions/commit/6c36d48c282884028980eeb45278ce4bf7915f15))
+
 # [1.13.0](https://github.com/raidcraft/rcregions/compare/v1.12.1...v1.13.0) (2020-12-03)
 
 
