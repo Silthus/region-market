@@ -12,21 +12,21 @@ public class SellDirectAction extends SellAction {
         super(region, regionPlayer, RegionCommands.SellType.DIRECT, price);
     }
 
-    public SellDirectAction(SellAction sellAction) {
+    public SellDirectAction(SellServerAction sellAction) {
         super(sellAction);
     }
 
     @Override
-    public Result run() {
+    public SellResult run() {
 
         Economy economy = RegionsPlugin.instance().getEconomy();
 
         if (getPriceDetails().regionBasePrice() < getPrice()) {
-            return new Result(this, "Der Verkaufspreis des Grundstücks darf nicht unterhalb des Grundpreises von " + economy.format(getPriceDetails().regionBasePrice()) + " liegen.", getPrice());
+            return new SellResult(this, "Der Verkaufspreis des Grundstücks darf nicht unterhalb des Grundpreises von " + economy.format(getPriceDetails().regionBasePrice()) + " liegen.");
         }
 
         // TODO: create extra table and sell entries
 
-        return new Result(this, getPrice());
+        return new SellResult(this);
     }
 }
