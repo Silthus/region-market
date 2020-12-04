@@ -4,7 +4,7 @@ import lombok.NonNull;
 import lombok.Value;
 import lombok.experimental.Accessors;
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.silthus.regions.costs.MoneyCost;
+import net.silthus.regions.costs.PriceDetails;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionPlayer;
 import org.bukkit.configuration.ConfigurationSection;
@@ -77,13 +77,13 @@ public interface Cost {
     class Result {
         boolean success;
         String error;
-        MoneyCost.Details price;
+        PriceDetails price;
         EnumSet<ResultStatus> status;
 
         public Result(boolean success, String error) {
             this.success = success;
             this.error = error;
-            this.price = new MoneyCost.Details();
+            this.price = new PriceDetails();
             status = EnumSet.of(ResultStatus.UNKNOWN);
         }
 
@@ -91,18 +91,18 @@ public interface Cost {
 
             this.success = success;
             this.error = error;
-            this.price = new MoneyCost.Details();
+            this.price = new PriceDetails();
             this.status = EnumSet.of(status);
         }
 
-        public Result(boolean success, String error, MoneyCost.Details price) {
+        public Result(boolean success, String error, PriceDetails price) {
             this.success = success;
             this.error = error;
             this.price = price;
             status = EnumSet.of(ResultStatus.UNKNOWN);
         }
 
-        public Result(boolean success, String error, MoneyCost.Details price, ResultStatus status) {
+        public Result(boolean success, String error, PriceDetails price, ResultStatus status) {
 
             this.success = success;
             this.error = error;
@@ -110,7 +110,7 @@ public interface Cost {
             this.status = EnumSet.of(status);
         }
 
-        public Result(boolean success, String error, MoneyCost.Details price, EnumSet<ResultStatus> status) {
+        public Result(boolean success, String error, PriceDetails price, EnumSet<ResultStatus> status) {
 
             this.success = success;
             this.error = error;

@@ -8,6 +8,7 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import net.milkbowl.vault.economy.Economy;
+import net.silthus.regions.actions.BuyAction;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionGroup;
 import net.silthus.regions.entities.RegionPlayer;
@@ -113,7 +114,7 @@ public final class Messages {
 
         ComponentBuilder builder = new ComponentBuilder();
 
-        Cost.Result canBuy = region.canBuy(player);
+        BuyAction.Result canBuy = new BuyAction(region, player).check();
         Economy economy = RegionsPlugin.instance().getEconomy();
         if (canBuy.success()) {
             return builder.append("[Kaufen]").color(ChatColor.GREEN)
@@ -127,13 +128,13 @@ public final class Messages {
                     .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format(Constants.BUY_REGION_COMMAND, region.id())))
                     .create();
         } else {
-            if (canBuy.status().contains(Cost.ResultStatus.OWNED_BY_SELF)) {
+            if (canBuy.getStatuses().contains(BuyAction.Result.Status.OWNED_BY_SELF)) {
                 return builder.append("[Verkaufen]").color(ChatColor.GREEN)
                         .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Klicke um das Grundstück zu verkaufen. Es folgt ein Dialog mit mehr Details.")))
                         .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/rcr sell " + region.id()))
                         .create();
             } else {
-                for (Cost.ResultStatus status : canBuy.status()) {
+                for (BuyAction.Result.Status status : canBuy.getStatuses()) {
                     switch (status) {
                         case OWNED_BY_OTHER:
                             return builder.append("[?]").color(ChatColor.GRAY)
@@ -156,7 +157,7 @@ public final class Messages {
                                     .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder()
                                             .append("Du hast nicht genügend Geld um das Grundstück zu kaufen.").color(ChatColor.DARK_RED).append("\n")
                                             .append("Du benötigst mindestens ").color(ChatColor.YELLOW).italic(true)
-                                            .append(economy.format(canBuy.price().total())).color(ChatColor.AQUA)
+                                            .append(canBuy.formattedPrice()).color(ChatColor.AQUA)
                                             .append(" hast aber nur ").color(ChatColor.YELLOW).italic(true)
                                             .append(economy.format(balance)).color(ChatColor.GREEN).append("\n")
                                             .append("Kosten: ").color(ChatColor.YELLOW).append("\n")

@@ -25,24 +25,9 @@ public class PlayerLimit extends Limit {
         this.player = player;
     }
 
-    public Result test(Region region) {
+    public LimitCheckResult test(Region region) {
 
-        Result totalLimit = super.hasReachedTotalLimit(player);
-        if (totalLimit.reachedLimit()) {
-            return totalLimit;
-        }
-
-        Result groupLimit = super.hasReachedGroupLimit(player);
-        if (groupLimit.reachedLimit()) {
-            return groupLimit;
-        }
-
-        Result regionsLimit = super.hasReachedRegionsInGroupLimit(player, region.group());
-        if (regionsLimit.reachedLimit()) {
-            return regionsLimit;
-        }
-
-        return new Result(false, null, Type.ALL);
+        return check(region, player());
     }
 
     public PlayerLimit loadPlayerLimits() {
@@ -56,17 +41,17 @@ public class PlayerLimit extends Limit {
                 .collect(Collectors.toList())) {
             String[] split = limitKey.split("\\.");
             if (split.length > 1) {
-                Limit.Type limitType = Enums.searchEnum(Limit.Type.class, split[0]);
+                LimitCheckResult.Type limitType = Enums.searchEnum(LimitCheckResult.Type.class, split[0]);
                 if (limitType != null) {
                     switch (limitType) {
-                        case REGIONS:
+                        case REGIONS_IN_GROUP_LIMIT_REACHED:
                             if (split.length == 3) {
                                 String groupName = split[1];
                                 super.groupRegions().put(groupName, Integer.parseInt(split[2]));
                             }
                             break;
-                        case GROUPS:
-                        case TOTAL:
+                        case TOTAL_GROUP_LIMIT_REACHED:
+                        case TOTAL_LIMIT_REACHED:
                             int limitValue = Integer.parseInt(split[1]);
                             super.set(limitType, limitValue);
                             break;

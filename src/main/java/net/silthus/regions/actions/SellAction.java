@@ -1,47 +1,52 @@
-package net.silthus.regions;
+package net.silthus.regions.actions;
 
 import co.aikar.commands.InvalidCommandArgument;
 import com.sk89q.worldguard.domains.DefaultDomain;
 import io.ebean.annotation.Transactional;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
+import lombok.experimental.Accessors;
 import lombok.experimental.NonFinal;
 import net.milkbowl.vault.economy.Economy;
+import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.commands.RegionCommands;
+import net.silthus.regions.costs.PriceDetails;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionPlayer;
 import net.silthus.regions.entities.RegionTransaction;
 import net.silthus.regions.events.SellRegionEvent;
 import net.silthus.regions.events.SoldRegionEvent;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 
 @Value
 @NonFinal
-public class SellAction {
+@EqualsAndHashCode(callSuper = true)
+public class SellAction extends RegionAction {
 
-    RegionPlayer regionPlayer;
-    Region region;
+    PriceDetails priceDetails;
     RegionCommands.SellType sellType;
 
     public SellAction(RegionPlayer regionPlayer, Region region, RegionCommands.SellType sellType) {
-        this.regionPlayer = regionPlayer;
-        this.region = region;
+        super(region, regionPlayer);
+        this.priceDetails = region.priceDetails(regionPlayer);
         this.sellType = sellType;
     }
 
     public SellAction(SellAction sellAction) {
-        this(sellAction.regionPlayer, sellAction.region, sellAction.sellType);
+        super(sellAction);
+        this.priceDetails = getRegion().priceDetails(getRegionPlayer());
+        this.sellType = sellAction.sellType;
     }
 
     @Transactional
-    public SellResult run() {
+    public Result run() {
 
         Economy economy = RegionsPlugin.instance().getEconomy();
 
         double price = 0;
         switch (getSellType()) {
             case SERVER:
-                price = getRegion().sellServerPrice(getRegionPlayer());
+                price = getPriceDetails().sellServerPrice();
                 break;
         }
 
@@ -70,6 +75,18 @@ public class SellAction {
                 .data("type", getSellType())
                 .save();
 
-        return new SellResult(this, price);
+        return new Result(this, price);
+    }
+
+    @Value
+    @EqualsAndHashCode(callSuper = true)
+    public static class Result extends SellAction {
+
+        double price;
+
+        private Result(SellAction sellAction, double price) {
+            super(sellAction);
+            this.price = price;
+        }
     }
 }

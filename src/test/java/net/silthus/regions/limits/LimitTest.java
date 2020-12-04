@@ -1,11 +1,13 @@
-package net.silthus.regions;
+package net.silthus.regions.limits;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
 import be.seeseemelk.mockbukkit.ServerMock;
+import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionGroup;
 import net.silthus.regions.entities.RegionPlayer;
 import net.silthus.regions.limits.Limit;
+import net.silthus.regions.limits.LimitCheckResult;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -47,7 +49,6 @@ class LimitTest {
             }
 
             assertThat(limit.hasReachedTotalLimit(player))
-                    .extracting(Limit.Result::reachedLimit)
                     .isEqualTo(true);
         }
 
@@ -57,7 +58,6 @@ class LimitTest {
 
             Limit limit = new Limit().total(1);
             assertThat(limit.hasReachedTotalLimit(player))
-                    .extracting(Limit.Result::reachedLimit)
                     .isEqualTo(false);
         }
 
@@ -71,7 +71,6 @@ class LimitTest {
             }
 
             assertThat(limit.hasReachedTotalLimit(player))
-                    .extracting(Limit.Result::reachedLimit)
                     .isEqualTo(false);
         }
     }
@@ -97,7 +96,6 @@ class LimitTest {
             player.regions().add(new Region("foo").group(fooGroup));
 
             assertThat(limit.hasReachedRegionsInGroupLimit(player, fooGroup))
-                    .extracting(Limit.Result::reachedLimit)
                     .isEqualTo(true);
         }
 
@@ -109,19 +107,6 @@ class LimitTest {
             player.regions().add(new Region("foo").group(barGroup));
 
             assertThat(limit.hasReachedRegionsInGroupLimit(player, fooGroup))
-                    .extracting(Limit.Result::reachedLimit)
-                    .isEqualTo(false);
-        }
-
-        @Test
-        @DisplayName("should not check group limits if group is null")
-        void shouldNotCheckGroupIfGroupIsNull() {
-
-            Limit limit = new Limit().setGroupLimit("foo", 1);
-            player.regions().add(new Region("foo").group(fooGroup));
-
-            assertThat(limit.hasReachedRegionsInGroupLimit(player, null))
-                    .extracting(Limit.Result::reachedLimit)
                     .isEqualTo(false);
         }
 
@@ -133,7 +118,6 @@ class LimitTest {
             player.regions().add(new Region("foo"));
 
             assertThat(limit.hasReachedRegionsInGroupLimit(player, fooGroup))
-                    .extracting(Limit.Result::reachedLimit)
                     .isEqualTo(false);
         }
     }
@@ -160,7 +144,6 @@ class LimitTest {
             player.regions().add(new Region("bar").group(fooGroup));
 
             assertThat(limit.hasReachedGroupLimit(player))
-                    .extracting(Limit.Result::reachedLimit)
                     .isEqualTo(false);
         }
 
@@ -173,7 +156,6 @@ class LimitTest {
             player.regions().add(new Region("bar").group(barGroup));
 
             assertThat(limit.hasReachedGroupLimit(player))
-                    .extracting(Limit.Result::reachedLimit)
                     .isEqualTo(true);
         }
     }

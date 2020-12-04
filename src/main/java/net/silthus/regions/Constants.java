@@ -14,4 +14,10 @@ public final class Constants {
 
     public static final String BUY_REGION_COMMAND = "/rcr buy %s";
     public static final String SELL_REGION_FOR_OTHERS_PERMISSION = "rcregions.region.sell.others";
+
+    public static final class Permissions {
+
+        public static final String BUY_REGION_FOR_OTHERS = "rcregions.region.buy.others";
+    }
+
 }

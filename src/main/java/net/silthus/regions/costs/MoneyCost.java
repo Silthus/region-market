@@ -71,13 +71,13 @@ public class MoneyCost implements Cost {
                     ))).create();
         }
 
-        Details cost = calculate(region, player);
+        PriceDetails cost = calculate(region, player);
 
         return new ComponentBuilder().append(economy().format(cost.total())).color(costColor(player, cost.total()))
                 .event(createCostHover(region, player, cost)).create();
     }
 
-    private HoverEvent createCostHover(@NonNull Region region, @Nullable RegionPlayer player, Details cost) {
+    private HoverEvent createCostHover(@NonNull Region region, @Nullable RegionPlayer player, PriceDetails cost) {
 
         ComponentBuilder builder = new ComponentBuilder();
         double basePrice = cost.basePrice();
@@ -159,7 +159,7 @@ public class MoneyCost implements Cost {
         }
         OfflinePlayer offlinePlayer = player.getOfflinePlayer();
 
-        Details cost = calculate(region, player);
+        PriceDetails cost = calculate(region, player);
         if (economy().has(offlinePlayer, cost.total())) {
             return new Result(true, null, cost);
         } else {
@@ -170,21 +170,22 @@ public class MoneyCost implements Cost {
     @Override
     public Result apply(Region region, RegionPlayer player) {
 
-        Details price = calculate(region, player);
+        PriceDetails price = calculate(region, player);
         EconomyResponse economyResponse = economy().withdrawPlayer(player.getOfflinePlayer(), price.total());
         return new Result(economyResponse.transactionSuccess(), economyResponse.errorMessage, price, ResultStatus.SUCCESS);
     }
 
-    public Details calculate(Region region) {
+    public PriceDetails calculate(Region region) {
 
         return calculate(region, null);
     }
 
-    public Details calculate(Region region, @Nullable RegionPlayer player) {
+    public PriceDetails calculate(Region region, @Nullable RegionPlayer player) {
 
-        Details price = new Details()
+        PriceDetails price = new PriceDetails()
                 .basePrice(calculateBasePrice(region));
         price.regionModifier((price.basePrice() * region.priceMultiplier()) - price.basePrice());
+        price.sellServerModifier(region.group().sellModifier());
 
         if (player != null) {
             double basePrice = price.regionBasePrice();
@@ -264,45 +265,4 @@ public class MoneyCost implements Cost {
         PER3M
     }
 
-    @Data
-    @Accessors(fluent = true)
-    public static class Details {
-
-        private double basePrice;
-        private double regionModifier;
-        private double playerRegionsModifier;
-        private double groupModifier;
-        private double sameGroupModifier;
-        private double playerMultiplier;
-
-        public double total() {
-
-            return basePrice + regionModifier() + additionalPlayerCosts();
-        }
-
-        public double regionBasePrice() {
-
-            return basePrice() + regionModifier();
-        }
-
-        public double additionalPlayerCosts() {
-
-            return playerRegionsModifier + groupModifier + sameGroupModifier + playerMultiplier;
-        }
-
-        public Details combine(@Nullable Details other) {
-
-            if (other == null) {
-                return this;
-            }
-
-            return new Details()
-                    .basePrice(basePrice() + other.basePrice())
-                    .regionModifier(regionModifier() + other.regionModifier())
-                    .playerRegionsModifier(playerRegionsModifier() + other.playerRegionsModifier())
-                    .groupModifier(groupModifier() + other.groupModifier())
-                    .sameGroupModifier(sameGroupModifier() + other.sameGroupModifier())
-                    .playerMultiplier(playerMultiplier() + other.playerMultiplier());
-        }
-    }
 }

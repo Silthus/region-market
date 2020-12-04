@@ -2,18 +2,22 @@ package net.silthus.regions.entities;
 
 import io.ebean.Finder;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import me.wiefferink.interactivemessenger.processing.ReplacementProvider;
 import net.silthus.ebean.BaseEntity;
 import net.silthus.regions.Constants;
 import net.silthus.regions.MessageTags;
+import net.silthus.regions.RegionsPlugin;
+import net.silthus.regions.limits.LimitCheckResult;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 
+import javax.annotation.Nullable;
 import javax.persistence.*;
 import java.time.Instant;
 import java.util.*;
@@ -107,6 +111,15 @@ public class RegionPlayer extends BaseEntity implements ReplacementProvider {
         return regions().stream()
                 .filter(region -> group.equals(region.group()))
                 .collect(Collectors.toList());
+    }
+
+    public LimitCheckResult checkLimits(@NonNull Region region) {
+
+        return RegionsPlugin.instance()
+                .getLimitsConfig()
+                .getPlayerLimit(this)
+                .map(playerLimit -> playerLimit.test(region))
+                .orElse(new LimitCheckResult());
     }
 
     @Override

@@ -4,12 +4,13 @@ import de.exlll.configlib.annotation.Comment;
 import de.exlll.configlib.annotation.ConfigurationElement;
 import io.ebean.annotation.DbEnumValue;
 import lombok.Data;
-import lombok.Value;
+import lombok.NonNull;
 import lombok.experimental.Accessors;
-import me.wiefferink.interactivemessenger.processing.Message;
+import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionGroup;
 import net.silthus.regions.entities.RegionPlayer;
 
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -49,52 +50,43 @@ public class Limit {
         this.priority = limit.priority();
     }
 
-    public Result hasReachedTotalLimit(RegionPlayer player) {
+    public LimitCheckResult check(@NonNull Region region, @NonNull RegionPlayer player) {
 
-        if (total() > -1 && player.regions().size() >= total()) {
-            return new Result(true,
-                    Message.fromKey("limits-reached-total")
-                        .replacements(player, this)
-                        .getSingle(),
-                    Type.TOTAL
-            );
+        EnumSet<LimitCheckResult.Type> result = EnumSet.noneOf(LimitCheckResult.Type.class);
+
+        boolean totalLimit = hasReachedTotalLimit(player);
+        if (totalLimit) result.add(LimitCheckResult.Type.TOTAL_LIMIT_REACHED);
+
+        boolean groupLimit = hasReachedGroupLimit(player);
+        if (groupLimit) result.add(LimitCheckResult.Type.TOTAL_GROUP_LIMIT_REACHED);
+
+        boolean inGroupLimit = hasReachedRegionsInGroupLimit(player, region.group());
+        if (inGroupLimit) result.add(LimitCheckResult.Type.REGIONS_IN_GROUP_LIMIT_REACHED);
+
+        if (!totalLimit && !groupLimit && !inGroupLimit) {
+            return new LimitCheckResult();
+        } else {
+            return new LimitCheckResult(result);
         }
-
-        return new Result(false, null, Type.TOTAL);
     }
 
-    public Result hasReachedRegionsInGroupLimit(RegionPlayer player, RegionGroup group) {
+    boolean hasReachedTotalLimit(@NonNull RegionPlayer player) {
 
-        if (group == null) return new Result(false, null, Type.REGIONS);
+        return total() > -1 && player.regions().size() >= total();
+    }
+
+    boolean hasReachedRegionsInGroupLimit(@NonNull RegionPlayer player, @NonNull RegionGroup group) {
 
         int groupLimit = groupRegions().getOrDefault(group.identifier(), -1);
-        if (groupLimit > -1 && player.regions().stream()
+        return groupLimit > -1 && player.regions().stream()
                 .filter(region -> Objects.nonNull(region.group()))
                 .filter(region -> region.group().equals(group))
-                .count() >= groupLimit) {
-            return new Result(true,
-                    Message.fromKey("limits-reached-regions")
-                        .replacements(player, group, this)
-                        .getSingle(),
-                    Type.REGIONS
-            );
-        }
-
-        return new Result(false, null, Type.REGIONS);
+                .count() >= groupLimit;
     }
 
-    public Result hasReachedGroupLimit(RegionPlayer player) {
+    boolean hasReachedGroupLimit(@NonNull RegionPlayer player) {
 
-        if (groups() > -1 && player.regionGroups().size() >= groups()) {
-            return new Result(true,
-                    Message.fromKey("limits-reached-group")
-                        .replacements(player, this)
-                        .getSingle(),
-                    Type.GROUPS
-            );
-        }
-
-        return new Result(false, null, Type.GROUPS);
+        return groups() > -1 && player.regionGroups().size() >= groups();
     }
 
     public Limit setGroupLimit(String group, int limit) {
@@ -111,37 +103,15 @@ public class Limit {
         }
     }
 
-    public void set(Type limitType, int limitValue) {
+    public void set(LimitCheckResult.Type limitType, int limitValue) {
 
         switch (limitType) {
-            case GROUPS:
+            case TOTAL_GROUP_LIMIT_REACHED:
                 groups(limitValue);
                 break;
-            case TOTAL:
+            case TOTAL_LIMIT_REACHED:
                 total(limitValue);
                 break;
-        }
-    }
-
-    @Value
-    public static class Result {
-
-        boolean reachedLimit;
-        String error;
-        Type type;
-    }
-
-    public enum Type {
-
-        TOTAL,
-        REGIONS,
-        GROUPS,
-        ALL,
-        NONE;
-
-        @DbEnumValue
-        public String getValue() {
-            return name();
         }
     }
 

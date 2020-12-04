@@ -14,7 +14,6 @@ import io.ebean.annotation.Transactional;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-import lombok.Value;
 import lombok.experimental.Accessors;
 import me.wiefferink.interactivemessenger.processing.ReplacementProvider;
 import net.md_5.bungee.api.ChatColor;
@@ -24,9 +23,10 @@ import net.milkbowl.vault.economy.Economy;
 import net.silthus.ebean.BaseEntity;
 import net.silthus.regions.*;
 import net.silthus.regions.costs.MoneyCost;
+import net.silthus.regions.costs.PriceDetails;
 import net.silthus.regions.events.BoughtRegionEvent;
 import net.silthus.regions.events.BuyRegionEvent;
-import net.silthus.regions.limits.Limit;
+import net.silthus.regions.limits.LimitCheckResult;
 import net.silthus.regions.util.MathUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -281,9 +281,9 @@ public class Region extends BaseEntity implements ReplacementProvider {
 
     public Region size(long size) {
         this.size = size;
-        this.volume = worldGuardRegion()
-                .map(region -> size * (region.getMaximumPoint().getBlockY() - region.getMinimumPoint().getBlockY()))
-                .orElse(0L);
+        worldGuardRegion().ifPresent(region -> {
+            this.volume = size * (region.getMaximumPoint().getBlockY() - region.getMinimumPoint().getBlockY());
+        });
         return this;
     }
 
@@ -314,85 +314,7 @@ public class Region extends BaseEntity implements ReplacementProvider {
 
         return worldGuardRegion().map(region -> volume()
                 / (region.getMaximumPoint().getBlockY() - region.getMinimumPoint().getBlockY()))
-                .orElse(0L);
-    }
-
-    public Cost.Result canBuy(@NonNull RegionPlayer player) {
-
-        Optional<RegionPlayer> owner = owner();
-        if (status() == Status.OCCUPIED) {
-            if (owner.isEmpty()) {
-                return new Cost.Result(false, "Das Grundstück " + name() + " gehört bereits jemandem steht aber fehlerhaft in der Datenbank. " +
-                        "Bitte kontaktiere einen Admin mit der Grundstücks ID: " + id(), Cost.ResultStatus.OTHER);
-            } else if (owner.get().equals(player)) {
-                return new Cost.Result(false, "Du besitzt das Grundstück " + name() + " bereits.", Cost.ResultStatus.OWNED_BY_SELF);
-            } else {
-                return new Cost.Result(false, "Das Grundstück " + name() + " gehört bereits " + owner().map(RegionPlayer::name).orElse("jemandem."), Cost.ResultStatus.OWNED_BY_OTHER);
-            }
-        }
-
-        Limit.Result limits = checkLimits(player);
-        if (limits.reachedLimit()) {
-            return new Cost.Result(false, limits.error(), Cost.ResultStatus.LIMITS_REACHED);
-        }
-
-        RegionsPlugin plugin = RegionsPlugin.instance();
-
-        if (group() == null) {
-            Economy economy = plugin.getEconomy();
-            double totalCosts = price() * priceMultiplier();
-            double balance = economy.getBalance(player.getOfflinePlayer());
-            return new Cost.Result(economy.has(player.getOfflinePlayer(), totalCosts),
-                    "Du hast nicht genügend Geld (" + economy.format(balance) + ")! Du benötigst mindestens: " + economy.format(price),
-                    new MoneyCost.Details().basePrice(price).regionModifier(priceMultiplier()),
-                    Cost.ResultStatus.NOT_ENOUGH_MONEY);
-        } else {
-            return group()
-                    .costs().stream()
-                    .map(cost -> cost.check(this, player))
-                    .reduce(Cost.Result::combine)
-                    .orElse(new Cost.Result(true, null, Cost.ResultStatus.SUCCESS));
-        }
-    }
-
-    private Limit.Result checkLimits(@Nullable RegionPlayer player) {
-
-        return RegionsPlugin.instance()
-                .getLimitsConfig()
-                .getPlayerLimit(player)
-                .map(playerLimit -> playerLimit.test(this))
-                .orElse(new Limit.Result(false, null, Limit.Type.NONE));
-    }
-
-    @Transactional
-    public Cost.Result buy(@NonNull RegionsPlugin plugin, @NonNull RegionPlayer player) {
-
-        Cost.Result canBuy = canBuy(player);
-        BuyRegionEvent buyRegionEvent = new BuyRegionEvent(this, player, canBuy);
-        Bukkit.getPluginManager().callEvent(buyRegionEvent);
-
-        if (buyRegionEvent.isCancelled()) {
-            return new Cost.Result(false, "Das Kaufen der Region wurde durch ein Plugin verhindert.", Cost.ResultStatus.EVENT_CANCELLED).combine(canBuy);
-        }
-
-        if (canBuy.failure()) {
-            return canBuy;
-        }
-
-        MoneyCost.Details price = canBuy.price();
-        plugin.getEconomy().withdrawPlayer(player.getOfflinePlayer(), price.total());
-
-        owner(player);
-        status(Status.OCCUPIED);
-        RegionTransaction.of(this, player, RegionTransaction.Action.BUY)
-                .data("price", this.price)
-                .save();
-        save();
-        updateSigns();
-
-        Bukkit.getPluginManager().callEvent(new BoughtRegionEvent(this, player, canBuy));
-
-        return new Cost.Result(true, null, price, Cost.ResultStatus.SUCCESS);
+                .orElse(size);
     }
 
     public List<Cost> costs() {
@@ -402,6 +324,15 @@ public class Region extends BaseEntity implements ReplacementProvider {
         } else {
             return group().costs();
         }
+    }
+
+    public PriceDetails priceDetails(@Nullable RegionPlayer player) {
+
+        return costs().stream()
+                .filter(cost -> cost instanceof MoneyCost)
+                .map(cost -> ((MoneyCost) cost).calculate(this, player))
+                .findFirst()
+                .orElse(new PriceDetails());
     }
 
     public BaseComponent[] displayCosts() {
@@ -510,14 +441,9 @@ public class Region extends BaseEntity implements ReplacementProvider {
                 .filter(cost -> cost instanceof MoneyCost)
                 .map(cost -> (MoneyCost) cost)
                 .map(moneyCost -> moneyCost.calculate(this))
-                .map(MoneyCost.Details::regionBasePrice)
+                .map(PriceDetails::regionBasePrice)
                 .reduce(Double::sum)
                 .orElse(price() * priceMultiplier());
-    }
-
-    public double sellServerPrice(@NonNull RegionPlayer player) {
-
-        return basePrice() * group().sellModifier();
     }
 
     public boolean isOwner(Player player) {
