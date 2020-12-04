@@ -3,7 +3,6 @@ package net.silthus.regions.commands;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.InvalidCommandArgument;
 import co.aikar.commands.annotation.*;
-import lombok.NonNull;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -183,12 +182,13 @@ public class RegionCommands extends BaseCommand {
                         .append(" zu verkaufen.\n").color(ChatColor.RED);
             }
 
-            SellAction sellAction = new SellAction(regionPlayer, region, SellType.SERVER);
+            SellAction sellAction = new SellAction(region, regionPlayer, SellType.SERVER);
+            double sellServerPrice = sellAction.getPriceDetails().sellServerPrice();
 
             builder.append("Willst du das Grundstück ").color(ChatColor.YELLOW)
                     .append(Messages.region(region, regionPlayer)).color(ChatColor.GOLD).bold(true)
                     .append(" für ").color(ChatColor.YELLOW).bold(false)
-                    .append(plugin.getEconomy().format(sellAction.getPriceDetails().sellServerPrice())).color(ChatColor.AQUA)
+                    .append(plugin.getEconomy().format(sellServerPrice)).color(ChatColor.AQUA)
                     .append(" an den ").color(ChatColor.YELLOW).append("Server").color(ChatColor.RED)
                     .append(" verkaufen?").color(ChatColor.YELLOW);
 
