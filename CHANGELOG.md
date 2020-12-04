@@ -1,3 +1,11 @@
+# [1.14.0](https://github.com/raidcraft/rcregions/compare/v1.13.1...v1.14.0) (2020-12-04)
+
+
+### Features
+
+* **cmd:** add /rcra set factor command to set the individual region factor ([9b167d0](https://github.com/raidcraft/rcregions/commit/9b167d053933881e5ba5907dd3f11834b542f66a))
+* save schematic when a player buys a region ([61e1068](https://github.com/raidcraft/rcregions/commit/61e106803e425330ea7d5bfdb5911b1e3928f34d))
+
 ## [1.13.1](https://github.com/raidcraft/rcregions/compare/v1.13.0...v1.13.1) (2020-12-04)
 
 
