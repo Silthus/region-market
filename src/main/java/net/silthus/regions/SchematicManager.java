@@ -11,6 +11,7 @@ import lombok.Getter;
 import net.silthus.ebean.BaseEntity;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionTransaction;
+import net.silthus.regions.events.BoughtRegionEvent;
 import net.silthus.regions.events.CreatedRegionEvent;
 import net.silthus.regions.events.DeletedRegionEvent;
 import net.silthus.regions.events.SoldRegionEvent;
@@ -32,6 +33,7 @@ public class SchematicManager implements Listener {
     private static final String SCHEMATIC_NAME_ORIGINAL = "original";
     private static final String SCHEMATIC_NAME_DELETED = "deleted";
     private static final String SCHEMATIC_NAME_SOLD = "sold";
+    private static final String SCHEMATIC_NAME_BUY = "buy";
 
     private final RegionsPlugin plugin;
     private final WorldEdit worldEdit;
@@ -54,6 +56,13 @@ public class SchematicManager implements Listener {
     public void onRegionDeleted(DeletedRegionEvent event) {
 
         saveSchematic(event.getRegion(), SCHEMATIC_NAME_DELETED);
+    }
+
+    @EventHandler
+    public void onRegionBuy(BoughtRegionEvent event) {
+
+        String dateTime = TimeUtil.formatDateTime(Instant.now(), "dd-MM-yyyy_HH-mm-ss");
+        saveSchematic(event.getRegion(), SCHEMATIC_NAME_BUY + "_" + event.getRegionPlayer().name() + "_" + dateTime);
     }
 
     @EventHandler
