@@ -152,6 +152,9 @@ public class Region extends BaseEntity implements ReplacementProvider {
     @OneToMany(cascade = CascadeType.REMOVE)
     private List<RegionSign> signs = new ArrayList<>();
 
+    @OneToMany(cascade = CascadeType.REMOVE)
+    private List<Sale> sales = new ArrayList<>();
+
     public Region(String name) {
 
         this(null, name);
@@ -236,6 +239,14 @@ public class Region extends BaseEntity implements ReplacementProvider {
         return owners().stream()
                 .filter(OwnedRegion::active)
                 .findFirst();
+    }
+
+    public List<DirectSale> directSales() {
+
+        return sales().stream()
+                .filter(sale -> sale instanceof DirectSale)
+                .map(sale -> (DirectSale) sale)
+                .collect(Collectors.toList());
     }
 
     public Region owner(@Nullable RegionPlayer player) {

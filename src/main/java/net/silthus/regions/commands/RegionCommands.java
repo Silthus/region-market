@@ -10,9 +10,7 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import net.milkbowl.vault.economy.Economy;
 import net.silthus.regions.*;
-import net.silthus.regions.actions.BuyAction;
-import net.silthus.regions.actions.RegionAction;
-import net.silthus.regions.actions.SellAction;
+import net.silthus.regions.actions.*;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionPlayer;
 import org.bukkit.Bukkit;
@@ -182,7 +180,7 @@ public class RegionCommands extends BaseCommand {
                         .append(" zu verkaufen.\n").color(ChatColor.RED);
             }
 
-            SellAction sellAction = new SellAction(region, regionPlayer, SellType.SERVER);
+            SellServerAction sellAction = new SellServerAction(region, regionPlayer);
             double sellServerPrice = sellAction.getPriceDetails().sellServerPrice();
 
             builder.append("Willst du das Grundstück ").color(ChatColor.YELLOW)
@@ -241,7 +239,7 @@ public class RegionCommands extends BaseCommand {
 
             Economy economy = RegionsPlugin.instance().getEconomy();
 
-            SellAction.Result result = sellAction.run();
+            SellResult result = sellAction.run();
             player.spigot().sendMessage(new ComponentBuilder().append("Das Grundstück ").color(ChatColor.YELLOW)
                     .append(Messages.region(result.getRegion(), result.getRegionPlayer())).color(ChatColor.GOLD).bold(true)
                     .append(" wurde für ").reset().color(ChatColor.YELLOW)

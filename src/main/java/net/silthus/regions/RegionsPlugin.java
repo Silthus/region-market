@@ -22,13 +22,7 @@ import net.silthus.ebean.Config;
 import net.silthus.ebean.EbeanWrapper;
 import net.silthus.regions.commands.AdminCommands;
 import net.silthus.regions.commands.RegionCommands;
-import net.silthus.regions.entities.OwnedRegion;
-import net.silthus.regions.entities.Region;
-import net.silthus.regions.entities.RegionAcl;
-import net.silthus.regions.entities.RegionGroup;
-import net.silthus.regions.entities.RegionPlayer;
-import net.silthus.regions.entities.RegionSign;
-import net.silthus.regions.entities.RegionTransaction;
+import net.silthus.regions.entities.*;
 import net.silthus.regions.limits.LimitsConfig;
 import net.silthus.regions.listener.PlayerListener;
 import net.silthus.regions.listener.SignClickListener;
@@ -154,7 +148,9 @@ public class RegionsPlugin extends JavaPlugin {
                         RegionGroup.class,
                         RegionPlayer.class,
                         RegionTransaction.class,
-                        OwnedRegion.class
+                        OwnedRegion.class,
+                        Sale.class,
+                        DirectSale.class
                 )
                 .build()).connect();
     }
