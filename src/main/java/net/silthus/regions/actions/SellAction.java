@@ -1,11 +1,12 @@
 package net.silthus.regions.actions;
 
 import co.aikar.commands.InvalidCommandArgument;
+import com.google.common.base.Strings;
 import com.sk89q.worldguard.domains.DefaultDomain;
 import io.ebean.annotation.Transactional;
 import lombok.EqualsAndHashCode;
+import lombok.NonNull;
 import lombok.Value;
-import lombok.experimental.Accessors;
 import lombok.experimental.NonFinal;
 import net.milkbowl.vault.economy.Economy;
 import net.silthus.regions.RegionsPlugin;
@@ -25,30 +26,37 @@ public class SellAction extends RegionAction {
 
     PriceDetails priceDetails;
     RegionCommands.SellType sellType;
+    double price;
 
-    public SellAction(RegionPlayer regionPlayer, Region region, RegionCommands.SellType sellType) {
+    public SellAction(@NonNull Region region, @NonNull RegionPlayer regionPlayer, @NonNull RegionCommands.SellType sellType) {
         super(region, regionPlayer);
+        this.priceDetails = region.priceDetails(regionPlayer);
+        this.sellType = sellType;
+        if (sellType == RegionCommands.SellType.SERVER) {
+            price = priceDetails.sellServerPrice();
+        } else {
+            price = 0;
+        }
+    }
+
+    public SellAction(@NonNull Region region, @NonNull RegionPlayer regionPlayer, @NonNull RegionCommands.SellType sellType, double price) {
+        super(region, regionPlayer);
+        this.price = price;
         this.priceDetails = region.priceDetails(regionPlayer);
         this.sellType = sellType;
     }
 
-    public SellAction(SellAction sellAction) {
+    public SellAction(@NonNull SellAction sellAction) {
         super(sellAction);
         this.priceDetails = getRegion().priceDetails(getRegionPlayer());
         this.sellType = sellAction.sellType;
+        this.price = sellAction.price;
     }
 
     @Transactional
     public Result run() {
 
         Economy economy = RegionsPlugin.instance().getEconomy();
-
-        double price = 0;
-        switch (getSellType()) {
-            case SERVER:
-                price = getPriceDetails().sellServerPrice();
-                break;
-        }
 
         SellRegionEvent event = new SellRegionEvent(getRegion(), getRegionPlayer(), price);
         Bukkit.getPluginManager().callEvent(event);
@@ -82,11 +90,27 @@ public class SellAction extends RegionAction {
     @EqualsAndHashCode(callSuper = true)
     public static class Result extends SellAction {
 
+        String error;
         double price;
 
-        private Result(SellAction sellAction, double price) {
+        Result(@NonNull SellAction sellAction, String error, double price) {
             super(sellAction);
+            this.error = error;
             this.price = price;
+        }
+
+        Result(SellAction sellAction, double price) {
+            super(sellAction);
+            this.error = null;
+            this.price = price;
+        }
+
+        public boolean success() {
+            return Strings.isNullOrEmpty(error);
+        }
+
+        public boolean failure() {
+            return !success();
         }
     }
 }
