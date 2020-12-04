@@ -367,6 +367,20 @@ public class AdminCommands extends BaseCommand implements Listener {
                     + ChatColor.AQUA + region.volume() + "m³ " + ChatColor.GREEN + " gesetzt."
             );
         }
+
+        @Subcommand("factor")
+        @CommandCompletion("@regions")
+        public void setFactor(Player player, Region region, double factor) {
+
+            region.priceMultiplier(factor).save();
+            player.spigot().sendMessage(new ComponentBuilder()
+                .append("Der individuelle Preis-Faktor des Grundstücks ").color(net.md_5.bungee.api.ChatColor.GREEN)
+                    .append(Messages.region(region, null)).color(net.md_5.bungee.api.ChatColor.GOLD).bold(true)
+                    .append(" wurde auf ").reset().color(net.md_5.bungee.api.ChatColor.GREEN)
+                    .append("x" + factor).color(net.md_5.bungee.api.ChatColor.AQUA)
+                    .append(" gesetzt.").color(net.md_5.bungee.api.ChatColor.GREEN)
+                    .create());
+        }
     }
 
     @EventHandler(ignoreCancelled = true)
