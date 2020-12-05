@@ -1,3 +1,10 @@
+## [1.17.1](https://github.com/raidcraft/rcregions/compare/v1.17.0...v1.17.1) (2020-12-05)
+
+
+### Bug Fixes
+
+* **sell:** do not reset region multiplier when selling to players ([9a6e5bf](https://github.com/raidcraft/rcregions/commit/9a6e5bf9823729cdf2dd103c61e34557a3905932)), closes [#22](https://github.com/raidcraft/rcregions/issues/22)
+
 # [1.17.0](https://github.com/raidcraft/rcregions/compare/v1.16.0...v1.17.0) (2020-12-05)
 
 
