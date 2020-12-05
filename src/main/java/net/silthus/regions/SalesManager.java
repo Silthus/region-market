@@ -2,6 +2,7 @@ package net.silthus.regions;
 
 import net.silthus.regions.entities.RegionPlayer;
 import net.silthus.regions.entities.Sale;
+import net.silthus.regions.events.SoldRegionEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -48,5 +49,17 @@ public class SalesManager implements Listener {
             event.getPlayer().spigot().sendMessage(Messages.sales("Du hast seit dem letzten Login folgende Grundstücke verkauft", sales));
             sales.forEach(sale -> sale.acknowledged(Instant.now()).save());
         }, plugin.getPluginConfig().getSalesLoginDelay() + 1L);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onRegionSell(SoldRegionEvent event) {
+
+        for (String command : plugin.getPluginConfig().getSellCommands()) {
+            command = command.replace("%player%", event.getPlayer().name())
+                    .replace("%region%", event.getRegion().name())
+                    .replace("%wgregion%", event.getRegion().name())
+                    .replace("%group%", event.getRegion().group().identifier());
+            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command);
+        }
     }
 }

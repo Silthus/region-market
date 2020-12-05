@@ -37,6 +37,11 @@ public class RegionsPluginConfig extends BukkitYamlConfiguration {
     @Comment("Time in ticks the login message for open sales should be delayed.")
     private long salesLoginDelay = 60L;
     private List<String> ignoredRegions = new ArrayList<>();
+    @Comment({
+            "A list of commands to execute as server when a region is sold.",
+            "You can use the %player%, %region%, %wgregion% and %group% replacements."
+    })
+    private List<String> sellCommands = new ArrayList<>();
     private DatabaseConfig database = new DatabaseConfig();
 
     public RegionsPluginConfig(Path path) {
