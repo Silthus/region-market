@@ -23,6 +23,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 public final class Messages {
 
@@ -505,5 +506,15 @@ public final class Messages {
                 .create();
 
         return new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(baseComponents));
+    }
+
+    public static BaseComponent[] regionList(@NonNull RegionPlayer player) {
+
+        ComponentBuilder builder = new ComponentBuilder();
+        for (Region region : player.regions()) {
+            builder.append(" - ").color(ChatColor.YELLOW)
+                    .append(region(region, player)).append("\n");
+        }
+        return builder.create();
     }
 }

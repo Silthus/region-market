@@ -51,20 +51,57 @@ public class RegionCommands extends BaseCommand {
     }
 
     @Default
+    @Subcommand("list")
+    @CommandPermission("rcregions.region.list")
+    @CommandCompletion("@players")
+    public void list(Player player, RegionPlayer regionPlayer) {
+
+        boolean isOwner = player.getUniqueId().equals(regionPlayer.id());
+        if (!isOwner
+                && !getCurrentCommandIssuer().hasPermission(Constants.Permissions.REGION_LIST_FOR_OTHERS)) {
+            throw new InvalidCommandArgument("Du hast nicht genügend Rechte dir die Regionen von anderen Spielern anzeigen zu lassen.");
+        }
+
+        ComponentBuilder builder = new ComponentBuilder();
+        if (!isOwner) {
+            builder.append("--- [ ").color(ChatColor.DARK_AQUA)
+                    .append("Die Regionen von ").color(ChatColor.YELLOW)
+                    .append(Messages.player(regionPlayer)).color(ChatColor.GOLD)
+                    .append(" ] ---").reset().color(ChatColor.DARK_AQUA).append("\n");
+        } else {
+            builder.append("--- [ ").color(ChatColor.DARK_AQUA)
+                    .append("Deine Regionen [?] ").color(ChatColor.GOLD)
+                    .event(Messages.playerHover(regionPlayer))
+                    .append(" ] ---").reset().color(ChatColor.DARK_AQUA).append("\n");
+        }
+        player.spigot().sendMessage(Messages.regionList(regionPlayer));
+    }
+
     @Subcommand("info")
     @CommandPermission("rcregions.region.info")
     @CommandCompletion("@regions @players")
     public void info(Player player, Region region, RegionPlayer regionPlayer) {
 
+        boolean isOwner = player.getUniqueId().equals(regionPlayer.id());
+        if (!isOwner
+                && !getCurrentCommandIssuer().hasPermission(Constants.Permissions.REGION_LIST_FOR_OTHERS)) {
+            throw new InvalidCommandArgument("Du hast nicht genügend Rechte dir die Regionen von anderen Spielern anzeigen zu lassen.");
+        }
+
         player.spigot().sendMessage(Messages.regionInfo(region, regionPlayer));
     }
-
 
     @Subcommand("limits")
     @CommandAlias("regionlimits|limits")
     @CommandPermission("rcregions.region.limits")
     @CommandCompletion("@players")
     public void limits(Player player, RegionPlayer regionPlayer) {
+
+        boolean isOwner = player.getUniqueId().equals(regionPlayer.id());
+        if (!isOwner
+                && !getCurrentCommandIssuer().hasPermission(Constants.Permissions.REGION_LIST_FOR_OTHERS)) {
+            throw new InvalidCommandArgument("Du hast nicht genügend Rechte dir die Grundstückslimits von anderen Spielern anzeigen zu lassen.");
+        }
 
         player.spigot().sendMessage(Messages.limits(regionPlayer));
     }

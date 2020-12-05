@@ -18,6 +18,7 @@ public final class Constants {
     public static final class Permissions {
 
         public static final String BUY_REGION_FOR_OTHERS = "rcregions.region.buy.others";
+        public static final String REGION_LIST_FOR_OTHERS = "rcregions.region.list.others";
     }
 
 }
