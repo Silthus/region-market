@@ -90,6 +90,11 @@ public class RegionPlayer extends BaseEntity implements ReplacementProvider {
         return Bukkit.getOfflinePlayer(id());
     }
 
+    public List<Sale> activeSales() {
+
+        return sales().stream().filter(Sale::active).collect(Collectors.toList());
+    }
+
     public double priceMultiplier() {
 
         if (priceMultiplier == 0) {

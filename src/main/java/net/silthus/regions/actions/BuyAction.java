@@ -95,7 +95,7 @@ public class BuyAction extends RegionAction {
         }
 
 
-        Optional<Sale> optionalSale = Sale.of(result.getRegion());
+        Optional<Sale> optionalSale = Sale.getActiveSale(result.getRegion());
         if (optionalSale.isPresent()) {
             Sale sale = optionalSale.get();
 

@@ -32,6 +32,10 @@ public class RegionsPluginConfig extends BukkitYamlConfiguration {
             "You can always manually trigger this with the command /rcra autogroup <group>"
     })
     private boolean autoMapParent = true;
+    @Comment("Set this to true to display a message to players that have open sales when they login.")
+    private boolean displaySalesLoginNotification = true;
+    @Comment("Time in ticks the login message for open sales should be delayed.")
+    private long salesLoginDelay = 60L;
     private List<String> ignoredRegions = new ArrayList<>();
     private DatabaseConfig database = new DatabaseConfig();
 

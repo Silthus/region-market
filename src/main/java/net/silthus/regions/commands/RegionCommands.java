@@ -30,6 +30,7 @@ import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -312,7 +313,7 @@ public class RegionCommands extends BaseCommand {
 
         @Subcommand("abort")
         @CommandPermission("rcregions.region.sell")
-        @CommandCompletion("@regions")
+        @CommandCompletion("@sales")
         public void sellAbort(Player player, @Optional Region region) {
 
             RegionAction sellAction = sellActions.remove(player.getUniqueId());
@@ -322,7 +323,7 @@ public class RegionCommands extends BaseCommand {
                         .append(" wurde abgebrochen.").bold(false).color(ChatColor.RED)
                         .create());
             } else if (region != null) {
-                java.util.Optional<Sale> optionalSale = Sale.of(region);
+                java.util.Optional<Sale> optionalSale = Sale.getActiveSale(region);
                 optionalSale.ifPresent(sale -> {
                     sale.abort();
                     player.spigot().sendMessage(new ComponentBuilder().append("Der Grundstücksverkauf von ").color(ChatColor.RED)
@@ -331,6 +332,19 @@ public class RegionCommands extends BaseCommand {
                             .create());
                 });
             }
+        }
+
+        @Subcommand("ack|acknowledge")
+        @CommandPermission("rcregions.region.sell")
+        @CommandCompletion("@sales")
+        public void sellAck(Player player, Region region) {
+
+            Sale.of(region).stream()
+                    .filter(Sale::needsAcknowledgement)
+                    .forEach(sale -> {
+                        sale.acknowledged(Instant.now()).save();
+                        player.sendMessage(ChatColor.GREEN + "Der Verkauf der Region " + region.name() + " wurde bestätigt.");
+                    });
         }
     }
 
