@@ -63,6 +63,11 @@ public class RegionCommands extends BaseCommand {
             throw new InvalidCommandArgument("Du hast nicht genügend Rechte dir die Regionen von anderen Spielern anzeigen zu lassen.");
         }
 
+        if (regionPlayer.regions().isEmpty()) {
+            player.sendMessage(ChatColor.RED + "Du besitzt noch keine Regionen.\n" + ChatColor.GREEN + "In den Slums gibt es kostenlose Grundstücke.");
+            return;
+        }
+
         ComponentBuilder builder = new ComponentBuilder();
         if (!isOwner) {
             builder.append("--- [ ").color(ChatColor.DARK_AQUA)
