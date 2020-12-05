@@ -52,6 +52,7 @@ public class RegionCommands extends BaseCommand {
 
     @Default
     @Subcommand("list")
+    @CommandAlias("grundstücke|gs|regionen|regions")
     @CommandPermission("rcregions.region.list")
     @CommandCompletion("@players")
     public void list(Player player, RegionPlayer regionPlayer) {
@@ -67,14 +68,14 @@ public class RegionCommands extends BaseCommand {
             builder.append("--- [ ").color(ChatColor.DARK_AQUA)
                     .append("Die Regionen von ").color(ChatColor.YELLOW)
                     .append(Messages.player(regionPlayer)).color(ChatColor.GOLD)
-                    .append(" ] ---").reset().color(ChatColor.DARK_AQUA).append("\n");
+                    .append(" ] ---").reset().color(ChatColor.DARK_AQUA).append("\n").reset();
         } else {
             builder.append("--- [ ").color(ChatColor.DARK_AQUA)
                     .append("Deine Regionen [?] ").color(ChatColor.GOLD)
                     .event(Messages.playerHover(regionPlayer))
-                    .append(" ] ---").reset().color(ChatColor.DARK_AQUA).append("\n");
+                    .append(" ] ---").reset().color(ChatColor.DARK_AQUA).append("\n").reset();
         }
-        player.spigot().sendMessage(Messages.regionList(regionPlayer));
+        player.spigot().sendMessage(builder.append(Messages.regionList(regionPlayer)).create());
     }
 
     @Subcommand("info")
@@ -104,6 +105,21 @@ public class RegionCommands extends BaseCommand {
         }
 
         player.spigot().sendMessage(Messages.limits(regionPlayer));
+    }
+
+    @Subcommand("sales")
+    @CommandAlias("regionsales|sales")
+    @CommandPermission("rcregions.sales")
+    @CommandCompletion("@players")
+    public void sales(Player player, RegionPlayer regionPlayer) {
+
+        boolean isOwner = player.getUniqueId().equals(regionPlayer.id());
+        if (!isOwner
+                && !getCurrentCommandIssuer().hasPermission(Constants.Permissions.REGION_LIST_FOR_OTHERS)) {
+            throw new InvalidCommandArgument("Du hast nicht genügend Rechte dir die Verkäufe von anderen Spielern anzeigen zu lassen.");
+        }
+
+        player.spigot().sendMessage(Messages.sales("Offene Verkäufe von " + regionPlayer.name() + ":", regionPlayer.activeSales()));
     }
 
     @Subcommand("buy")

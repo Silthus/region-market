@@ -40,6 +40,7 @@ public class SellDirectAction extends SellAction {
         if (timeout > 0) {
             sale.expires(Instant.now().plus(timeout, ChronoUnit.MINUTES));
         }
+        sale.start(Instant.now());
         sale.save();
 
         getRegion().priceType(Region.PriceType.STATIC)
