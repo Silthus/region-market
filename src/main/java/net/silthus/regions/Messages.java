@@ -60,20 +60,20 @@ public final class Messages {
 
         ComponentBuilder builder = new ComponentBuilder("\n")
                 .append("Grundstück: ").color(ChatColor.YELLOW)
-                    .append(region(region, player))
-                    .append(" ").reset().append(showBuyInfo ? buy(region, player) : new BaseComponent[0])
-                    .append("\n")
+                .append(region(region, player))
+                .append(" ").reset().append(showBuyInfo ? buy(region, player) : new BaseComponent[0])
+                .append("\n")
                 .append("Größe: ").reset().color(ChatColor.YELLOW)
-                    .append(region.size() + "m²").reset().color(ChatColor.AQUA)
-                    .append(" | ").color(ChatColor.YELLOW)
-                    .append(region.volume() + "m³").color(ChatColor.AQUA)
-                    .append("\n")
+                .append(region.size() + "m²").reset().color(ChatColor.AQUA)
+                .append(" | ").color(ChatColor.YELLOW)
+                .append(region.volume() + "m³").color(ChatColor.AQUA)
+                .append("\n")
                 .append("Stadtteil: ").reset().color(ChatColor.YELLOW)
-                    .append(group(region)).append("\n")
+                .append(group(region)).append("\n")
                 .append("Besitzer: ").reset().color(ChatColor.YELLOW)
-                    .append(owner(region)).append("\n")
+                .append(owner(region)).append("\n")
                 .append("Kosten: ").reset().color(ChatColor.YELLOW).append("\n")
-                    .append(costs(region, player));
+                .append(costs(region, player));
 
         return builder.create();
     }
@@ -352,7 +352,7 @@ public final class Messages {
             Optional<RegionGroup> group = RegionGroup.of(entry.getKey());
             group.ifPresent(regionGroup -> builder.append(" - ").color(ChatColor.GRAY)
                     .append(limit(regionGroup.name() + ": ", player.regions(regionGroup).size(), entry.getValue()))
-            .append("\n"));
+                    .append("\n"));
         }
         return builder.create();
     }
@@ -466,14 +466,21 @@ public final class Messages {
             builder.append(" [X]").color(ChatColor.DARK_RED)
                     .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder("Klicken um den Verkauf abzubrechen.").color(ChatColor.RED).create())))
                     .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/rcr sell abort " + sale.region().name()));
-        } else if (sale.buyer() != null) {
-            builder.append(" [VERKAUFT]").color(ChatColor.GREEN)
-                    .append(" | ").color(ChatColor.YELLOW)
-                    .append(player(sale.buyer())).color(ChatColor.GOLD).bold(true)
-                    .append(" | ").reset().color(ChatColor.YELLOW)
-                    .append(economy.format(sale.price())).color(ChatColor.AQUA)
-                    .append(" [✅]").color(ChatColor.GREEN)
-                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Klicke um den Verkauf der Region zu bestätigen und diese Nachricht auszublenden.")))
+        } else if (sale.needsAcknowledgement()) {
+            if (sale.buyer() != null) {
+                builder.append(" [VERKAUFT]").color(ChatColor.GREEN)
+                        .append(" | ").color(ChatColor.YELLOW)
+                        .append(player(sale.buyer())).color(ChatColor.GOLD).bold(true)
+                        .append(" | ").reset().color(ChatColor.YELLOW)
+                        .append(economy.format(sale.price())).color(ChatColor.AQUA);
+            } else if (sale.exired()) {
+                builder.append(" [ABGELAUFEN]").color(ChatColor.GRAY)
+                        .append(" | ").color(ChatColor.YELLOW)
+                        .append(TimeUtil.formatDateTime(sale.end())).color(ChatColor.AQUA);
+            }
+
+            builder.append(" [✅]").color(ChatColor.GREEN)
+                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Klicke um den Verkauf/Ablauf des Grundstücks zu bestätigen und diese Nachricht auszublenden.")))
                     .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/rcr sell acknowledge " + sale.region().name()));
         }
 

@@ -41,6 +41,8 @@ public class RegionsPluginConfig extends BukkitYamlConfiguration {
             "Set to less than 0 to disable the timeout and never expire sales."
     })
     private long regionSellTimeout = 20160;
+    @Comment("Interval in ticks for the regular tasks that checks for expired sales.")
+    private long expirationTaskInterval = 1200;
     private List<String> ignoredRegions = new ArrayList<>();
     @Comment({
             "A list of commands to execute as server when a region is sold.",

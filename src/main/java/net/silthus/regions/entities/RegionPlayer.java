@@ -5,10 +5,8 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import me.wiefferink.interactivemessenger.processing.ReplacementProvider;
 import net.silthus.ebean.BaseEntity;
 import net.silthus.regions.Constants;
-import net.silthus.regions.MessageTags;
 import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.limits.LimitCheckResult;
 import org.bukkit.Bukkit;
@@ -17,29 +15,17 @@ import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
-
-import static net.silthus.regions.MessageTags.playerId;
-import static net.silthus.regions.MessageTags.playerName;
 
 @Entity
 @Getter
 @Setter
 @Accessors(fluent = true)
 @Table(name = "rcregions_players")
-public class RegionPlayer extends BaseEntity implements ReplacementProvider {
+public class RegionPlayer extends BaseEntity {
 
     public static Optional<RegionPlayer> of(OfflinePlayer player) {
         return Optional.ofNullable(find.byId(player.getUniqueId()));
@@ -136,20 +122,5 @@ public class RegionPlayer extends BaseEntity implements ReplacementProvider {
                 .getPlayerLimit(this)
                 .map(playerLimit -> playerLimit.test(region))
                 .orElse(new LimitCheckResult());
-    }
-
-    @Override
-    public Object provideReplacement(String variable) {
-
-        switch (variable) {
-            case playerName:
-                return name();
-            case playerId:
-                return id();
-            case MessageTags.priceMultiplier:
-                return priceMultiplier;
-        }
-
-        return null;
     }
 }

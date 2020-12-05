@@ -13,7 +13,6 @@ import io.ebean.annotation.DbEnumValue;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import me.wiefferink.interactivemessenger.processing.ReplacementProvider;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -35,19 +34,9 @@ import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 
 import javax.annotation.Nullable;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static net.silthus.regions.MessageTags.*;
@@ -57,7 +46,7 @@ import static net.silthus.regions.MessageTags.*;
 @Setter
 @Accessors(fluent = true)
 @Table(name = "rcregions_regions")
-public class Region extends BaseEntity implements ReplacementProvider {
+public class Region extends BaseEntity {
 
     public static boolean exists(World world, ProtectedRegion protectedRegion) {
 
@@ -396,47 +385,6 @@ public class Region extends BaseEntity implements ReplacementProvider {
             sign.delete();
         }
         return super.delete();
-    }
-
-    @Override
-    public Object provideReplacement(String variable) {
-
-        switch (variable) {
-            case regionName:
-                return name();
-            case regionVolume:
-                return calcVolume();
-            case regionSize:
-                return calcSize();
-            case playerName:
-            case MessageTags.owner:
-                return owner().map(RegionPlayer::name).orElse(null);
-            case ownerId:
-            case playerId:
-                return owner().map(BaseEntity::id).orElse(null);
-            case MessageTags.price:
-                return RegionsPlugin.instance().getEconomy().format(price());
-            case priceraw:
-                return price();
-            case MessageTags.priceMultiplier:
-                return priceMultiplier();
-            case MessageTags.worldName:
-                return worldName();
-            case regionStatus:
-                return status().getValue().toLowerCase();
-            case MessageTags.regionType:
-                return regionType().getValue().toLowerCase();
-            case MessageTags.priceType:
-                return priceType().getValue().toLowerCase();
-            case groupName:
-                return group() != null ? group().name() : null;
-            case groupId:
-                return group() != null ? group().identifier() : null;
-            case groupDescription:
-                return group() != null ? group().description() : null;
-        }
-
-        return null;
     }
 
     public double basePrice() {

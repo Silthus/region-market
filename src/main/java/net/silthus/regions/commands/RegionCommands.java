@@ -350,7 +350,7 @@ public class RegionCommands extends BaseCommand {
             } else if (region != null) {
                 java.util.Optional<Sale> optionalSale = Sale.getActiveSale(region);
                 optionalSale.ifPresent(sale -> {
-                    sale.abort();
+                    sale.abort(true);
                     player.spigot().sendMessage(new ComponentBuilder().append("Der Grundstücksverkauf von ").color(ChatColor.RED)
                             .append(Messages.region(sale.region())).color(ChatColor.GOLD).bold(true)
                             .append(" wurde abgebrochen.").bold(false).color(ChatColor.RED)

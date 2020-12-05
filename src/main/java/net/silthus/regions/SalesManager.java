@@ -1,5 +1,7 @@
 package net.silthus.regions;
 
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.silthus.regions.entities.RegionPlayer;
 import net.silthus.regions.entities.Sale;
 import net.silthus.regions.events.SoldRegionEvent;
@@ -7,6 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.time.Instant;
 import java.util.List;
@@ -15,10 +18,37 @@ import java.util.stream.Collectors;
 public class SalesManager implements Listener {
 
     private final RegionsPlugin plugin;
+    private BukkitTask task;
 
     public SalesManager(RegionsPlugin plugin) {
 
         this.plugin = plugin;
+    }
+
+    public void start() {
+
+        if (task != null) {
+            stop();
+        }
+
+        long interval = plugin.getPluginConfig().getExpirationTaskInterval();
+        task = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> {
+            for (Sale expiredSale : Sale.getExpiredSales()) {
+                expiredSale.expire();
+                expiredSale.seller().getBukkitPlayer()
+                        .ifPresent(player -> player.spigot().sendMessage(new ComponentBuilder()
+                                .append("Verkaufsstatus von: ").color(ChatColor.RED)
+                                .append(Messages.sale(expiredSale)).create()));
+            }
+        }, interval, interval);
+    }
+
+    public void stop() {
+
+        if (task != null) {
+            task.cancel();
+            task = null;
+        }
     }
 
     @EventHandler(ignoreCancelled = true)

@@ -46,19 +46,36 @@ public class Sale extends BaseEntity {
                 .findAny();
     }
 
+    public static List<Sale> getActiveSales() {
+
+        return find.query().where()
+                .isNull("end")
+                .findList();
+    }
+
+    public static List<Sale> getExpiredSales() {
+
+        return find.query().where()
+                .isNull("end")
+                .and()
+                .le("expires", Instant.now())
+                .findList();
+    }
+
     @ManyToOne
     private Region region;
     @ManyToOne
     private RegionPlayer seller;
     private double price;
+
     private Type type;
 
     @ManyToOne
     private RegionPlayer buyer;
-
     private Instant start;
     private Instant expires;
     private Instant end;
+
     private Instant acknowledged;
 
     public Sale(Region region, RegionPlayer seller, Type type) {
@@ -84,9 +101,10 @@ public class Sale extends BaseEntity {
         return this;
     }
 
-    public void abort() {
+    public void abort(boolean acknowledge) {
 
         end(Instant.now());
+        if (acknowledge) acknowledged(Instant.now());
         region().status(Region.Status.OCCUPIED).save();
         save();
     }
@@ -98,7 +116,18 @@ public class Sale extends BaseEntity {
 
     public boolean needsAcknowledgement() {
 
-        return buyer() != null && acknowledged() == null;
+        return !active() && acknowledged() == null;
+    }
+
+    public boolean exired() {
+
+        return !active() && buyer() == null;
+    }
+
+    public void expire() {
+
+        end(Instant.now());
+        save();
     }
 
     public enum Type {

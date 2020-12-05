@@ -207,10 +207,10 @@ public class AdminCommands extends BaseCommand implements Listener {
 
         if (signLinkModes.containsKey(player.getUniqueId())) {
             signLinkModes.remove(player.getUniqueId());
-            plugin.message(player, "autolink-deactivated");
+            player.sendMessage(ChatColor.RED + "[AutoLink] deaktiviert.");
         } else {
             signLinkModes.put(player.getUniqueId(), new SignLinkMode());
-            plugin.message(player, "autolink-activated");
+            player.sendMessage(ChatColor.GREEN + "[AutoLink] aktiviert.");
         }
     }
 

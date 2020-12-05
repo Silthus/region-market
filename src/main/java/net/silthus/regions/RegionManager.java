@@ -36,8 +36,13 @@ public final class RegionManager {
         loadRegionGroups(new File(plugin.getDataFolder(), config.getRegionGroupsConfig()).toPath());
     }
 
-    public void reload() {
+    public void unload() {
+
         groups.clear();
+    }
+
+    public void reload() {
+        unload();
         load();
     }
 

@@ -13,8 +13,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import me.wiefferink.interactivemessenger.processing.Message;
-import me.wiefferink.interactivemessenger.source.LanguageManager;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 import net.silthus.ebean.BaseEntity;
@@ -29,6 +27,7 @@ import net.silthus.regions.listener.SignClickListener;
 import net.silthus.regions.listener.SignListener;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -57,7 +56,6 @@ public class RegionsPlugin extends JavaPlugin {
     private RegionManager regionManager;
     private SchematicManager schematicManager;
     private PaperCommandManager commandManager;
-    private LanguageManager languageManager;
     private SalesManager salesManager;
 
     private SignListener signListener;
@@ -92,12 +90,11 @@ public class RegionsPlugin extends JavaPlugin {
         }
 
         loadConfig();
-        setupLanguageManager();
         setupDatabase();
         setupRegionManager();
         setupSchematicManager();
-        setupSalesManager();
         if (!isTesting()) {
+            setupSalesManager();
             setupListeners();
             setupCommands();
         }
@@ -107,6 +104,18 @@ public class RegionsPlugin extends JavaPlugin {
 
         loadConfig();
         getRegionManager().reload();
+        getSalesManager().start();
+    }
+
+    @Override
+    public void onDisable() {
+
+        if (!isTesting()) {
+            HandlerList.unregisterAll(this);
+            getCommandManager().unregisterCommands();
+            getSalesManager().stop();
+        }
+        getRegionManager().unload();
     }
 
     private boolean setupVault() {
@@ -168,6 +177,7 @@ public class RegionsPlugin extends JavaPlugin {
 
         this.salesManager = new SalesManager(this);
         Bukkit.getPluginManager().registerEvents(salesManager, this);
+        salesManager.start();
     }
 
     private void setupSchematicManager() {
@@ -307,36 +317,5 @@ public class RegionsPlugin extends JavaPlugin {
                     .stream().filter(s -> !getPluginConfig().getIgnoredRegions().contains(s))
                     .collect(Collectors.toSet());
         });
-    }
-
-    private void setupLanguageManager() {
-
-        languageManager = new LanguageManager(
-                this,                                  // The plugin (used to get the languages bundled in the jar file)
-                "lang",                           // Folder where the languages are stored
-                getConfig().getString("language"),     // The language to use indicated by the plugin user
-                "EN",                                  // The default language, expected to be shipped with the plugin and should be complete, fills in gaps in the user-selected language
-                getConfig().getStringList("chatPrefix") // Chat prefix to use with Message#prefix(), could of course come from the config file
-        );
-    }
-
-    /**
-     * Send a message to a target without a prefix.
-     * @param target       The target to send the message to
-     * @param key          The key of the language string
-     * @param replacements The replacements to insert in the message
-     */
-    public void messageNoPrefix(Object target, String key, Object... replacements) {
-        Message.fromKey(key).replacements(replacements).send(target);
-    }
-
-    /**
-     * Send a message to a target, prefixed by the default chat prefix.
-     * @param target       The target to send the message to
-     * @param key          The key of the language string
-     * @param replacements The replacements to insert in the message
-     */
-    public void message(Object target, String key, Object... replacements) {
-        Message.fromKey(key).prefix().replacements(replacements).send(target);
     }
 }

@@ -76,7 +76,6 @@ dependencies {
     implementation 'com.sk89q.worldguard:worldguard-bukkit:7.0.4'
     implementation 'com.sk89q.worldedit:worldedit-bukkit:7.2.0'
     implementation 'com.github.MilkBowl:VaultAPI:1.7'
-    implementation 'net.silthus:interactivemessenger:master'
 
     testImplementation 'io.ebean:ebean-test:12.6.0'
 
@@ -105,7 +104,6 @@ shadowJar {
     relocate 'co.aikar.commands', "shadow.${pluginName}.acf"
     relocate 'co.aikar.locales', "shadow.${pluginName}.locales"
     relocate 'de.exlll.configlib', "shadow.${pluginName}.configlib"
-    relocate 'me.wiefferink.interactivemessenger', "shadow.${pluginName}.interactivemessenger"
     relocate 'net.wesjd.anvilgui', "shadow.${pluginName}.anvilgui"
 }
 
