@@ -1,3 +1,17 @@
+# [1.17.0](https://github.com/raidcraft/rcregions/compare/v1.16.0...v1.17.0) (2020-12-05)
+
+
+### Bug Fixes
+
+* **sales:** make region occupied when a sale expires ([a54d223](https://github.com/raidcraft/rcregions/commit/a54d223cd4511890643581e8f947816000112c13))
+
+
+### Features
+
+* **cmd:** add /rcr list command that lists all player regions ([0134a80](https://github.com/raidcraft/rcregions/commit/0134a80d5fef939b5886c814d4559b0c6f27c903))
+* **cmd:** add /sales command that shows all player sales ([3c3ab85](https://github.com/raidcraft/rcregions/commit/3c3ab858ceb79cc47ebc469282428628466936c0))
+* add task that expires regions on sale ([a1f5bbb](https://github.com/raidcraft/rcregions/commit/a1f5bbb95f9a1d861292ce818b0004dc3ec16eee))
+
 # [1.16.0](https://github.com/raidcraft/rcregions/compare/v1.15.0...v1.16.0) (2020-12-05)
 
 
