@@ -1,3 +1,11 @@
+# [1.15.0](https://github.com/raidcraft/rcregions/compare/v1.14.0...v1.15.0) (2020-12-05)
+
+
+### Features
+
+* add option to sell regions directly to players ([b1249b9](https://github.com/raidcraft/rcregions/commit/b1249b9b0c0ea091cec7da1931f5952156340b38))
+* show active sales and sold regions on login ([427bc1a](https://github.com/raidcraft/rcregions/commit/427bc1a0c141b811da9c99b9b7f9a66212c2036d))
+
 # [1.14.0](https://github.com/raidcraft/rcregions/compare/v1.13.1...v1.14.0) (2020-12-04)
 
 
