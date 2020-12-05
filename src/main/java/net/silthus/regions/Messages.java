@@ -12,6 +12,7 @@ import net.silthus.regions.actions.BuyAction;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionGroup;
 import net.silthus.regions.entities.RegionPlayer;
+import net.silthus.regions.entities.Sale;
 import net.silthus.regions.limits.PlayerLimit;
 import net.silthus.regions.util.MathUtil;
 import net.silthus.regions.util.TimeUtil;
@@ -421,5 +422,77 @@ public final class Messages {
         builder.append(limits(player));
 
         return new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(builder.create()));
+    }
+
+    public static BaseComponent[] player(@Nullable RegionPlayer player) {
+
+        if (player == null) {
+            return new ComponentBuilder("N/A").color(ChatColor.GRAY).create();
+        }
+
+        return new ComponentBuilder(player.name()).color(ChatColor.DARK_AQUA).bold(true)
+                .event(playerHover(player)).create();
+    }
+
+    public static BaseComponent[] sales(String text, List<Sale> sales) {
+
+        if (sales.isEmpty()) {
+            return new ComponentBuilder().append("Du verkaufst aktuell keine Grundstücke.").color(ChatColor.YELLOW).create();
+        }
+
+        ComponentBuilder builder = new ComponentBuilder();
+        builder.append(text).append("\n").color(ChatColor.YELLOW);
+
+        for (Sale sale : sales) {
+            builder.append(" - ").color(ChatColor.YELLOW).append(sale(sale)).append("\n");
+        }
+
+        return builder.create();
+    }
+
+    public static BaseComponent[] sale(Sale sale) {
+
+        Economy economy = RegionsPlugin.instance().getEconomy();
+
+        ComponentBuilder builder = new ComponentBuilder()
+                .append(region(sale.region()))
+                .event(saleHover(sale));
+
+        if (sale.active()) {
+            builder.append(" [X]").color(ChatColor.DARK_RED)
+                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder("Klicken um den Verkauf abzubrechen.").color(ChatColor.RED).create())))
+                    .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/rcr sell abort " + sale.region().name()));
+        } else if (sale.buyer() != null) {
+            builder.append(" [VERKAUFT]").color(ChatColor.GREEN)
+                    .append(" | ").color(ChatColor.YELLOW)
+                    .append(player(sale.buyer())).color(ChatColor.GOLD).bold(true)
+                    .append(" | ").reset().color(ChatColor.YELLOW)
+                    .append(economy.format(sale.price())).color(ChatColor.AQUA)
+                    .append(" [✅]").color(ChatColor.GREEN)
+                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text("Klicke um den Verkauf der Region zu bestätigen und diese Nachricht auszublenden.")))
+                    .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/rcr sell acknowledge " + sale.region().name()));
+        }
+
+        return builder.create();
+    }
+
+    public static HoverEvent saleHover(Sale sale) {
+
+        ComponentBuilder builder = new ComponentBuilder();
+        Economy economy = RegionsPlugin.instance().getEconomy();
+
+        BaseComponent[] baseComponents = builder.append("--- ").color(ChatColor.DARK_AQUA)
+                .append(sale.region().name()).color(ChatColor.GOLD)
+                .append(" ---").color(ChatColor.DARK_AQUA).append("\n")
+                .append("Stadtteil: ").color(ChatColor.YELLOW)
+                .append(sale.region().group().name()).color(ChatColor.DARK_AQUA).append("\n")
+                .append("Preis: ").color(ChatColor.YELLOW).append(economy.format(sale.price())).color(ChatColor.AQUA).append("\n")
+                .append("Gekauft von: ").color(ChatColor.YELLOW).append(player(sale.buyer())).append("\n")
+                .append("Gekauft am: ").color(ChatColor.YELLOW).append(TimeUtil.formatDateTime(sale.end())).color(ChatColor.GOLD).append("\n")
+                .append("Start: ").color(ChatColor.YELLOW).append(TimeUtil.formatDateTime(sale.start())).color(ChatColor.GRAY).append("\n")
+                .append("Läuft aus am: ").color(ChatColor.YELLOW).append(TimeUtil.formatDateTime(sale.expires(), "dd.MM.yyyy")).color(ChatColor.GRAY)
+                .create();
+
+        return new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(baseComponents));
     }
 }

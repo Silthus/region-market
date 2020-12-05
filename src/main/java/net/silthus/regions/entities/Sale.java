@@ -12,6 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -24,13 +25,18 @@ public class Sale extends BaseEntity {
 
     public static final Finder<UUID, Sale> find = new Finder<>(Sale.class);
 
+    public static List<Sale> of(@NonNull Region region) {
+
+        return find.query().where().eq("region_id", region.id()).findList();
+    }
+
     /**
      * Tries to find an active sale for the given region.
      *
      * @param region the region to find an active sale for
      * @return the active sale if found
      */
-    public static Optional<Sale> of(@NonNull Region region) {
+    public static Optional<Sale> getActiveSale(@NonNull Region region) {
 
         return find.query().where()
                 .eq("region_id", region.id())
@@ -88,6 +94,11 @@ public class Sale extends BaseEntity {
     public boolean active() {
 
         return end == null;
+    }
+
+    public boolean needsAcknowledgement() {
+
+        return buyer() != null && acknowledged() == null;
     }
 
     public enum Type {

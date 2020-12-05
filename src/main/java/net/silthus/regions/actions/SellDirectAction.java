@@ -28,7 +28,7 @@ public class SellDirectAction extends SellAction {
             return new SellResult(this, "Der Verkaufspreis des Grundstücks darf nicht unterhalb des Grundpreises von " + economy.format(getPriceDetails().regionBasePrice()) + " liegen.");
         }
 
-        if (Sale.of(getRegion()).isPresent()) {
+        if (Sale.getActiveSale(getRegion()).isPresent()) {
             return new SellResult(this, "Das Grundstück steht bereits zum Verkauf.");
         }
 

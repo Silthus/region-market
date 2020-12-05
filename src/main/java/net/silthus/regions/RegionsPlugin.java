@@ -58,6 +58,7 @@ public class RegionsPlugin extends JavaPlugin {
     private SchematicManager schematicManager;
     private PaperCommandManager commandManager;
     private LanguageManager languageManager;
+    private SalesManager salesManager;
 
     private SignListener signListener;
     private SignClickListener signClickListener;
@@ -162,6 +163,12 @@ public class RegionsPlugin extends JavaPlugin {
         regionManager.load();
     }
 
+    private void setupSalesManager() {
+
+        this.salesManager = new SalesManager(this);
+        Bukkit.getPluginManager().registerEvents(salesManager, this);
+    }
+
     private void setupSchematicManager() {
 
         this.schematicManager = new SchematicManager(this, WorldEdit.getInstance());
@@ -192,6 +199,7 @@ public class RegionsPlugin extends JavaPlugin {
         registerRegionsCompletion(commandManager);
         registerWorldGuardRegionCompletion(commandManager);
         registerGroupsCompletion(commandManager);
+        registerSalesCompletion(commandManager);
 
         commandManager.registerCommand(new AdminCommands(this));
         commandManager.registerCommand(new RegionCommands(this));
@@ -263,6 +271,17 @@ public class RegionsPlugin extends JavaPlugin {
                 Region.find.all().stream()
                 .filter(region -> region.world() == null
                         || context.getPlayer().getWorld().getUID().equals(region.world()))
+                .map(Region::name)
+                .collect(Collectors.toSet()));
+    }
+
+    private void registerSalesCompletion(PaperCommandManager commandManager) {
+
+        commandManager.getCommandCompletions().registerAsyncCompletion("sales", context -> Sale.find.query().where()
+                .eq("seller_id", context.getPlayer().getUniqueId())
+                .isNull("end")
+                .findList()
+                .stream().map(Sale::region)
                 .map(Region::name)
                 .collect(Collectors.toSet()));
     }
