@@ -1,3 +1,11 @@
+## [1.17.2](https://github.com/raidcraft/rcregions/compare/v1.17.1...v1.17.2) (2020-12-05)
+
+
+### Bug Fixes
+
+* **cmd:** npe if players has no regions ([df44eb5](https://github.com/raidcraft/rcregions/commit/df44eb5b43f8e02ef973d0fe71f1579949b569fa))
+* **money:** do not increase region size by one ([71aacd4](https://github.com/raidcraft/rcregions/commit/71aacd4a61ce987a29ea6362b58cdf299bda710b))
+
 ## [1.17.1](https://github.com/raidcraft/rcregions/compare/v1.17.0...v1.17.1) (2020-12-05)
 
 
