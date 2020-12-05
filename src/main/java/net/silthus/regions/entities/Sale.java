@@ -126,8 +126,7 @@ public class Sale extends BaseEntity {
 
     public void expire() {
 
-        end(Instant.now());
-        save();
+        abort(false);
     }
 
     public enum Type {
