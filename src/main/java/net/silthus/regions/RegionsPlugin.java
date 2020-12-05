@@ -96,6 +96,7 @@ public class RegionsPlugin extends JavaPlugin {
         setupDatabase();
         setupRegionManager();
         setupSchematicManager();
+        setupSalesManager();
         if (!isTesting()) {
             setupListeners();
             setupCommands();

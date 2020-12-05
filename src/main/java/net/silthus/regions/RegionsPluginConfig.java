@@ -36,6 +36,11 @@ public class RegionsPluginConfig extends BukkitYamlConfiguration {
     private boolean displaySalesLoginNotification = true;
     @Comment("Time in ticks the login message for open sales should be delayed.")
     private long salesLoginDelay = 60L;
+    @Comment({
+            "Time in minutes after which a region sale should end automatically.",
+            "Set to less than 0 to disable the timeout and never expire sales."
+    })
+    private long regionSellTimeout = 20160;
     private List<String> ignoredRegions = new ArrayList<>();
     @Comment({
             "A list of commands to execute as server when a region is sold.",

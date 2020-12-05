@@ -45,6 +45,8 @@ public class SalesManager implements Listener {
                 .filter(Sale::needsAcknowledgement)
                 .collect(Collectors.toList());
 
+        if (sales.isEmpty()) return;
+
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             event.getPlayer().spigot().sendMessage(Messages.sales("Du hast seit dem letzten Login folgende Grundstücke verkauft", sales));
             sales.forEach(sale -> sale.acknowledged(Instant.now()).save());
@@ -58,7 +60,8 @@ public class SalesManager implements Listener {
             command = command.replace("%player%", event.getPlayer().name())
                     .replace("%region%", event.getRegion().name())
                     .replace("%wgregion%", event.getRegion().name())
-                    .replace("%group%", event.getRegion().group().identifier());
+                    .replace("%group%", event.getRegion().group().identifier())
+                    .replace("%world%", event.getRegion().worldName());
             Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command);
         }
     }

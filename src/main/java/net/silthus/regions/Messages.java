@@ -31,17 +31,21 @@ public final class Messages {
         String[] lines = new String[4];
         Economy economy = RegionsPlugin.instance().getEconomy();
 
-        if (region.status() != Region.Status.OCCUPIED) {
-            lines[0] = ChatColor.WHITE + region.name();
-            lines[1] = ChatColor.GREEN + "- Verfügbar -";
-            lines[2] = ChatColor.GREEN + economy.format(region.basePrice()) + ChatColor.YELLOW + " | " + ChatColor.AQUA + region.size() + "m²";
-            lines[3] = ChatColor.GRAY + "" + ChatColor.ITALIC + "Klick für Details.";
-        } else {
-            lines[0] = ChatColor.WHITE + region.name();
+        lines[0] = ChatColor.WHITE + region.name();
+        if (region.status() == Region.Status.OCCUPIED) {
             lines[1] = ChatColor.RED + "- Belegt durch -";
             lines[2] = ChatColor.GOLD + region.owner().map(RegionPlayer::name).orElse("Unbekannt");
             lines[3] = ChatColor.YELLOW + "seit " + ChatColor.AQUA
                     + TimeUtil.formatDateTime(region.whenModified());
+        } else if (region.status() == Region.Status.FOR_SALE) {
+            Double price = region.activeSale().map(Sale::price).orElse(region.basePrice());
+            lines[1] = ChatColor.GREEN + "- Zu Verkaufen -";
+            lines[2] = ChatColor.GREEN + economy.format(price) + ChatColor.YELLOW + " | " + ChatColor.AQUA + region.size() + "m²";
+            lines[3] = ChatColor.GRAY + "" + ChatColor.ITALIC + "Klick für Details.";
+        } else {
+            lines[1] = ChatColor.GREEN + "- Verfügbar -";
+            lines[2] = ChatColor.GREEN + economy.format(region.basePrice()) + ChatColor.YELLOW + " | " + ChatColor.AQUA + region.size() + "m²";
+            lines[3] = ChatColor.GRAY + "" + ChatColor.ITALIC + "Klick für Details.";
         }
 
         return lines;

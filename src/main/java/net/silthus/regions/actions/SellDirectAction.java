@@ -8,6 +8,10 @@ import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionPlayer;
 import net.silthus.regions.entities.Sale;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
+
 public class SellDirectAction extends SellAction {
 
     public SellDirectAction(Region region, RegionPlayer regionPlayer, double price) {
@@ -19,12 +23,11 @@ public class SellDirectAction extends SellAction {
     }
 
     @Override
-    @Transactional
     public SellResult run() {
 
         Economy economy = RegionsPlugin.instance().getEconomy();
 
-        if (getPriceDetails().regionBasePrice() < getPrice()) {
+        if (getPrice() < getPriceDetails().regionBasePrice()) {
             return new SellResult(this, "Der Verkaufspreis des Grundstücks darf nicht unterhalb des Grundpreises von " + economy.format(getPriceDetails().regionBasePrice()) + " liegen.");
         }
 
@@ -32,11 +35,17 @@ public class SellDirectAction extends SellAction {
             return new SellResult(this, "Das Grundstück steht bereits zum Verkauf.");
         }
 
-        new Sale(getRegion(), getRegionPlayer(), Sale.Type.DIRECT, getPrice()).save();
+        Sale sale = new Sale(getRegion(), getRegionPlayer(), Sale.Type.DIRECT, getPrice());
+        long timeout = RegionsPlugin.instance().getPluginConfig().getRegionSellTimeout();
+        if (timeout > 0) {
+            sale.expires(Instant.now().plus(timeout, ChronoUnit.MINUTES));
+        }
+        sale.save();
 
         getRegion().priceType(Region.PriceType.STATIC)
                 .price(getPrice())
                 .priceMultiplier(1.0)
+                .status(Region.Status.FOR_SALE)
                 .save();
 
         return new SellResult(this);
