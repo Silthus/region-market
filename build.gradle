@@ -57,6 +57,7 @@ repositories {
     enginehub()
     maven { url = "https://repo.aikar.co/content/groups/aikar/" }
     protocolLib()
+    codemc()
     maven { url = "http://maven.wiefferink.me" }
 }
 
@@ -68,6 +69,7 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.3'
 
     implementation 'co.aikar:acf-paper:0.5.0-SNAPSHOT'
+    implementation 'net.wesjd:anvilgui:1.4.0-SNAPSHOT'
 
     implementation group: 'io.art-framework', name: 'art-core', version: '1.0.0-beta.30'
 
@@ -98,11 +100,13 @@ shadowJar {
         include(dependency('net.silthus.configlib:configlib-bukkit:'))
         include(dependency('com.fasterxml.jackson.core::'))
         include(dependency('net.silthus:interactivemessenger:'))
+        include(dependency('net.wesjd:anvilgui:'))
     }
     relocate 'co.aikar.commands', "shadow.${pluginName}.acf"
     relocate 'co.aikar.locales', "shadow.${pluginName}.locales"
     relocate 'de.exlll.configlib', "shadow.${pluginName}.configlib"
     relocate 'me.wiefferink.interactivemessenger', "shadow.${pluginName}.interactivemessenger"
+    relocate 'net.wesjd.anvilgui', "shadow.${pluginName}.anvilgui"
 }
 
 tasks.build.dependsOn(shadowJar)

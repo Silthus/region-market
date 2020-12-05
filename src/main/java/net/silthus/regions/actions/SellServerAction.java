@@ -1,6 +1,5 @@
 package net.silthus.regions.actions;
 
-import co.aikar.commands.InvalidCommandArgument;
 import com.sk89q.worldguard.domains.DefaultDomain;
 import io.ebean.annotation.Transactional;
 import lombok.EqualsAndHashCode;
@@ -57,7 +56,7 @@ public class SellServerAction extends SellAction {
 
         Bukkit.getPluginManager().callEvent(new SoldRegionEvent(getRegion(), getRegionPlayer()));
 
-        RegionTransaction.of(getRegion(), getRegionPlayer(), RegionTransaction.Action.SELL)
+        RegionTransaction.of(getRegion(), getRegionPlayer(), RegionTransaction.Action.SELL_TO_SERVER)
                 .data("price", getPrice())
                 .data("type", getSellType())
                 .save();

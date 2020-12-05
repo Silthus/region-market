@@ -11,8 +11,10 @@ import net.silthus.regions.costs.PriceDetails;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionPlayer;
 import net.silthus.regions.entities.RegionTransaction;
+import net.silthus.regions.entities.Sale;
 import net.silthus.regions.events.BoughtRegionEvent;
 import net.silthus.regions.events.BuyRegionEvent;
+import net.silthus.regions.events.BuyRegionFromPlayerEvent;
 import net.silthus.regions.limits.LimitCheckResult;
 import org.bukkit.Bukkit;
 
@@ -86,10 +88,38 @@ public class BuyAction extends RegionAction {
 
         // lets to a final money check - just to be sure
         Economy economy = RegionsPlugin.instance().getEconomy();
-        RegionPlayer regionPlayer = result.getRegionPlayer();
+        final RegionPlayer regionPlayer = result.getRegionPlayer();
 
         if (!economy.has(regionPlayer.getOfflinePlayer(), priceDetails.total())) {
             return new Result(result, "Du hast nicht genügend Geld um das Grundstück zu kaufen.", Result.Status.NOT_ENOUGH_MONEY);
+        }
+
+
+        Optional<Sale> optionalSale = Sale.of(result.getRegion());
+        if (optionalSale.isPresent()) {
+            Sale sale = optionalSale.get();
+
+            if (sale.type() == Sale.Type.DIRECT) {
+                BuyRegionFromPlayerEvent event = new BuyRegionFromPlayerEvent(result, sale.seller(), sale.price());
+                Bukkit.getPluginManager().callEvent(event);
+
+                if (event.isCancelled()) {
+                    return new Result(result, "Das Kaufen der Region von einem anderen Spieler wurde durch ein Plugin verhindert.", Result.Status.EVENT_CANCELLED);
+                }
+
+                if (event.getResult().failure()) {
+                    return event.getResult();
+                }
+
+                economy.depositPlayer(sale.seller().getOfflinePlayer(), sale.price());
+                RegionTransaction.of(getRegion(), sale.seller(), RegionTransaction.Action.SELL_TO_PLAYER)
+                        .data("buyer_id", regionPlayer.id())
+                        .data("buyer", regionPlayer.name())
+                        .data("price", sale.price())
+                        .save();
+            }
+
+            sale.buyer(regionPlayer).save();
         }
 
         economy.withdrawPlayer(regionPlayer.getOfflinePlayer(), result.getPriceDetails().total());

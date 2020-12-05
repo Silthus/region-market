@@ -149,8 +149,7 @@ public class RegionsPlugin extends JavaPlugin {
                         RegionPlayer.class,
                         RegionTransaction.class,
                         OwnedRegion.class,
-                        Sale.class,
-                        DirectSale.class
+                        Sale.class
                 )
                 .build()).connect();
     }
