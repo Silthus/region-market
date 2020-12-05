@@ -1,3 +1,11 @@
+# [1.16.0](https://github.com/raidcraft/rcregions/compare/v1.15.0...v1.16.0) (2020-12-05)
+
+
+### Features
+
+* add option to execute commands when a region is sold ([24136b3](https://github.com/raidcraft/rcregions/commit/24136b35a44da0c2630a367cca46c1a8d7e58519))
+* auto expire selling regions after some time ([04e9c21](https://github.com/raidcraft/rcregions/commit/04e9c214f45f5940535804e07a6059db742bec98))
+
 # [1.15.0](https://github.com/raidcraft/rcregions/compare/v1.14.0...v1.15.0) (2020-12-05)
 
 
