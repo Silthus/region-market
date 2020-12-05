@@ -1,6 +1,5 @@
 package net.silthus.regions.actions;
 
-import io.ebean.annotation.Transactional;
 import net.milkbowl.vault.economy.Economy;
 import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.commands.RegionCommands;
@@ -10,7 +9,6 @@ import net.silthus.regions.entities.Sale;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 
 public class SellDirectAction extends SellAction {
 
@@ -45,8 +43,7 @@ public class SellDirectAction extends SellAction {
 
         getRegion().priceType(Region.PriceType.STATIC)
                 .price(getPrice())
-                .priceMultiplier(1.0)
-                .status(Region.Status.FOR_SALE)
+                .status(Region.Status.FOR_DIRECT_SALE)
                 .save();
 
         return new SellResult(this);

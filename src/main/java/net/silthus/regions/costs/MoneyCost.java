@@ -184,7 +184,9 @@ public class MoneyCost implements Cost {
 
         PriceDetails price = new PriceDetails()
                 .basePrice(calculateBasePrice(region));
-        price.regionModifier((price.basePrice() * region.priceMultiplier()) - price.basePrice());
+        if (region.priceType() != Region.PriceType.STATIC) {
+            price.regionModifier((price.basePrice() * region.priceMultiplier()) - price.basePrice());
+        }
         price.sellServerModifier(region.group().sellModifier());
 
         if (player != null) {

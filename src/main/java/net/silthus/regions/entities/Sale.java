@@ -105,7 +105,10 @@ public class Sale extends BaseEntity {
 
         end(Instant.now());
         if (acknowledge) acknowledged(Instant.now());
-        region().status(Region.Status.OCCUPIED).save();
+        Region region = region();
+        region.status(Region.Status.OCCUPIED)
+                .priceType(region.group().priceType())
+                .save();
         save();
     }
 
@@ -119,7 +122,7 @@ public class Sale extends BaseEntity {
         return !active() && acknowledged() == null;
     }
 
-    public boolean exired() {
+    public boolean expired() {
 
         return !active() && buyer() == null;
     }

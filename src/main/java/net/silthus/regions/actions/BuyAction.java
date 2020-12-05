@@ -18,6 +18,7 @@ import net.silthus.regions.events.BuyRegionFromPlayerEvent;
 import net.silthus.regions.limits.LimitCheckResult;
 import org.bukkit.Bukkit;
 
+import java.time.Instant;
 import java.util.EnumSet;
 import java.util.Optional;
 
@@ -94,7 +95,6 @@ public class BuyAction extends RegionAction {
             return new Result(result, "Du hast nicht genügend Geld um das Grundstück zu kaufen.", Result.Status.NOT_ENOUGH_MONEY);
         }
 
-
         Optional<Sale> optionalSale = Sale.getActiveSale(result.getRegion());
         if (optionalSale.isPresent()) {
             Sale sale = optionalSale.get();
@@ -118,11 +118,19 @@ public class BuyAction extends RegionAction {
                         .data("price", sale.price())
                         .save();
             }
-
             sale.buyer(regionPlayer).save();
+        } else {
+            new Sale(getRegion(), null, Sale.Type.SERVER, result.price())
+                    .start(Instant.now())
+                    .buyer(regionPlayer)
+                    .end(Instant.now())
+                    .acknowledged(Instant.now())
+                    .save();
         }
 
-        economy.withdrawPlayer(regionPlayer.getOfflinePlayer(), result.getPriceDetails().total());
+        double price = result.price();
+
+        economy.withdrawPlayer(regionPlayer.getOfflinePlayer(), price);
 
         Region region = result.getRegion();
         region.owner(regionPlayer)
@@ -130,7 +138,7 @@ public class BuyAction extends RegionAction {
                 .save();
 
         RegionTransaction.of(region, regionPlayer, RegionTransaction.Action.BUY)
-                .data("price", result.getPriceDetails().total())
+                .data("price", price)
                 .save();
 
         region.updateSigns();

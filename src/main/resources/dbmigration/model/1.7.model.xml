@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<migration xmlns="http://ebean-orm.github.io/xml/ns/dbmigration">
+    <changeSet type="apply">
+        <alterColumn columnName="status" tableName="rcregions_regions" type="varchar(15)" currentType="varchar(8)" currentNotnull="false" checkConstraint="check ( status in ('FREE','OCCUPIED','ABADONED','FOR_DIRECT_SALE'))" checkConstraintName="ck_rcregions_regions_status"/>
+    </changeSet>
+</migration>

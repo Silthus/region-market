@@ -434,7 +434,7 @@ public class Region extends BaseEntity {
         FREE,
         OCCUPIED,
         ABADONED,
-        FOR_SALE;
+        FOR_DIRECT_SALE;
 
         @DbEnumValue
         public String getValue() {

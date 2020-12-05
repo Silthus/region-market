@@ -23,7 +23,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 public final class Messages {
 
@@ -38,7 +37,7 @@ public final class Messages {
             lines[2] = ChatColor.GOLD + region.owner().map(RegionPlayer::name).orElse("Unbekannt");
             lines[3] = ChatColor.YELLOW + "seit " + ChatColor.AQUA
                     + TimeUtil.formatDateTime(region.whenModified());
-        } else if (region.status() == Region.Status.FOR_SALE) {
+        } else if (region.status() == Region.Status.FOR_DIRECT_SALE) {
             Double price = region.activeSale().map(Sale::price).orElse(region.basePrice());
             lines[1] = ChatColor.GREEN + "- Zu Verkaufen -";
             lines[2] = ChatColor.GREEN + economy.format(price) + ChatColor.YELLOW + " | " + ChatColor.AQUA + region.size() + "m²";
@@ -474,7 +473,7 @@ public final class Messages {
                         .append(player(sale.buyer())).color(ChatColor.GOLD).bold(true)
                         .append(" | ").reset().color(ChatColor.YELLOW)
                         .append(economy.format(sale.price())).color(ChatColor.AQUA);
-            } else if (sale.exired()) {
+            } else if (sale.expired()) {
                 builder.append(" [ABGELAUFEN]").color(ChatColor.GRAY)
                         .append(" | ").color(ChatColor.YELLOW)
                         .append(TimeUtil.formatDateTime(sale.end())).color(ChatColor.AQUA);
