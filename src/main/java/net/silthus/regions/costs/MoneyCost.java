@@ -249,7 +249,11 @@ public class MoneyCost implements Cost {
 
     private double calculateMultiplier(int count, double power, double multiplier, double basePrice) {
 
-        return (basePrice * ((Math.pow(count, power) * multiplier) + 1.0)) - basePrice;
+        double result = (basePrice * (Math.pow(count, power) * multiplier)) - basePrice;
+        if (result < 0) {
+            return 0;
+        }
+        return result;
     }
 
     private ChatColor costColor(RegionPlayer player, double cost) {
