@@ -73,6 +73,11 @@ public final class Messages {
         return builder.create();
     }
 
+    public static BaseComponent[] region(@NonNull Region region) {
+
+        return region(region, null);
+    }
+
     public static BaseComponent[] region(@NonNull Region region, @Nullable RegionPlayer player) {
 
         return new ComponentBuilder().reset()
@@ -187,12 +192,12 @@ public final class Messages {
                 .append("[").color(ChatColor.YELLOW).append("VERKAUF").color(ChatColor.RED).append("] ").color(ChatColor.YELLOW)
                 .append("<---").color(ChatColor.DARK_AQUA).append("\n").reset()
                 .append("--> ").color(ChatColor.DARK_AQUA)
-                .append(" [").color(ChatColor.YELLOW).append("SERVER").color(ChatColor.GREEN)
+                .append(" [").color(ChatColor.YELLOW).append("SERVER").color(ChatColor.DARK_GREEN)
                 .event(sellServerHover(region))
                 .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/rcr sell server " + region.id()))
                 .append("] ").reset().color(ChatColor.YELLOW)
                 .append("--- ").color(ChatColor.DARK_AQUA).append("[").color(ChatColor.YELLOW)
-                .append("DIREKT").color(ChatColor.GRAY).strikethrough(true)
+                .append("DIREKT").color(ChatColor.GRAY).color(ChatColor.GREEN)
                 .event(sellDirectHover(region))
                 .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/rcr sell direct " + region.id()))
                 .append("] ").reset().color(ChatColor.YELLOW)
@@ -220,6 +225,28 @@ public final class Messages {
                 .append("Klicke um dein Grundstück an den Server zu verkaufen.").color(ChatColor.GRAY).italic(true)
                 .create();
         return new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(msg));
+    }
+
+    public static BaseComponent[] confirm(String yes, String yesCommand, String no, String noCommand) {
+
+        return new ComponentBuilder(" [JA]").color(ChatColor.GREEN)
+                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder()
+                        .append(yes).italic(true).color(ChatColor.GRAY).create())))
+                .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, yesCommand))
+                .append(" [ABBRECHEN]").reset().color(ChatColor.RED)
+                .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder()
+                        .append(no).italic(true).color(ChatColor.GRAY).create())))
+                .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, noCommand))
+                .create();
+    }
+
+    public static BaseComponent[] sellOthersRegion(@NonNull RegionPlayer player) {
+
+        return new ComponentBuilder().append("[WARNUNG]").color(ChatColor.DARK_RED).append(" Du bist dabei die Region von ")
+                .append(player.name()).color(ChatColor.GOLD).bold(true)
+                .event(Messages.playerHover(player))
+                .append(" zu verkaufen.\n").color(ChatColor.RED)
+                .create();
     }
 
     private static HoverEvent sellDirectHover(@NonNull Region region) {

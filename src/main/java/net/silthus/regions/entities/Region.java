@@ -10,9 +10,7 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import io.ebean.ExpressionList;
 import io.ebean.Finder;
 import io.ebean.annotation.DbEnumValue;
-import io.ebean.annotation.Transactional;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import me.wiefferink.interactivemessenger.processing.ReplacementProvider;
@@ -21,12 +19,12 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.milkbowl.vault.economy.Economy;
 import net.silthus.ebean.BaseEntity;
-import net.silthus.regions.*;
+import net.silthus.regions.Cost;
+import net.silthus.regions.MessageTags;
+import net.silthus.regions.Messages;
+import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.costs.MoneyCost;
 import net.silthus.regions.costs.PriceDetails;
-import net.silthus.regions.events.BoughtRegionEvent;
-import net.silthus.regions.events.BuyRegionEvent;
-import net.silthus.regions.limits.LimitCheckResult;
 import net.silthus.regions.util.MathUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -187,6 +185,11 @@ public class Region extends BaseEntity implements ReplacementProvider {
         return this.group;
     }
 
+    public Optional<Sale> activeSale() {
+
+        return sales().stream().filter(Sale::active).findAny();
+    }
+
     public Region priceType(PriceType priceType) {
 
         this.priceType = priceType;
@@ -239,14 +242,6 @@ public class Region extends BaseEntity implements ReplacementProvider {
         return owners().stream()
                 .filter(OwnedRegion::active)
                 .findFirst();
-    }
-
-    public List<DirectSale> directSales() {
-
-        return sales().stream()
-                .filter(sale -> sale instanceof DirectSale)
-                .map(sale -> (DirectSale) sale)
-                .collect(Collectors.toList());
     }
 
     public Region owner(@Nullable RegionPlayer player) {
@@ -490,7 +485,8 @@ public class Region extends BaseEntity implements ReplacementProvider {
     public enum Status {
         FREE,
         OCCUPIED,
-        ABADONED;
+        ABADONED,
+        FOR_SALE;
 
         @DbEnumValue
         public String getValue() {

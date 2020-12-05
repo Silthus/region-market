@@ -2,17 +2,31 @@ package net.silthus.regions.commands;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.InvalidCommandArgument;
-import co.aikar.commands.annotation.*;
+import co.aikar.commands.annotation.CommandAlias;
+import co.aikar.commands.annotation.CommandCompletion;
+import co.aikar.commands.annotation.CommandPermission;
+import co.aikar.commands.annotation.Default;
+import co.aikar.commands.annotation.Flags;
+import co.aikar.commands.annotation.Optional;
+import co.aikar.commands.annotation.Subcommand;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.hover.content.Text;
 import net.milkbowl.vault.economy.Economy;
-import net.silthus.regions.*;
-import net.silthus.regions.actions.*;
+import net.silthus.regions.Constants;
+import net.silthus.regions.Messages;
+import net.silthus.regions.RegionsPlugin;
+import net.silthus.regions.actions.BuyAction;
+import net.silthus.regions.actions.RegionAction;
+import net.silthus.regions.actions.SellAction;
+import net.silthus.regions.actions.SellDirectAction;
+import net.silthus.regions.actions.SellResult;
+import net.silthus.regions.actions.SellServerAction;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionPlayer;
+import net.silthus.regions.entities.Sale;
+import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -73,14 +87,12 @@ public class RegionCommands extends BaseCommand {
                     .append(" für ").reset().color(ChatColor.YELLOW)
                     .append(result.formattedPrice()).color(ChatColor.AQUA)
                     .append(" kaufen?").reset().color(ChatColor.YELLOW)
-                    .append(" [JA]").reset().color(ChatColor.GREEN)
-                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder()
-                            .append("Klicken um das Grundstück zu kaufen.").italic(true).color(ChatColor.GRAY).create())))
-                    .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/rcregions buyconfirm"))
-                    .append(" [ABBRECHEN]").reset().color(ChatColor.RED)
-                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder()
-                            .append("Klicken um den Grundstückskauf abzubrechen.").italic(true).color(ChatColor.GRAY).create())))
-                    .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/rcregions buyabort"))
+                    .append(Messages.confirm(
+                            "Klicken um das Grundstück zu kaufen.",
+                            "/rcregions buyconfirm",
+                            "Klicken um den Grundstückskauf abzubrechen.",
+                            "/rcregions buyabort"
+                    ))
                     .create()
             );
             buyActions.put(regionPlayer.id(), buyAction);
@@ -174,10 +186,7 @@ public class RegionCommands extends BaseCommand {
             ComponentBuilder builder = new ComponentBuilder();
 
             if (!getCurrentCommandIssuer().getUniqueId().equals(regionPlayer.id())) {
-                builder.append("[WARNUNG]").color(ChatColor.DARK_RED).append(" Du bist dabei die Region von ")
-                        .append(regionPlayer.name()).color(ChatColor.GOLD).bold(true)
-                        .event(Messages.playerHover(regionPlayer))
-                        .append(" zu verkaufen.\n").color(ChatColor.RED);
+                builder.append(Messages.sellOthersRegion(regionPlayer));
             }
 
             SellServerAction sellAction = new SellServerAction(region, regionPlayer);
@@ -188,33 +197,72 @@ public class RegionCommands extends BaseCommand {
                     .append(" für ").color(ChatColor.YELLOW).bold(false)
                     .append(plugin.getEconomy().format(sellServerPrice)).color(ChatColor.AQUA)
                     .append(" an den ").color(ChatColor.YELLOW).append("Server").color(ChatColor.RED)
-                    .append(" verkaufen?").color(ChatColor.YELLOW);
-
-            builder.append(" [JA]").reset().color(ChatColor.GREEN)
-                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder()
-                            .append("Klicken um das Grundstück an den Server zu verkaufen.").italic(true).color(ChatColor.GRAY).create())))
-                    .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/rcregions sell confirm"))
-                    .append(" [ABBRECHEN]").reset().color(ChatColor.RED)
-                    .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(new ComponentBuilder()
-                            .append("Klicken um den Grundstücksverkauf abzubrechen.").italic(true).color(ChatColor.GRAY).create())))
-                    .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/rcregions sell abort"))
-                    .create();
+                    .append(" verkaufen?").color(ChatColor.YELLOW)
+                    .append(Messages.confirm(
+                    "Klicken um das Grundstück an den Server zu verkaufen.",
+                    "/rcregions sell confirm",
+                    "Klicken um den Grundstücksverkauf abzubrechen.",
+                    "/rcregions sell abort"
+                    ));
 
             ((Player) getCurrentCommandIssuer().getIssuer()).spigot().sendMessage(builder.create());
 
             sellActions.put(getCurrentCommandIssuer().getUniqueId(), sellAction);
-            Bukkit.getScheduler().runTaskLater(plugin, () -> sellAbort(getCurrentCommandIssuer().getIssuer()), plugin.getPluginConfig().getBuyTimeTicks());
+            Bukkit.getScheduler().runTaskLater(plugin, () -> sellAbort(getCurrentCommandIssuer().getIssuer(), null), plugin.getPluginConfig().getBuyTimeTicks());
         }
 
         @Subcommand("direct")
         @CommandPermission("rcregions.region.sell.direct")
-        public void sellDirect(RegionPlayer player, Region region) {
+        @CommandCompletion("@regions @players")
+        public void sellDirect(Region region, RegionPlayer regionPlayer) {
 
             if (!getCurrentCommandIssuer().isPlayer()) {
                 throw new InvalidCommandArgument("Nur Spieler können Grundstücke verkaufen.");
             }
 
-            getCurrentCommandIssuer().sendMessage(ChatColor.RED + "Grundstücke können aktuell noch nicht direkt verkauft werden.");
+            if (!getCurrentCommandIssuer().hasPermission(Constants.SELL_REGION_FOR_OTHERS_PERMISSION) && !region.isOwner(getCurrentCommandIssuer().getIssuer())) {
+                throw new InvalidCommandArgument("Du bist nicht der Besitzer des Grundstücks.");
+            }
+
+            ComponentBuilder builder = new ComponentBuilder();
+
+            if (!getCurrentCommandIssuer().getUniqueId().equals(regionPlayer.id())) {
+                builder.append(Messages.sellOthersRegion(regionPlayer));
+            }
+
+            new AnvilGUI.Builder()
+                    .title("Grundstückspreis für " + region.name())
+                    .text("Preis")
+                    .onClose(player -> player.sendMessage(ChatColor.RED + "Bitte gebe einen Preis für das Grundstück ein um es zu verkaufen."))
+                    .onComplete((player, s) -> {
+                        try {
+                            double price = Double.parseDouble(s);
+
+                            SellDirectAction action = new SellDirectAction(region, regionPlayer, price);
+                            sellActions.put(getCurrentCommandIssuer().getUniqueId(), action);
+
+                            BaseComponent[] msg = builder.append("Willst du das Grundstück ").color(ChatColor.YELLOW)
+                                    .append(Messages.region(region, regionPlayer)).color(ChatColor.GOLD).bold(true)
+                                    .append(" für ").color(ChatColor.YELLOW).bold(false)
+                                    .append(plugin.getEconomy().format(price)).color(ChatColor.AQUA)
+                                    .append(" zum Verkauf für andere Spieler freigeben?").color(ChatColor.YELLOW)
+                                    .append(Messages.confirm(
+                                            "Klicken um das Grundstück zum Verkauf freizugeben.",
+                                            "/rcregions sell confirm",
+                                            "Klicken um den Grundstücksverkauf abzubrechen.",
+                                            "/rcregions sell abort"
+                                    )).append("\n").reset()
+                                    .append("Du behältst bis zum Kauf durch einen anderen Spieler die Rechte auf deinem Grundstück.\n").color(ChatColor.GRAY).italic(true)
+                                    .append("Das Grundstück kann jederzeit gekauft werden, auch wenn du nicht online bist, " +
+                                            "und sämtlicher Besitzt der sich zu diesem Zeitpunkt darauf befindet geht an den Käufer über.").color(ChatColor.DARK_RED).italic(true)
+                                    .create();
+                            player.spigot().sendMessage(msg);
+
+                            return AnvilGUI.Response.close();
+                        } catch (NumberFormatException e) {
+                            return AnvilGUI.Response.text(s + " ist keine Zahl. Bitte gebe einen gültigen Preis für das Grundstück ein.");
+                        }
+                    }).open(getCurrentCommandIssuer().getIssuer());
         }
 
         @Subcommand("auction")
@@ -240,17 +288,32 @@ public class RegionCommands extends BaseCommand {
             Economy economy = RegionsPlugin.instance().getEconomy();
 
             SellResult result = sellAction.run();
-            player.spigot().sendMessage(new ComponentBuilder().append("Das Grundstück ").color(ChatColor.YELLOW)
-                    .append(Messages.region(result.getRegion(), result.getRegionPlayer())).color(ChatColor.GOLD).bold(true)
-                    .append(" wurde für ").reset().color(ChatColor.YELLOW)
-                    .append(economy.format(result.getPrice())).color(ChatColor.AQUA)
-                    .append(" an den Server verkauft.").color(ChatColor.YELLOW)
-                    .create());
+
+            ComponentBuilder builder = new ComponentBuilder().append("Das Grundstück ").color(ChatColor.YELLOW)
+                    .append(Messages.region(result.getRegion(), result.getRegionPlayer())).color(ChatColor.GOLD).bold(true);
+
+            if (sellAction instanceof SellServerAction) {
+                player.spigot().sendMessage(builder
+                        .append(" wurde für ").reset().color(ChatColor.YELLOW)
+                        .append(economy.format(result.getPrice())).color(ChatColor.AQUA)
+                        .append(" an den Server verkauft.").color(ChatColor.YELLOW)
+                        .create());
+            } else if (sellAction instanceof SellDirectAction) {
+                player.spigot().sendMessage(builder
+                        .append(" wurde zum Verkauf an andere Spieler freigegeben.").color(ChatColor.YELLOW).append("\n")
+                        .append("Du erhältst eine Nachricht sobald dein Grundstück gekauft wurde.").color(ChatColor.YELLOW).append("\n")
+                        .append("Du kannst den Verkauf des Grundstücks jederzeit mit ").color(ChatColor.GRAY)
+                        .append("/rcr sell abort " + sellAction.getRegion().name()).bold(true).color(ChatColor.DARK_GRAY)
+                        .event(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/rcr sell abort " + sellAction.getRegion().name()))
+                        .append(" abbrechen.").reset().color(ChatColor.GRAY)
+                        .create());
+            }
         }
 
         @Subcommand("abort")
         @CommandPermission("rcregions.region.sell")
-        public void sellAbort(Player player) {
+        @CommandCompletion("@regions")
+        public void sellAbort(Player player, @Optional Region region) {
 
             RegionAction sellAction = sellActions.remove(player.getUniqueId());
             if (sellAction != null) {
@@ -258,6 +321,15 @@ public class RegionCommands extends BaseCommand {
                         .append(Messages.region(sellAction.getRegion(), sellAction.getRegionPlayer())).color(ChatColor.GOLD).bold(true)
                         .append(" wurde abgebrochen.").bold(false).color(ChatColor.RED)
                         .create());
+            } else if (region != null) {
+                java.util.Optional<Sale> optionalSale = Sale.of(region);
+                optionalSale.ifPresent(sale -> {
+                    sale.abort();
+                    player.spigot().sendMessage(new ComponentBuilder().append("Der Grundstücksverkauf von ").color(ChatColor.RED)
+                            .append(Messages.region(sale.region())).color(ChatColor.GOLD).bold(true)
+                            .append(" wurde abgebrochen.").bold(false).color(ChatColor.RED)
+                            .create());
+                });
             }
         }
     }

@@ -17,10 +17,18 @@ import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 
-import javax.annotation.Nullable;
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static net.silthus.regions.MessageTags.playerId;
@@ -63,6 +71,9 @@ public class RegionPlayer extends BaseEntity implements ReplacementProvider {
 
     @OneToMany(cascade = CascadeType.REMOVE)
     private List<OwnedRegion> ownedRegions = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "seller")
+    private List<Sale> sales = new ArrayList<>();
 
     RegionPlayer(OfflinePlayer player) {
 

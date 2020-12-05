@@ -66,7 +66,8 @@ public class RegionTransaction extends BaseEntity {
 
     public enum Action {
 
-        SELL,
+        SELL_TO_SERVER,
+        SELL_TO_PLAYER,
         BUY,
         CHANGE_OWNER,
         SAVE_SCHEMATIC;

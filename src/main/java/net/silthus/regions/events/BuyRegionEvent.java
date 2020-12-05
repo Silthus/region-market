@@ -26,6 +26,11 @@ public class BuyRegionEvent extends RegionEvent implements Cancellable {
         this.result = result;
     }
 
+    public double getPrice() {
+
+        return getResult().getPriceDetails().total();
+    }
+
     @Override
     public HandlerList getHandlers() {
         return handlerList;
