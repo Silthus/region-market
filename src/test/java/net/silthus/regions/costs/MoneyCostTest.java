@@ -95,13 +95,13 @@ class MoneyCostTest {
 
             @SneakyThrows
             @Test
-            @DisplayName("should factor in individual cost factor of region")
+            @DisplayName("should not factor in individual cost factor of region")
             void shouldFactorInIdividualCostFactorOfRegion() {
 
                 region.price(100.0);
                 region.priceMultiplier(2.0);
 
-                assertThat(cost.calculate(region, player).total()).isEqualTo(200.0);
+                assertThat(cost.calculate(region, player).total()).isEqualTo(100.0);
             }
 
             @SneakyThrows
