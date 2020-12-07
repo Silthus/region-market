@@ -1,3 +1,11 @@
+# [1.18.0](https://github.com/raidcraft/rcregions/compare/v1.17.2...v1.18.0) (2020-12-07)
+
+
+### Features
+
+* **cmd:** add /rcra reset command to restore from schematic ([092728d](https://github.com/raidcraft/rcregions/commit/092728ddd8c310470d42a3e5ffe63508c8bf4c05))
+* **cmd:** add /rcra set owner command ([45fa087](https://github.com/raidcraft/rcregions/commit/45fa087c98e3137ef2116588c52c6f557dd7ce15))
+
 ## [1.17.2](https://github.com/raidcraft/rcregions/compare/v1.17.1...v1.17.2) (2020-12-05)
 
 
