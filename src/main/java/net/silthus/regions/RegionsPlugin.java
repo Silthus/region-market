@@ -211,9 +211,15 @@ public class RegionsPlugin extends JavaPlugin {
         registerWorldGuardRegionCompletion(commandManager);
         registerGroupsCompletion(commandManager);
         registerSalesCompletion(commandManager);
+        registerSchematicsCompletion(commandManager);
 
         commandManager.registerCommand(new AdminCommands(this));
         commandManager.registerCommand(new RegionCommands(this));
+    }
+
+    private void registerSchematicsCompletion(PaperCommandManager commandManager) {
+
+        commandManager.getCommandCompletions().registerAsyncCompletion("schematics", context -> getSchematicManager().getSchematics(context.getContextValue(Region.class)));
     }
 
     private void registerRegionPlayerContext(PaperCommandManager commandManager) {

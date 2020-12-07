@@ -198,6 +198,23 @@ public class AdminCommands extends BaseCommand implements Listener {
         Bukkit.getPluginManager().callEvent(new DeletedRegionEvent(region));
     }
 
+    @Subcommand("reset")
+    @CommandCompletion("@regions @schematics")
+    @CommandPermission("rcregions.region.reset")
+    public void reset(Region region, @Optional String schematic) {
+
+        region.activeSale().ifPresent(sale -> sale.abort(true));
+        region.owner(null).status(Region.Status.FREE).save();
+        if (!Strings.isNullOrEmpty(schematic)) {
+            try {
+                plugin.getSchematicManager().restore(region, schematic);
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new InvalidCommandArgument(e.getMessage());
+            }
+        }
+    }
+
     @Getter
     private final Map<UUID, SignLinkMode> signLinkModes = new HashMap<>();
 
