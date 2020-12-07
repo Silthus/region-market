@@ -28,6 +28,7 @@ import net.silthus.regions.Messages;
 import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionGroup;
+import net.silthus.regions.entities.RegionPlayer;
 import net.silthus.regions.entities.RegionSign;
 import net.silthus.regions.events.CreateRegionEvent;
 import net.silthus.regions.events.CreatedRegionEvent;
@@ -396,6 +397,19 @@ public class AdminCommands extends BaseCommand implements Listener {
                     .append(" wurde auf ").reset().color(net.md_5.bungee.api.ChatColor.GREEN)
                     .append("x" + factor).color(net.md_5.bungee.api.ChatColor.AQUA)
                     .append(" gesetzt.").color(net.md_5.bungee.api.ChatColor.GREEN)
+                    .create());
+        }
+
+        @Subcommand("owner")
+        @CommandCompletion("@regions @players")
+        public void setOwner(Player player, Region region, RegionPlayer regionPlayer) {
+
+            region.owner(regionPlayer).status(Region.Status.OCCUPIED).save();
+            player.spigot().sendMessage(new ComponentBuilder("Der Besitzer des Grundstücks ").color(net.md_5.bungee.api.ChatColor.GREEN)
+                    .append(Messages.region(region)).color(net.md_5.bungee.api.ChatColor.GOLD).bold(true)
+                    .append(" wurde zu ").reset().color(net.md_5.bungee.api.ChatColor.GREEN)
+                    .append(Messages.player(regionPlayer)).color(net.md_5.bungee.api.ChatColor.AQUA).bold(true)
+                    .append(" geändert.").reset().color(net.md_5.bungee.api.ChatColor.GREEN)
                     .create());
         }
     }
