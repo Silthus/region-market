@@ -116,7 +116,7 @@ public class RegionGroup extends Model {
         world(config.getString("world", "world"));
         worldGuardRegion(config.getString("worldguard-region"));
         sellModifier(config.getDouble("sell-modifier", 1.0));
-        priceType(Enums.searchEnum(Region.PriceType.class, config.getString("price-type")));
+        priceType(Enums.searchEnum(Region.PriceType.class, config.getString("price-type", "DYNAMIC")));
 
         ConfigurationSection costsSection = config.getConfigurationSection("costs");
         if (costsSection != null) {
