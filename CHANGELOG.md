@@ -1,3 +1,15 @@
+# [1.19.0](https://github.com/raidcraft/rcregions/compare/v1.18.0...v1.19.0) (2021-01-09)
+
+
+### Bug Fixes
+
+* **cmd:** /region info not working in current region ([f1ea226](https://github.com/raidcraft/rcregions/commit/f1ea2263c3ae19ea08139e092a12d90170e421d6)), closes [#34](https://github.com/raidcraft/rcregions/issues/34)
+
+
+### Features
+
+* replace vault with rceconomy ([d880efc](https://github.com/raidcraft/rcregions/commit/d880efc491aefcca01a6670be4f5e248980bfa06)), closes [#33](https://github.com/raidcraft/rcregions/issues/33)
+
 # [1.18.0](https://github.com/raidcraft/rcregions/compare/v1.17.2...v1.18.0) (2020-12-07)
 
 
