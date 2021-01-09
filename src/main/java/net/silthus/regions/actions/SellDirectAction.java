@@ -1,6 +1,6 @@
 package net.silthus.regions.actions;
 
-import net.milkbowl.vault.economy.Economy;
+import de.raidcraft.economy.wrapper.Economy;
 import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.commands.RegionCommands;
 import net.silthus.regions.entities.Region;
@@ -23,10 +23,9 @@ public class SellDirectAction extends SellAction {
     @Override
     public SellResult run() {
 
-        Economy economy = RegionsPlugin.instance().getEconomy();
 
         if (getPrice() < getPriceDetails().regionBasePrice()) {
-            return new SellResult(this, "Der Verkaufspreis des Grundstücks darf nicht unterhalb des Grundpreises von " + economy.format(getPriceDetails().regionBasePrice()) + " liegen.");
+            return new SellResult(this, "Der Verkaufspreis des Grundstücks darf nicht unterhalb des Grundpreises von " + Economy.get().format(getPriceDetails().regionBasePrice()) + " liegen.");
         }
 
         if (Sale.getActiveSale(getRegion()).isPresent()) {

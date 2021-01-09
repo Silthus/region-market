@@ -1,10 +1,10 @@
 package net.silthus.regions.actions;
 
+import de.raidcraft.economy.wrapper.Economy;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.Value;
 import lombok.experimental.NonFinal;
-import net.milkbowl.vault.economy.Economy;
 import net.silthus.regions.Cost;
 import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.costs.PriceDetails;
@@ -20,6 +20,7 @@ import org.bukkit.Bukkit;
 
 import java.time.Instant;
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.Optional;
 
 @Value
@@ -88,7 +89,8 @@ public class BuyAction extends RegionAction {
         PriceDetails priceDetails = result.getPriceDetails();
 
         // lets to a final money check - just to be sure
-        Economy economy = RegionsPlugin.instance().getEconomy();
+//        Economy economy = RegionsPlugin.instance().getEconomy();
+        Economy economy = Economy.get();
         final RegionPlayer regionPlayer = result.getRegionPlayer();
 
         if (!economy.has(regionPlayer.getOfflinePlayer(), priceDetails.total())) {
@@ -111,7 +113,19 @@ public class BuyAction extends RegionAction {
                     return event.getResult();
                 }
 
-                economy.depositPlayer(sale.seller().getOfflinePlayer(), sale.price());
+                economy.depositPlayer(sale.seller().getOfflinePlayer(), sale.price(),
+                        "Verkauf von " + sale.region().name() + " an " + regionPlayer.name(),
+                        Map.of(
+                                "price", sale.price(),
+                                "buyer_id", regionPlayer.id(),
+                                "buyer_name", regionPlayer.name(),
+                                "region_id", sale.region().id(),
+                                "region", sale.region().name(),
+                                "seller_id", sale.seller().id(),
+                                "seller_name", sale.seller().name(),
+                                "action", RegionTransaction.Action.SELL_TO_PLAYER.name()
+                        )
+                );
                 RegionTransaction.of(getRegion(), sale.seller(), RegionTransaction.Action.SELL_TO_PLAYER)
                         .data("buyer_id", regionPlayer.id())
                         .data("buyer", regionPlayer.name())
@@ -130,7 +144,13 @@ public class BuyAction extends RegionAction {
 
         double price = result.price();
 
-        economy.withdrawPlayer(regionPlayer.getOfflinePlayer(), price);
+        economy.withdrawPlayer(regionPlayer.getOfflinePlayer(), price, "Kauf von " + result.getRegion().name(), Map.of(
+                "price", price,
+                "buyer_id", regionPlayer.id(),
+                "buyer_name", regionPlayer.name(),
+                "region", result.getRegion().name(),
+                "action", RegionTransaction.Action.BUY.name()
+        ));
 
         Region region = result.getRegion();
         region.owner(regionPlayer)

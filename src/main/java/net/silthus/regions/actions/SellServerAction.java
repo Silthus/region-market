@@ -1,13 +1,12 @@
 package net.silthus.regions.actions;
 
 import com.sk89q.worldguard.domains.DefaultDomain;
+import de.raidcraft.economy.wrapper.Economy;
 import io.ebean.annotation.Transactional;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.Value;
 import lombok.experimental.NonFinal;
-import net.milkbowl.vault.economy.Economy;
-import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.commands.RegionCommands;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionPlayer;
@@ -15,6 +14,8 @@ import net.silthus.regions.entities.RegionTransaction;
 import net.silthus.regions.events.SellRegionEvent;
 import net.silthus.regions.events.SoldRegionEvent;
 import org.bukkit.Bukkit;
+
+import java.util.Map;
 
 @Value
 @NonFinal
@@ -34,8 +35,6 @@ public class SellServerAction extends SellAction {
     @Transactional
     public SellResult run() {
 
-        Economy economy = RegionsPlugin.instance().getEconomy();
-
         SellRegionEvent event = new SellRegionEvent(this);
         Bukkit.getPluginManager().callEvent(event);
 
@@ -52,7 +51,15 @@ public class SellServerAction extends SellAction {
                 .status(Region.Status.FREE)
                 .save();
 
-        economy.depositPlayer(getRegionPlayer().getOfflinePlayer(), getPrice());
+        Economy.get().depositPlayer(getRegionPlayer().getOfflinePlayer(), getPrice(),
+                "Verkauf von " + getRegion().name() + " an den Server.",
+                    Map.of(
+                        "region", getRegion().name(),
+                        "price", getPrice(),
+                        "player_id", getRegionPlayer().id(),
+                        "player_name", getRegionPlayer().name(),
+                        "action", RegionTransaction.Action.SELL_TO_SERVER.name()
+        ));
 
         Bukkit.getPluginManager().callEvent(new SoldRegionEvent(getRegion(), getRegionPlayer()));
 

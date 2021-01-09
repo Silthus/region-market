@@ -67,6 +67,7 @@ dependencies {
     implementation 'net.silthus:ebean-wrapper:2.8.1'
     implementation 'net.silthus.configlib:configlib-bukkit:2.6.0'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.3'
+    implementation 'de.raidcraft.economy:wrapper:2.0.1'
 
     implementation 'co.aikar:acf-paper:0.5.0-SNAPSHOT'
     implementation 'net.wesjd:anvilgui:1.4.0-SNAPSHOT'
@@ -100,11 +101,13 @@ shadowJar {
         include(dependency('com.fasterxml.jackson.core::'))
         include(dependency('net.silthus:interactivemessenger:'))
         include(dependency('net.wesjd:anvilgui:'))
+        include(dependency('de.raidcraft.economy:wrapper:'))
     }
     relocate 'co.aikar.commands', "shadow.${pluginName}.acf"
     relocate 'co.aikar.locales', "shadow.${pluginName}.locales"
     relocate 'de.exlll.configlib', "shadow.${pluginName}.configlib"
     relocate 'net.wesjd.anvilgui', "shadow.${pluginName}.anvilgui"
+    relocate 'de.raidcraft.economy.wrapper', "de.raidcraft.regions.economy"
 }
 
 tasks.build.dependsOn(shadowJar)
