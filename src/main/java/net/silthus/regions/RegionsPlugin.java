@@ -224,12 +224,22 @@ public class RegionsPlugin extends JavaPlugin {
 
     private void registerRegionPlayerContext(PaperCommandManager commandManager) {
 
-        commandManager.getCommandContexts().registerIssuerOnlyContext(RegionPlayer.class, c -> RegionPlayer.getOrCreate(c.getPlayer()));
+        commandManager.getCommandContexts().registerIssuerAwareContext(RegionPlayer.class, c -> {
+            String arg = c.popFirstArg();
+            if (Strings.isNullOrEmpty(arg)) {
+                return RegionPlayer.getOrCreate(c.getPlayer());
+            }
+            Optional<RegionPlayer> player = RegionPlayer.of(arg);
+            if (player.isEmpty()) {
+                throw new InvalidCommandArgument("Kein Spieler mit dem Namen " + arg + " gefunden!");
+            }
+            return player.get();
+        });
     }
 
     private void registerRegionContext(PaperCommandManager commandManager) {
 
-        commandManager.getCommandContexts().registerContext(Region.class, c -> {
+        commandManager.getCommandContexts().registerIssuerAwareContext(Region.class, c -> {
             String regionName = c.popFirstArg();
 
             Optional<Region> region;
