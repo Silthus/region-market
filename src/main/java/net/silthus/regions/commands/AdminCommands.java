@@ -369,7 +369,7 @@ public class AdminCommands extends BaseCommand implements Listener {
         public void setSize(Region region, long size) {
 
             region.size(size).save();
-            getCurrentCommandIssuer().sendMessage(ChatColor.GREEN + "The Größe des Grundstücks wurde auf "
+            getCurrentCommandIssuer().sendMessage(ChatColor.GREEN + "Die Größe des Grundstücks wurde auf "
                     + ChatColor.AQUA + region.size() + "m² " + ChatColor.GREEN + " und "
                     + ChatColor.AQUA + region.volume() + "m³ " + ChatColor.GREEN + " gesetzt."
             );
@@ -380,7 +380,7 @@ public class AdminCommands extends BaseCommand implements Listener {
         public void setVolume(Region region, long volume) {
 
             region.volume(volume).save();
-            getCurrentCommandIssuer().sendMessage(ChatColor.GREEN + "The Größe des Grundstücks wurde auf "
+            getCurrentCommandIssuer().sendMessage(ChatColor.GREEN + "Die Größe des Grundstücks wurde auf "
                     + ChatColor.AQUA + region.size() + "m² " + ChatColor.GREEN + " und "
                     + ChatColor.AQUA + region.volume() + "m³ " + ChatColor.GREEN + " gesetzt."
             );
