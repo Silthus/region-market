@@ -5,6 +5,7 @@ import net.silthus.regions.Messages;
 import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionPlayer;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.event.EventHandler;
@@ -43,8 +44,14 @@ public class SignClickListener implements Listener {
         RegionPlayer player = RegionPlayer.getOrCreate(event.getPlayer());
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             event.getPlayer().spigot().sendMessage(Messages.regionInfo(region, player));
-        } else if (event.getAction() == Action.LEFT_CLICK_BLOCK && event.getPlayer().isSneaking() && event.getPlayer().hasPermission(Constants.PERMISSION_SIGN_DESTROY)) {
-            event.setCancelled(false);
+        } else if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
+            if (region.isOwner(event.getPlayer())) {
+                event.setCancelled(false);
+            } else if (event.getPlayer().getGameMode() == GameMode.CREATIVE && event.getPlayer().isSneaking() && event.getPlayer().hasPermission(Constants.PERMISSION_SIGN_DESTROY)) {
+                event.setCancelled(false);
+            } else if (event.getPlayer().hasPermission(Constants.PERMISSION_SIGN_DESTROY)) {
+                event.setCancelled(false);
+            }
         }
     }
 }
