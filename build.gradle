@@ -54,11 +54,11 @@ repositories {
     jcenter()
     spigot()
     maven { url = 'https://jitpack.io' }
-    enginehub()
     maven { url = "https://repo.aikar.co/content/groups/aikar/" }
     protocolLib()
     codemc()
     maven { url = "http://maven.wiefferink.me" }
+    enginehub()
 }
 
 dependencies {
@@ -107,6 +107,7 @@ shadowJar {
     relocate 'co.aikar.locales', "shadow.${pluginName}.locales"
     relocate 'de.exlll.configlib', "shadow.${pluginName}.configlib"
     relocate 'net.wesjd.anvilgui', "shadow.${pluginName}.anvilgui"
+    relocate 'com.fasterxml.jackson', "shadow.${pluginName}.jackson"
     relocate 'de.raidcraft.economy.wrapper', "de.raidcraft.regions.economy"
 }
 
