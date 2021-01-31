@@ -1,3 +1,12 @@
+## [1.19.1](https://github.com/raidcraft/rcregions/compare/v1.19.0...v1.19.1) (2021-01-31)
+
+
+### Bug Fixes
+
+* **build:** properly shade fasterxml ([6de03b7](https://github.com/raidcraft/rcregions/commit/6de03b72df31632a628dc7a6d217be432e2f1237))
+* allow destroying of signs in owned regions ([298878e](https://github.com/raidcraft/rcregions/commit/298878e6da9eec6935e67b7b62fb1a00d3226a60)), closes [#29](https://github.com/raidcraft/rcregions/issues/29)
+* **style:** correct small typo in admin commands ([2a07054](https://github.com/raidcraft/rcregions/commit/2a07054e5c4c1dd0fe8a80f6717f7df5352114ca)), closes [#28](https://github.com/raidcraft/rcregions/issues/28)
+
 # [1.19.0](https://github.com/raidcraft/rcregions/compare/v1.18.0...v1.19.0) (2021-01-09)
 
 
