@@ -1,3 +1,10 @@
+## [1.19.2](https://github.com/raidcraft/rcregions/compare/v1.19.1...v1.19.2) (2021-02-10)
+
+
+### Bug Fixes
+
+* add proper dependencies to spigot.yml ([27a66bf](https://github.com/raidcraft/rcregions/commit/27a66bfe3816955fec3d2e7f6a99d22e5ea4f28f))
+
 ## [1.19.1](https://github.com/raidcraft/rcregions/compare/v1.19.0...v1.19.1) (2021-01-31)
 
 
