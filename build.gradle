@@ -36,8 +36,8 @@ spigot {
     authors = [project.property("author")]
     apiVersion = project.property("apiVersion")
     load = STARTUP
-    depends = ['WorldGuard', 'WorldEdit', 'Vault', 'ebean-wrapper']
-//    softDepend = ['HolographicDisplays', 'Vault']
+    depends = ['WorldGuard', 'WorldEdit', 'ebean-wrapper']
+    softDepends = ['HolographicDisplays', 'RCEconomy', 'Vault']
 }
 
 compileJava {
