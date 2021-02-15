@@ -1,3 +1,10 @@
+# [1.20.0](https://github.com/raidcraft/rcregions/compare/v1.19.2...v1.20.0) (2021-02-15)
+
+
+### Features
+
+* add region achievement ([d606f84](https://github.com/raidcraft/rcregions/commit/d606f841039e2af148b43e214928be943d114172))
+
 ## [1.19.2](https://github.com/raidcraft/rcregions/compare/v1.19.1...v1.19.2) (2021-02-10)
 
 
