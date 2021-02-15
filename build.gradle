@@ -37,7 +37,7 @@ spigot {
     apiVersion = project.property("apiVersion")
     load = STARTUP
     depends = ['WorldGuard', 'WorldEdit', 'ebean-wrapper']
-    softDepends = ['HolographicDisplays', 'RCEconomy', 'Vault']
+    softDepends = ['HolographicDisplays', 'RCEconomy', 'Vault', 'RCAchievements']
 }
 
 compileJava {
@@ -67,7 +67,8 @@ dependencies {
     implementation 'net.silthus:ebean-wrapper:2.8.1'
     implementation 'net.silthus.configlib:configlib-bukkit:2.6.0'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.3'
-    implementation 'de.raidcraft.economy:wrapper:2.0.1'
+    implementation 'de.raidcraft:economy:2.4.0'
+    implementation 'de.raidcraft:rcachievements:1.18.5'
 
     implementation 'co.aikar:acf-paper:0.5.0-SNAPSHOT'
     implementation 'net.wesjd:anvilgui:1.4.0-SNAPSHOT'

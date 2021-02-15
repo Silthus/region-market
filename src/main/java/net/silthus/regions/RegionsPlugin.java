@@ -7,6 +7,8 @@ import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.bukkit.BukkitPlayer;
 import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldguard.WorldGuard;
+import de.raidcraft.achievements.RCAchievements;
+import de.raidcraft.achievements.TypeRegistrationException;
 import io.ebean.Database;
 import kr.entree.spigradle.annotations.PluginMain;
 import lombok.AccessLevel;
@@ -18,6 +20,7 @@ import net.milkbowl.vault.permission.Permission;
 import net.silthus.ebean.BaseEntity;
 import net.silthus.ebean.Config;
 import net.silthus.ebean.EbeanWrapper;
+import net.silthus.regions.achievements.RegionAchievement;
 import net.silthus.regions.commands.AdminCommands;
 import net.silthus.regions.commands.RegionCommands;
 import net.silthus.regions.entities.*;
@@ -28,6 +31,7 @@ import net.silthus.regions.listener.SignListener;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.event.HandlerList;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -89,6 +93,10 @@ public class RegionsPlugin extends JavaPlugin {
             return;
         }
 
+        if (!isTesting()) {
+
+        }
+
         loadConfig();
         setupDatabase();
         setupRegionManager();
@@ -137,6 +145,18 @@ public class RegionsPlugin extends JavaPlugin {
         permission = registration.getProvider();
 
         return true;
+    }
+
+    private void setupAchievements() {
+
+        Plugin achievements = Bukkit.getPluginManager().getPlugin("RCAchievements");
+        if (achievements != null) {
+            try {
+                ((RCAchievements) achievements).achievementManager().register(new RegionAchievement.Factory());
+            } catch (TypeRegistrationException e) {
+                getLogger().warning("failed to register region achievement type: " + e.getMessage());
+            }
+        }
     }
 
     private void loadConfig() {

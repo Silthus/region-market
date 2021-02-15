@@ -17,6 +17,7 @@ RCRegions ist das Grundstücksplugin des [Raid-Craft Servers](https://raid-craft
 * [Usage](#usage)
   * [Creating Regions](#creating-regions)
   * [Region Price Calculation](#region-price-calculation)
+* [Achievement](#achievement)
 
 ## Getting started
 
@@ -194,3 +195,16 @@ You can specify a price modifier for groups that gets applied for players that w
 ```
 region_price = SUM(base_price * [(count ^ power) * multiplier + 1] - base_price) * player_permission_multiplier * region_multiplier
 ```
+
+## Achievement
+
+The RCRegions plugin comes with a built-in achievement type for [RCAchievements](https://github.com/raidcraft/rcachievements).
+
+Use the `region` type with the following achievement configuration:
+
+| Config | Default | Description |
+| ------ | ------- | ----------- |
+| `count` | `0` | How many regions must the player own. Ignored if `0`. |
+| `groups` | `[]` | A list region groups the player must have a region in. |
+| `regions` | `[]` | A list of regions the player must own. |
+| `money_progress` | `false` | Show how much money the player needs until he can buy a region in the list. |
