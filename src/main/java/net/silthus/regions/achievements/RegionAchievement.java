@@ -15,6 +15,7 @@ import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionGroup;
 import net.silthus.regions.entities.RegionPlayer;
 import net.silthus.regions.events.BoughtRegionEvent;
+import net.silthus.regions.events.SoldRegionEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
@@ -52,10 +53,11 @@ public class RegionAchievement extends AbstractAchievementType implements Progre
 
     }
 
-    private int count = 0;
-    private boolean showMoneyProgress = false;
-    private final List<RegionGroup> groups = new ArrayList<>();
-    private final List<Region> regions = new ArrayList<>();
+    int count = 0;
+    boolean requireAll = false;
+    boolean showMoneyProgress = false;
+    final List<RegionGroup> groups = new ArrayList<>();
+    final List<Region> regions = new ArrayList<>();
 
     protected RegionAchievement(AchievementContext context) {
         super(context);
@@ -66,6 +68,7 @@ public class RegionAchievement extends AbstractAchievementType implements Progre
 
         this.count = config.getInt("count", count);
         this.showMoneyProgress = config.getBoolean("money_progress", false);
+        this.requireAll = config.getBoolean("require_all", false);
 
         for (String groupName : config.getStringList("groups")) {
             RegionGroup.of(groupName).ifPresent(groups::add);
@@ -156,11 +159,28 @@ public class RegionAchievement extends AbstractAchievementType implements Progre
 
         if (notApplicable(event.getRegionPlayer().getOfflinePlayer())) return;
 
+        Bukkit.getPluginManager().callEvent(
+                new AchievementProgressChangeEvent(
+                        playerAchievement(AchievementPlayer.of(event.getRegionPlayer().getOfflinePlayer())),
+                        this
+                )
+        );
+
         check(event.getRegionPlayer());
     }
 
     @EventHandler(ignoreCancelled = true)
+    public void onRegionSell(SoldRegionEvent event) {
+
+        if (notApplicable(event.getPlayer().getOfflinePlayer())) return;
+
+        check(event.getPlayer());
+    }
+
+    @EventHandler(ignoreCancelled = true)
     public void onPlayerJoin(PlayerJoinEvent event) {
+
+        if (notApplicable(event.getPlayer())) return;
 
         Bukkit.getScheduler().runTaskLater(RegionsPlugin.instance(),
                 () -> check(RegionPlayer.getOrCreate(event.getPlayer())),
@@ -180,25 +200,28 @@ public class RegionAchievement extends AbstractAchievementType implements Progre
         }
     }
 
-    private void check(RegionPlayer player) {
-
-        Bukkit.getPluginManager().callEvent(
-                new AchievementProgressChangeEvent(
-                        playerAchievement(AchievementPlayer.of(player.getOfflinePlayer())),
-                        this
-                )
-        );
+    void check(RegionPlayer player) {
 
         boolean countReached = count < 1 || player.ownedRegions().size() >= count;
-        boolean groupsReached = groups.isEmpty() || player.regionGroups().containsAll(groups);
-        boolean regionsReached = regions.isEmpty() || player.regions().containsAll(regions);
+        boolean groupsReached = groups.isEmpty()
+                || (
+                        (requireAll && player.regionGroups().containsAll(groups))
+                        || player.regionGroups().stream().anyMatch(groups::contains)
+                    );
+        boolean regionsReached = regions.isEmpty()
+                || (
+                (requireAll && player.regions().containsAll(regions))
+                        || player.regions().stream().anyMatch(regions::contains)
+        );
 
         if (countReached && groupsReached && regionsReached) {
             addTo(player(player.getOfflinePlayer()));
+        } else {
+            removeFrom(player(player.getOfflinePlayer()));
         }
     }
 
-    private OptionalDouble getLowestPrice(RegionPlayer player) {
+    OptionalDouble getLowestPrice(RegionPlayer player) {
 
         return Stream.concat(
                 groups.stream()
