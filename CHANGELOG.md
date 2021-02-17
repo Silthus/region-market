@@ -1,3 +1,10 @@
+## [1.21.1](https://github.com/raidcraft/rcregions/compare/v1.21.0...v1.21.1) (2021-02-17)
+
+
+### Bug Fixes
+
+* catch all worldedit exceptions ([0326834](https://github.com/raidcraft/rcregions/commit/03268340353c0201cb811d80f55859d8330bc2ac))
+
 # [1.21.0](https://github.com/raidcraft/rcregions/compare/v1.20.1...v1.21.0) (2021-02-17)
 
 
