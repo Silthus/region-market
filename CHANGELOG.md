@@ -1,3 +1,10 @@
+# [1.21.0](https://github.com/raidcraft/rcregions/compare/v1.20.1...v1.21.0) (2021-02-17)
+
+
+### Features
+
+* improve region achievements - remove if no longer active ([2182815](https://github.com/raidcraft/rcregions/commit/21828152f9a81e39a10651e6e259d4de48321dab))
+
 ## [1.20.1](https://github.com/raidcraft/rcregions/compare/v1.20.0...v1.20.1) (2021-02-17)
 
 
