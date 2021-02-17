@@ -1,3 +1,10 @@
+## [1.20.1](https://github.com/raidcraft/rcregions/compare/v1.20.0...v1.20.1) (2021-02-17)
+
+
+### Bug Fixes
+
+* achievements not registered ([c0d1553](https://github.com/raidcraft/rcregions/commit/c0d1553352cbcba7896bf141ac6007181e503c45))
+
 # [1.20.0](https://github.com/raidcraft/rcregions/compare/v1.19.2...v1.20.0) (2021-02-15)
 
 
