@@ -1,6 +1,7 @@
 package net.silthus.regions;
 
 import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.EditSessionBuilder;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.bukkit.BukkitWorld;
@@ -129,7 +130,7 @@ public class SchematicManager implements Listener {
                             Operations.complete(copy);
                         }
                         return clipboard;
-                    } catch (WorldEditException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                         return null;
                     }
