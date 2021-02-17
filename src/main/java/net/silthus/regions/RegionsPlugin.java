@@ -94,7 +94,7 @@ public class RegionsPlugin extends JavaPlugin {
         }
 
         if (!isTesting()) {
-
+            setupAchievements();
         }
 
         loadConfig();
