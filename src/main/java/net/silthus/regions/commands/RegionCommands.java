@@ -2,13 +2,7 @@ package net.silthus.regions.commands;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.InvalidCommandArgument;
-import co.aikar.commands.annotation.CommandAlias;
-import co.aikar.commands.annotation.CommandCompletion;
-import co.aikar.commands.annotation.CommandPermission;
-import co.aikar.commands.annotation.Default;
-import co.aikar.commands.annotation.Flags;
-import co.aikar.commands.annotation.Optional;
-import co.aikar.commands.annotation.Subcommand;
+import co.aikar.commands.annotation.*;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -223,8 +217,8 @@ public class RegionCommands extends BaseCommand {
         private final Map<UUID, SellAction> sellActions = new HashMap<>();
 
         @Default
-        @CommandCompletion("@regions")
-        public void sell(RegionPlayer player, @Flags("owner") Region region) {
+        @CommandCompletion("@ownregions")
+        public void sell(@Conditions("owner") Region region, RegionPlayer player) {
 
             if (!getCurrentCommandIssuer().isPlayer()) {
                 throw new InvalidCommandArgument("Nur Spieler können Grundstücke verkaufen.");
@@ -236,8 +230,8 @@ public class RegionCommands extends BaseCommand {
 
         @Subcommand("server")
         @CommandPermission("rcregions.region.sell.server")
-        @CommandCompletion("@regions @players")
-        public void sellServer(Player player, Region region, RegionPlayer regionPlayer) {
+        @CommandCompletion("@ownregions @players")
+        public void sellServer(@Conditions("owner") Region region, RegionPlayer regionPlayer) {
 
             if (!getCurrentCommandIssuer().isPlayer()) {
                 throw new InvalidCommandArgument("Nur Spieler können Grundstücke verkaufen.");
@@ -272,13 +266,13 @@ public class RegionCommands extends BaseCommand {
             ((Player) getCurrentCommandIssuer().getIssuer()).spigot().sendMessage(builder.create());
 
             sellActions.put(getCurrentCommandIssuer().getUniqueId(), sellAction);
-            Bukkit.getScheduler().runTaskLater(plugin, () -> sellAbort(player, null), plugin.getPluginConfig().getBuyTimeTicks());
+            Bukkit.getScheduler().runTaskLater(plugin, () -> sellAbort(getCurrentCommandIssuer().getIssuer(), null), plugin.getPluginConfig().getBuyTimeTicks());
         }
 
         @Subcommand("direct")
         @CommandPermission("rcregions.region.sell.direct")
-        @CommandCompletion("@regions @players")
-        public void sellDirect(Region region, RegionPlayer regionPlayer) {
+        @CommandCompletion("@ownregions @players")
+        public void sellDirect(@Conditions("owner") Region region, RegionPlayer regionPlayer) {
 
             if (!getCurrentCommandIssuer().isPlayer()) {
                 throw new InvalidCommandArgument("Nur Spieler können Grundstücke verkaufen.");
@@ -346,7 +340,7 @@ public class RegionCommands extends BaseCommand {
 
         @Subcommand("auction")
         @CommandPermission("rcregions.region.sell.auction")
-        public void sellAuction(RegionPlayer player, Region region) {
+        public void sellAuction(@Conditions("owner") Region region, RegionPlayer player) {
 
             if (!getCurrentCommandIssuer().isPlayer()) {
                 throw new InvalidCommandArgument("Nur Spieler können Grundstücke verkaufen.");

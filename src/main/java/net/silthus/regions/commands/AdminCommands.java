@@ -206,7 +206,7 @@ public class AdminCommands extends BaseCommand implements Listener {
 
         region.activeSale().ifPresent(sale -> sale.abort(true));
         region.owner(null).status(Region.Status.FREE).save();
-        if (!Strings.isNullOrEmpty(schematic)) {
+        if (!Strings.isNullOrEmpty(schematic) && plugin.getSchematicManager() != null) {
             try {
                 plugin.getSchematicManager().restore(region, schematic);
             } catch (Exception e) {

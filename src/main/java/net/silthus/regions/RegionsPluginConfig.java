@@ -50,6 +50,7 @@ public class RegionsPluginConfig extends BukkitYamlConfiguration {
     })
     private List<String> sellCommands = new ArrayList<>();
     private DatabaseConfig database = new DatabaseConfig();
+    private boolean enableSchematics = false;
 
     public RegionsPluginConfig(Path path) {
 

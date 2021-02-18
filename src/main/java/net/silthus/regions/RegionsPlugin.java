@@ -1,5 +1,6 @@
 package net.silthus.regions;
 
+import co.aikar.commands.ConditionFailedException;
 import co.aikar.commands.InvalidCommandArgument;
 import co.aikar.commands.PaperCommandManager;
 import com.google.common.base.Strings;
@@ -202,8 +203,10 @@ public class RegionsPlugin extends JavaPlugin {
 
     private void setupSchematicManager() {
 
-        this.schematicManager = new SchematicManager(this, WorldEdit.getInstance());
-        Bukkit.getPluginManager().registerEvents(schematicManager, this);
+        if (pluginConfig.isEnableSchematics()) {
+            this.schematicManager = new SchematicManager(this, WorldEdit.getInstance());
+            Bukkit.getPluginManager().registerEvents(schematicManager, this);
+        }
     }
 
     private void setupListeners() {
@@ -232,6 +235,7 @@ public class RegionsPlugin extends JavaPlugin {
         registerGroupsCompletion(commandManager);
         registerSalesCompletion(commandManager);
         registerSchematicsCompletion(commandManager);
+        registerOwnRegionsCompletion(commandManager);
 
         commandManager.registerCommand(new AdminCommands(this));
         commandManager.registerCommand(new RegionCommands(this));
@@ -239,6 +243,7 @@ public class RegionsPlugin extends JavaPlugin {
 
     private void registerSchematicsCompletion(PaperCommandManager commandManager) {
 
+        if (schematicManager == null) return;
         commandManager.getCommandCompletions().registerAsyncCompletion("schematics", context -> getSchematicManager().getSchematics(context.getContextValue(Region.class)));
     }
 
@@ -289,13 +294,19 @@ public class RegionsPlugin extends JavaPlugin {
                 throw new InvalidCommandArgument("Unable to find a region with the name or id " + regionName);
             }
 
-            if (c.hasFlag("owner") && c.getPlayer() != null) {
-                if (!c.getPlayer().getUniqueId().equals(region.get().owner().map(BaseEntity::id).orElse(null))) {
-                    throw new InvalidCommandArgument("Dir gehört diese Region nicht.");
-                }
-            }
-
             return region.get();
+        });
+    }
+
+    private void registerOwnerCondition(PaperCommandManager commandManager) {
+
+        commandManager.getCommandConditions().addCondition(Region.class, "owner", (context, execContext, value) -> {
+            if (context.getIssuer().hasPermission(Constants.SELL_REGION_FOR_OTHERS_PERMISSION)) {
+                return;
+            }
+            if (!value.isOwner(context.getIssuer().getPlayer())) {
+                throw new ConditionFailedException("Du bist nicht der Besitzer dieser Region.");
+            }
         });
     }
 
@@ -316,11 +327,21 @@ public class RegionsPlugin extends JavaPlugin {
 
         commandManager.getCommandCompletions().registerAsyncCompletion("regions", context ->
                 Region.find.all().stream()
-                .filter(region -> region.world() == null
-                        || context.getPlayer().getWorld().getUID().equals(region.world()))
-                .map(Region::name)
-                .collect(Collectors.toSet()));
+                        .filter(region -> region.world() == null
+                                || context.getPlayer().getWorld().getUID().equals(region.world()))
+                        .map(Region::name)
+                        .collect(Collectors.toSet()));
     }
+
+    private void registerOwnRegionsCompletion(PaperCommandManager commandManager) {
+
+        commandManager.getCommandCompletions().registerAsyncCompletion("ownregions", context ->
+                Region.find.all().stream()
+                        .filter(region -> region.isOwner(context.getPlayer()))
+                        .map(Region::name)
+                        .collect(Collectors.toSet()));
+    }
+
 
     private void registerSalesCompletion(PaperCommandManager commandManager) {
 
