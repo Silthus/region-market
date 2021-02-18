@@ -6,10 +6,8 @@ import de.raidcraft.achievements.Progressable;
 import de.raidcraft.achievements.TypeFactory;
 import de.raidcraft.achievements.entities.AchievementPlayer;
 import de.raidcraft.achievements.events.AchievementProgressChangeEvent;
-import de.raidcraft.achievements.types.CountAchievement;
 import de.raidcraft.economy.events.PlayerBalanceChangedEvent;
 import de.raidcraft.economy.wrapper.Economy;
-import net.silthus.regions.Messages;
 import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionGroup;
@@ -25,14 +23,17 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import shadow.RCAchievements.text.adventure.text.Component;
 import shadow.RCAchievements.text.adventure.text.TextComponent;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.OptionalDouble;
 import java.util.stream.Stream;
 
 import static de.raidcraft.achievements.Messages.Colors.*;
 import static shadow.RCAchievements.text.adventure.text.Component.newline;
 import static shadow.RCAchievements.text.adventure.text.Component.text;
 
-public class RegionAchievement extends AbstractAchievementType implements Progressable {
+public class RegionAchievement extends AbstractAchievementType implements Progressable, Listener {
 
     public static class Factory implements TypeFactory<RegionAchievement>, Listener {
 
