@@ -1,3 +1,10 @@
+## [1.21.4](https://github.com/raidcraft/rcregions/compare/v1.21.3...v1.21.4) (2021-02-18)
+
+
+### Bug Fixes
+
+* npe in sell command ([81e4671](https://github.com/raidcraft/rcregions/commit/81e4671e0da6ae8e50aebbc44a7f58d2df286cba))
+
 ## [1.21.3](https://github.com/raidcraft/rcregions/compare/v1.21.2...v1.21.3) (2021-02-18)
 
 
