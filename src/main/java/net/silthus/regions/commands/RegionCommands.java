@@ -263,10 +263,11 @@ public class RegionCommands extends BaseCommand {
                     "/rcregions sell abort"
                     ));
 
-            ((Player) getCurrentCommandIssuer().getIssuer()).spigot().sendMessage(builder.create());
+            Player player = (Player) getCurrentCommandIssuer().getIssuer();
+            player.spigot().sendMessage(builder.create());
 
             sellActions.put(getCurrentCommandIssuer().getUniqueId(), sellAction);
-            Bukkit.getScheduler().runTaskLater(plugin, () -> sellAbort(getCurrentCommandIssuer().getIssuer(), null), plugin.getPluginConfig().getBuyTimeTicks());
+            Bukkit.getScheduler().runTaskLater(plugin, () -> sellAbort(player, null), plugin.getPluginConfig().getBuyTimeTicks());
         }
 
         @Subcommand("direct")
@@ -392,6 +393,8 @@ public class RegionCommands extends BaseCommand {
         @CommandPermission("rcregions.region.sell")
         @CommandCompletion("@sales")
         public void sellAbort(Player player, @Optional Region region) {
+
+            if (player == null) return;
 
             RegionAction sellAction = sellActions.remove(player.getUniqueId());
             if (sellAction != null) {
