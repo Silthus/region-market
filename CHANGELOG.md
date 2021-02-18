@@ -1,3 +1,10 @@
+## [1.21.5](https://github.com/raidcraft/rcregions/compare/v1.21.4...v1.21.5) (2021-02-18)
+
+
+### Bug Fixes
+
+* region achievements not working ([7f7c17e](https://github.com/raidcraft/rcregions/commit/7f7c17e415c0366aa5fd3e0c9ecfbca7064d010b)), closes [#37](https://github.com/raidcraft/rcregions/issues/37)
+
 ## [1.21.4](https://github.com/raidcraft/rcregions/compare/v1.21.3...v1.21.4) (2021-02-18)
 
 
