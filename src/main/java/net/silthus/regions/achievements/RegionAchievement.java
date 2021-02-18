@@ -101,7 +101,7 @@ public class RegionAchievement extends AbstractAchievementType implements Progre
         if (count > 0) {
             builder.append(newline())
                     .append(text("Anzahl: ", TEXT))
-                    .append(text((regionPlayer.regions().size()), DARK_HIGHLIGHT))
+                    .append(text(getCurrentCount(regionPlayer), DARK_HIGHLIGHT))
                     .append(text("/", ACCENT))
                     .append(text(count, HIGHLIGHT))
                     .append(text(" Grundstücke", TEXT));
@@ -231,5 +231,16 @@ public class RegionAchievement extends AbstractAchievementType implements Progre
                 .filter(region -> region.status() == Region.Status.FREE)
                 .mapToDouble(region -> region.priceDetails(player).total())
                 .min();
+    }
+
+    long getCurrentCount(RegionPlayer player) {
+
+        if (regions.isEmpty() && groups.isEmpty()) return player.regions().size();
+
+        return Stream.concat(regions.stream(),
+                groups.stream()
+                        .map(RegionGroup::regions)
+                        .flatMap(Collection::stream)
+        ).filter(player::isOwner).count();
     }
 }

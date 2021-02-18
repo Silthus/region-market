@@ -123,4 +123,9 @@ public class RegionPlayer extends BaseEntity {
                 .map(playerLimit -> playerLimit.test(region))
                 .orElse(new LimitCheckResult());
     }
+
+    public boolean isOwner(Region region) {
+
+        return regions().contains(region);
+    }
 }
