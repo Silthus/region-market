@@ -1,3 +1,10 @@
+## [1.21.2](https://github.com/raidcraft/rcregions/compare/v1.21.1...v1.21.2) (2021-02-18)
+
+
+### Bug Fixes
+
+* **achievement:** region count incorrectly displayed ([b7c53bc](https://github.com/raidcraft/rcregions/commit/b7c53bc5f4b6a5f90e2f11450b8714c1c57048ea)), closes [#36](https://github.com/raidcraft/rcregions/issues/36)
+
 ## [1.21.1](https://github.com/raidcraft/rcregions/compare/v1.21.0...v1.21.1) (2021-02-17)
 
 
