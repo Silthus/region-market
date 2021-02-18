@@ -1,3 +1,10 @@
+## [1.21.6](https://github.com/raidcraft/rcregions/compare/v1.21.5...v1.21.6) (2021-02-18)
+
+
+### Bug Fixes
+
+* make /gs the root command for rcregions ([e0d19d2](https://github.com/raidcraft/rcregions/commit/e0d19d27e3a7251088a1bf9aa32df325055e8db7))
+
 ## [1.21.5](https://github.com/raidcraft/rcregions/compare/v1.21.4...v1.21.5) (2021-02-18)
 
 
