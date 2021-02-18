@@ -68,7 +68,7 @@ dependencies {
     implementation 'net.silthus.configlib:configlib-bukkit:2.6.0'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.3'
     implementation 'de.raidcraft:economy:2.4.0'
-    implementation 'de.raidcraft:rcachievements:1.18.5'
+    implementation 'de.raidcraft:rcachievements:1.27.0'
 
     implementation 'co.aikar:acf-paper:0.5.0-SNAPSHOT'
     implementation 'net.wesjd:anvilgui:1.4.0-SNAPSHOT'
