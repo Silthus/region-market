@@ -1,3 +1,11 @@
+## [1.21.3](https://github.com/raidcraft/rcregions/compare/v1.21.2...v1.21.3) (2021-02-18)
+
+
+### Bug Fixes
+
+* add option to disable worldedit schematics ([16f54e4](https://github.com/raidcraft/rcregions/commit/16f54e40fd20170b1c757f5a8501470381de4add))
+* catch all save schematic exceptions ([1ac347e](https://github.com/raidcraft/rcregions/commit/1ac347e11be477821d51edc18f8018ae99c19e68))
+
 ## [1.21.2](https://github.com/raidcraft/rcregions/compare/v1.21.1...v1.21.2) (2021-02-18)
 
 
