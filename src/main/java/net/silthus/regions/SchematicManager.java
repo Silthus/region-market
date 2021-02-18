@@ -91,11 +91,15 @@ public class SchematicManager implements Listener {
 
     private void saveSchematic(Region region, String name) {
 
-        createClipboard(region).ifPresent(clipboard -> {
-            File destination = new File(getSchematicLocation(region), name);
-            saveSchematic(clipboard, destination);
-            plugin.getLogger().info("saved " + name + " state of region " + region.name() + " as a schematic at: " + destination.getAbsolutePath());
-        });
+        try {
+            createClipboard(region).ifPresent(clipboard -> {
+                File destination = new File(getSchematicLocation(region), name);
+                saveSchematic(clipboard, destination);
+                plugin.getLogger().info("saved " + name + " state of region " + region.name() + " as a schematic at: " + destination.getAbsolutePath());
+            });
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
     }
 
     private void saveSchematic(Clipboard clipboard, File destination) {
