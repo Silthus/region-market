@@ -1,3 +1,10 @@
+## [1.21.7](https://github.com/raidcraft/rcregions/compare/v1.21.6...v1.21.7) (2021-02-18)
+
+
+### Bug Fixes
+
+* **deps:** update rcachievements ([97f9bb2](https://github.com/raidcraft/rcregions/commit/97f9bb239b6f5383a270f9330613e0177d955446))
+
 ## [1.21.6](https://github.com/raidcraft/rcregions/compare/v1.21.5...v1.21.6) (2021-02-18)
 
 
