@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-@CommandAlias("sregions|sr|rcr|rcregions|sregionmarket|srm")
+@CommandAlias("gs|grundstücke|sregions|sr|rcr|rcregions|sregionmarket|srm")
 public class RegionCommands extends BaseCommand {
 
     private final RegionsPlugin plugin;
@@ -46,7 +46,6 @@ public class RegionCommands extends BaseCommand {
 
     @Default
     @Subcommand("list")
-    @CommandAlias("grundstücke|gs|regionen|regions")
     @CommandPermission("rcregions.region.list")
     @CommandCompletion("@players")
     public void list(Player player, RegionPlayer regionPlayer) {
