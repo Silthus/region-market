@@ -19,27 +19,20 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.milkbowl.vault.economy.Economy;
 import net.silthus.ebean.BaseEntity;
 import net.silthus.regions.Cost;
-import net.silthus.regions.MessageTags;
 import net.silthus.regions.Messages;
 import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.costs.MoneyCost;
 import net.silthus.regions.costs.PriceDetails;
 import net.silthus.regions.util.MathUtil;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
-import org.bukkit.entity.Player;
 
 import javax.annotation.Nullable;
 import javax.persistence.*;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static net.silthus.regions.MessageTags.*;
 
 @Entity
 @Getter
@@ -400,7 +393,7 @@ public class Region extends BaseEntity {
                 .orElse(price() * priceMultiplier());
     }
 
-    public boolean isOwner(Player player) {
+    public boolean isOwner(OfflinePlayer player) {
 
         return owner != null && owner.id().equals(player.getUniqueId());
     }

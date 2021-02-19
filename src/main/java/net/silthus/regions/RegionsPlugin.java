@@ -18,7 +18,6 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
-import net.silthus.ebean.BaseEntity;
 import net.silthus.ebean.Config;
 import net.silthus.ebean.EbeanWrapper;
 import net.silthus.regions.achievements.RegionAchievement;

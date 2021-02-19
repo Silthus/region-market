@@ -1,7 +1,6 @@
 package net.silthus.regions.util;
 
 import javax.annotation.Nullable;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;

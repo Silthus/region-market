@@ -1,10 +1,8 @@
 package net.silthus.regions.actions;
 
 import lombok.Value;
-import lombok.experimental.Accessors;
 import lombok.experimental.NonFinal;
 import net.silthus.regions.entities.Region;
-import net.silthus.regions.entities.RegionAcl;
 import net.silthus.regions.entities.RegionPlayer;
 
 @Value

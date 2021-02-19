@@ -1,10 +1,8 @@
 package net.silthus.regions.actions;
 
 import com.google.common.base.Strings;
-import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.Value;
-import net.silthus.regions.commands.RegionCommands;
 import net.silthus.regions.costs.PriceDetails;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionPlayer;

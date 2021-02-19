@@ -203,16 +203,18 @@ public class RegionAchievement extends AbstractAchievementType implements Progre
 
     void check(RegionPlayer player) {
 
-        boolean countReached = count < 1 || player.ownedRegions().size() >= count;
+        List<Region> regions = player.regions();
+        boolean countReached = count < 1 || regions.stream().filter(region -> region.isOwner(player.getOfflinePlayer())).count() >= count;
+        Collection<RegionGroup> regionGroups = player.regionGroups();
         boolean groupsReached = groups.isEmpty()
                 || (
-                        (requireAll && player.regionGroups().containsAll(groups))
-                        || player.regionGroups().stream().anyMatch(groups::contains)
+                        (requireAll && regionGroups.containsAll(groups))
+                        || regionGroups.stream().anyMatch(groups::contains)
                     );
-        boolean regionsReached = regions.isEmpty()
+        boolean regionsReached = this.regions.isEmpty()
                 || (
-                (requireAll && player.regions().containsAll(regions))
-                        || player.regions().stream().anyMatch(regions::contains)
+                (requireAll && regions.containsAll(this.regions))
+                        || regions.stream().anyMatch(this.regions::contains)
         );
 
         if (countReached && groupsReached && regionsReached) {

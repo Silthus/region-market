@@ -1,7 +1,6 @@
 package net.silthus.regions;
 
 import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.EditSessionBuilder;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.bukkit.BukkitWorld;
@@ -13,15 +12,11 @@ import com.sk89q.worldedit.extent.clipboard.io.ClipboardWriter;
 import com.sk89q.worldedit.function.operation.ForwardExtentCopy;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.function.operation.Operations;
-import com.sk89q.worldedit.math.BlockVector3;
-import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.Polygonal2DRegion;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import lombok.Getter;
-import net.silthus.ebean.BaseEntity;
 import net.silthus.regions.entities.Region;
-import net.silthus.regions.entities.RegionTransaction;
 import net.silthus.regions.events.BoughtRegionEvent;
 import net.silthus.regions.events.CreatedRegionEvent;
 import net.silthus.regions.events.DeletedRegionEvent;

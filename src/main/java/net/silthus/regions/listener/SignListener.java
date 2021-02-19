@@ -13,7 +13,6 @@ import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionGroup;
 import net.silthus.regions.entities.RegionSign;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -25,7 +24,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.SignChangeEvent;
 
-import java.util.*;
+import java.util.Optional;
 
 import static net.silthus.regions.Constants.PERMISSION_SIGN_CREATE;
 import static net.silthus.regions.Constants.SIGN_TAG;

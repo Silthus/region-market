@@ -4,7 +4,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import net.silthus.regions.entities.Region;
-import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 
 @Getter
