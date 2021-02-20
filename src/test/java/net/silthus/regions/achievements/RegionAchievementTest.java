@@ -3,6 +3,7 @@ package net.silthus.regions.achievements;
 import be.seeseemelk.mockbukkit.MockBukkit;
 import be.seeseemelk.mockbukkit.ServerMock;
 import de.raidcraft.achievements.AchievementContext;
+import io.ebean.Model;
 import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionGroup;
@@ -35,6 +36,7 @@ class RegionAchievementTest {
 
     @AfterEach
     public void tearDown() {
+        Region.find.all().forEach(Model::delete);
         MockBukkit.unmock();
     }
 
