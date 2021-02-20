@@ -1,3 +1,10 @@
+## [1.21.8](https://github.com/raidcraft/rcregions/compare/v1.21.7...v1.21.8) (2021-02-20)
+
+
+### Bug Fixes
+
+* region achievement is always granted ([3d73589](https://github.com/raidcraft/rcregions/commit/3d735890d97dcdb20d0becfb043df90dca9ed087))
+
 ## [1.21.7](https://github.com/raidcraft/rcregions/compare/v1.21.6...v1.21.7) (2021-02-18)
 
 
