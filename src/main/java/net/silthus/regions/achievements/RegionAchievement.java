@@ -23,10 +23,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import shadow.RCAchievements.text.adventure.text.Component;
 import shadow.RCAchievements.text.adventure.text.TextComponent;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.OptionalDouble;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static de.raidcraft.achievements.Messages.Colors.*;
@@ -57,8 +54,8 @@ public class RegionAchievement extends AbstractAchievementType implements Progre
     int count = 0;
     boolean requireAll = false;
     boolean showMoneyProgress = false;
-    final List<RegionGroup> groups = new ArrayList<>();
-    final List<Region> regions = new ArrayList<>();
+    final Set<RegionGroup> groups = new HashSet<>();
+    final Set<Region> regions = new HashSet<>();
 
     protected RegionAchievement(AchievementContext context) {
         super(context);
@@ -155,6 +152,18 @@ public class RegionAchievement extends AbstractAchievementType implements Progre
         return (groupPercent + regionPercent) / 2.0f;
     }
 
+    @Override
+    public long progressCount(AchievementPlayer player) {
+
+        return getCurrentCount(RegionPlayer.getOrCreate(player.offlinePlayer()));
+    }
+
+    @Override
+    public long progressMaxCount(AchievementPlayer player) {
+
+        return count;
+    }
+
     @EventHandler(ignoreCancelled = true)
     public void onRegionBuy(BoughtRegionEvent event) {
 
@@ -204,7 +213,7 @@ public class RegionAchievement extends AbstractAchievementType implements Progre
     void check(RegionPlayer player) {
 
         List<Region> regions = player.regions();
-        boolean countReached = count < 1 || regions.stream().filter(region -> region.isOwner(player.getOfflinePlayer())).count() >= count;
+        boolean countReached = count < 1 || getCurrentCount(player) >= count;
         Collection<RegionGroup> regionGroups = player.regionGroups();
         boolean groupsReached = groups.isEmpty()
                 || (
