@@ -4,6 +4,7 @@ import be.seeseemelk.mockbukkit.MockBukkit;
 import be.seeseemelk.mockbukkit.ServerMock;
 import de.raidcraft.achievements.AchievementContext;
 import io.ebean.Model;
+import net.bytebuddy.utility.RandomString;
 import net.silthus.regions.RegionsPlugin;
 import net.silthus.regions.entities.Region;
 import net.silthus.regions.entities.RegionGroup;
@@ -81,11 +82,11 @@ class RegionAchievementTest {
     @DisplayName("should give achievement if region groups match")
     void shouldOnlyGiveAchievementIfRegionGroupsMatch() {
 
-        RegionGroup group = new RegionGroup("test123");
+        RegionGroup group = new RegionGroup(RandomString.make());
         group.save();
         MemoryConfiguration cfg = new MemoryConfiguration();
         cfg.set("count", 1);
-        cfg.set("groups", Arrays.asList("test123"));
+        cfg.set("groups", Arrays.asList(group.identifier()));
 
         achievement.load(cfg);
 
@@ -103,10 +104,11 @@ class RegionAchievementTest {
     @DisplayName("should not give achievement if groups do not match")
     void shouldNotGiveAchievementIfGroupsNotMatch() {
 
-        new RegionGroup("test").save();
+        RegionGroup group = new RegionGroup(RandomString.make());
+        group.save();
         MemoryConfiguration cfg = new MemoryConfiguration();
         cfg.set("count", 1);
-        cfg.set("groups", Arrays.asList("test"));
+        cfg.set("groups", Arrays.asList(group.identifier()));
 
         achievement.load(cfg);
 
@@ -125,11 +127,11 @@ class RegionAchievementTest {
     @DisplayName("should only give achievement for regions owned by the player")
     void shouldOnlyGiveAchievementIfUserIsOwner() {
 
-        RegionGroup group = new RegionGroup("test12");
+        RegionGroup group = new RegionGroup(RandomString.make());
         group.save();
         MemoryConfiguration cfg = new MemoryConfiguration();
         cfg.set("count", 1);
-        cfg.set("groups", Arrays.asList("test12"));
+        cfg.set("groups", Arrays.asList(group.identifier()));
 
         achievement.load(cfg);
 
