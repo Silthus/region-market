@@ -113,7 +113,7 @@ class RegionAchievementTest {
         achievement.load(cfg);
 
         RegionPlayer player = RegionPlayer.getOrCreate(server.addPlayer());
-        RegionGroup foobar = new RegionGroup("foobar");
+        RegionGroup foobar = new RegionGroup(RandomString.make());
         foobar.save();
         new Region("test").group(foobar).owner(player).save();
         player.refresh();
