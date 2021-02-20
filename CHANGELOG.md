@@ -1,3 +1,10 @@
+## [1.21.9](https://github.com/raidcraft/rcregions/compare/v1.21.8...v1.21.9) (2021-02-20)
+
+
+### Bug Fixes
+
+* show correct count display ([1af339e](https://github.com/raidcraft/rcregions/commit/1af339e10f11aebed56b4f83e736ce9cb54a6a9a))
+
 ## [1.21.8](https://github.com/raidcraft/rcregions/compare/v1.21.7...v1.21.8) (2021-02-20)
 
 
