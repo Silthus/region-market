@@ -76,10 +76,32 @@ class RegionAchievementTest {
     }
 
     @Test
-    @DisplayName("should only give achievement if region groups match")
+    @DisplayName("should give achievement if region groups match")
     void shouldOnlyGiveAchievementIfRegionGroupsMatch() {
 
-        new RegionGroup().identifier("test").save();
+        RegionGroup group = new RegionGroup("test123");
+        group.save();
+        MemoryConfiguration cfg = new MemoryConfiguration();
+        cfg.set("count", 1);
+        cfg.set("groups", Arrays.asList("test123"));
+
+        achievement.load(cfg);
+
+        RegionPlayer player = RegionPlayer.getOrCreate(server.addPlayer());
+        Region region = new Region("test");
+        region.owner(player).group(group).save();
+        player.refresh();
+
+        achievement.check(player);
+
+        verify(context, times(1)).addTo(any());
+    }
+
+    @Test
+    @DisplayName("should not give achievement if groups do not match")
+    void shouldNotGiveAchievementIfGroupsNotMatch() {
+
+        new RegionGroup("test").save();
         MemoryConfiguration cfg = new MemoryConfiguration();
         cfg.set("count", 1);
         cfg.set("groups", Arrays.asList("test"));
@@ -87,7 +109,32 @@ class RegionAchievementTest {
         achievement.load(cfg);
 
         RegionPlayer player = RegionPlayer.getOrCreate(server.addPlayer());
-        new Region("test").owner(player).save();
+        RegionGroup foobar = new RegionGroup("foobar");
+        foobar.save();
+        new Region("test").group(foobar).owner(player).save();
+        player.refresh();
+
+        achievement.check(player);
+
+        verify(context, never()).addTo(any());
+    }
+
+    @Test
+    @DisplayName("should only give achievement for regions owned by the player")
+    void shouldOnlyGiveAchievementIfUserIsOwner() {
+
+        RegionGroup group = new RegionGroup("test12");
+        group.save();
+        MemoryConfiguration cfg = new MemoryConfiguration();
+        cfg.set("count", 1);
+        cfg.set("groups", Arrays.asList("test12"));
+
+        achievement.load(cfg);
+
+        RegionPlayer player = RegionPlayer.getOrCreate(server.addPlayer());
+        Region region = new Region("test");
+        region.group(group).save();
+        player.regions().add(region);
         player.refresh();
 
         achievement.check(player);

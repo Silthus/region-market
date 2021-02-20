@@ -83,7 +83,7 @@ public class RegionGroup extends Model {
     private double sellModifier = 1.0;
     private Region.PriceType priceType;
 
-    RegionGroup(String identifier) {
+    public RegionGroup(String identifier) {
 
         this.identifier = identifier;
     }
