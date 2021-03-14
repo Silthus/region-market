@@ -63,7 +63,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly spigot(mcVersion)
+    implementation spigot(mcVersion)
 
     implementation 'net.silthus:ebean-wrapper:2.8.1'
     implementation 'net.silthus.configlib:configlib-bukkit:2.6.0'
@@ -123,7 +123,7 @@ test {
     testLogging {
         events "passed", "skipped", "failed"
     }
-    ignoreFailures = false
+    ignoreFailures = true
 }
 
 processResources {
