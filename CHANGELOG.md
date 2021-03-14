@@ -1,3 +1,10 @@
+## [1.21.10](https://github.com/raidcraft/rcregions/compare/v1.21.9...v1.21.10) (2021-03-14)
+
+
+### Bug Fixes
+
+* use fawe compatible api in schematic manager ([2c56f66](https://github.com/raidcraft/rcregions/commit/2c56f66612262e62e30fe45960f191fd8822766c))
+
 ## [1.21.9](https://github.com/raidcraft/rcregions/compare/v1.21.8...v1.21.9) (2021-02-20)
 
 
