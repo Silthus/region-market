@@ -1,5 +1,6 @@
 package net.silthus.regions;
 
+import com.boydti.fawe.util.EditSessionBuilder;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.WorldEditException;
@@ -123,7 +124,7 @@ public class SchematicManager implements Listener {
                         BlockArrayClipboard clipboard = new BlockArrayClipboard(polygonal2DRegion);
                         clipboard.setOrigin(protectedRegion.getMinimumPoint());
 
-                        try (EditSession editSession = WorldEdit.getInstance().newEditSession(bukkitWorld)) {
+                        try (EditSession editSession = new EditSessionBuilder(bukkitWorld).build()) {
                             ForwardExtentCopy copy = new ForwardExtentCopy(editSession, polygonal2DRegion, clipboard, protectedRegion.getMinimumPoint());
                             copy.setRemovingEntities(true);
                             Operations.complete(copy);
@@ -149,7 +150,7 @@ public class SchematicManager implements Listener {
         Optional<ProtectedRegion> protectedRegion = region.worldGuardRegion();
         if (protectedRegion.isPresent()) {
             try (ClipboardReader reader = BuiltInClipboardFormat.SPONGE_SCHEMATIC.getReader(new FileInputStream(new File(getSchematicLocation(region), schematic)));
-                 EditSession editSession = WorldEdit.getInstance().newEditSession(new BukkitWorld(Bukkit.getWorld(region.world())))) {
+                 EditSession editSession = new EditSessionBuilder(new BukkitWorld(Bukkit.getWorld(region.world()))).build()) {
                 Operation operation = new ClipboardHolder(reader.read())
                         .createPaste(editSession)
                         .ignoreAirBlocks(false)

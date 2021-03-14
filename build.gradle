@@ -59,6 +59,7 @@ repositories {
     codemc()
     maven { url = "http://maven.wiefferink.me" }
     enginehub()
+    maven { url = uri("https://mvn.intellectualsites.com/content/repositories/releases/") } // FAWE
 }
 
 dependencies {
@@ -76,7 +77,8 @@ dependencies {
     implementation group: 'io.art-framework', name: 'art-core', version: '1.0.0-beta.30'
 
     implementation 'com.sk89q.worldguard:worldguard-bukkit:7.0.4'
-    implementation 'com.sk89q.worldedit:worldedit-bukkit:7.2.0'
+    implementation "com.intellectualsites.fawe:FAWE-Bukkit:1.16-583"
+    implementation "com.intellectualsites.fawe:FAWE-Core:1.16-583"
     implementation 'com.github.MilkBowl:VaultAPI:1.7'
 
     testImplementation 'io.ebean:ebean-test:12.6.0'
