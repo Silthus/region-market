@@ -1,3 +1,10 @@
+## [1.21.11](https://github.com/raidcraft/rcregions/compare/v1.21.10...v1.21.11) (2021-04-05)
+
+
+### Bug Fixes
+
+* **msg:** show region info when clicking on region in /gs list ([7ea31ba](https://github.com/raidcraft/rcregions/commit/7ea31baaa21d14fa4a867e54971faeceb9314866))
+
 ## [1.21.10](https://github.com/raidcraft/rcregions/compare/v1.21.9...v1.21.10) (2021-03-14)
 
 
