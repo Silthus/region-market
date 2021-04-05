@@ -393,7 +393,7 @@ public final class Messages {
                 .append(owner(region)).append("\n")
                 .append("Kosten: ").reset().color(ChatColor.YELLOW).append("\n")
                 .append(costs(region, player)).append("\n")
-                .append("\nKlicken um die WorldGuard Informationen zu dem Grundstück anzuzeigen.")
+                .append("\nKlicken um dir Informationen zu dem Grundstück anzuzeigen.")
                 .reset().italic(true).color(ChatColor.GRAY);
 
         return new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(builder.create()));
@@ -512,7 +512,11 @@ public final class Messages {
         ComponentBuilder builder = new ComponentBuilder();
         for (Region region : player.regions()) {
             builder.append(" - ").color(ChatColor.YELLOW)
-                    .append(region(region, player)).append("\n");
+                    .append(new ComponentBuilder().reset()
+                            .append(region.name()).bold(true).color(ChatColor.GOLD)
+                            .event(regionHover(region, player))
+                            .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/gs info " + region.name()))
+                            .create()).append("\n");
         }
         return builder.create();
     }
